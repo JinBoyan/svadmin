@@ -66,11 +66,15 @@
   const params = $derived(getParams());
 
   // Auth check
-  let isAuthenticated = $state(!authProvider);
-  let authChecked = $state(!authProvider);
+  let isAuthenticated = $state(false);
+  let authChecked = $state(false);
 
   $effect(() => {
-    if (!authProvider) return;
+    if (!authProvider) {
+      isAuthenticated = true;
+      authChecked = true;
+      return;
+    }
     authProvider.check().then(result => {
       isAuthenticated = result.authenticated;
       authChecked = true;
