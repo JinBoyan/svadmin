@@ -179,7 +179,7 @@
     position: relative;
   }
 
-  .input-icon {
+  :global(.input-icon) {
     position: absolute;
     left: 0.75rem;
     top: 50%;
