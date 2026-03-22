@@ -4,10 +4,12 @@
   import { getLocale } from '@svadmin/core/i18n';
   import { currentPath } from '@svadmin/core/router';
   import { Button } from './ui/button/index.js';
-  import { X, Bug, ChevronDown, ChevronUp } from 'lucide-svelte';
+  import { X, Bug, ChevronDown, ChevronUp, Wand2 } from 'lucide-svelte';
+  import InferencerPanel from './InferencerPanel.svelte';
 
   let visible = $state(false);
   let collapsed = $state(false);
+  let activeTab = $state<'state' | 'inferencer'>('state');
 
   function toggle() {
     visible = !visible;
@@ -53,44 +55,57 @@
       </div>
 
       {#if !collapsed}
+        <div class="devtools-tabs">
+          <button class="devtools-tab" class:active={activeTab === 'state'} onclick={() => activeTab = 'state'}>
+            State
+          </button>
+          <button class="devtools-tab" class:active={activeTab === 'inferencer'} onclick={() => activeTab = 'inferencer'}>
+            <Wand2 class="h-3 w-3" /> Inferencer
+          </button>
+        </div>
+
         <div class="devtools-body">
-          <div class="devtools-section">
-            <h4>Router</h4>
-            <div class="devtools-row">
-              <span class="devtools-label">Path</span>
-              <code class="devtools-value">{path}</code>
-            </div>
-          </div>
-
-          <div class="devtools-section">
-            <h4>Theme</h4>
-            <div class="devtools-row">
-              <span class="devtools-label">Mode</span>
-              <code class="devtools-value">{theme}</code>
-            </div>
-            <div class="devtools-row">
-              <span class="devtools-label">Color</span>
-              <code class="devtools-value">{colorTheme}</code>
-            </div>
-          </div>
-
-          <div class="devtools-section">
-            <h4>i18n</h4>
-            <div class="devtools-row">
-              <span class="devtools-label">Locale</span>
-              <code class="devtools-value">{locale}</code>
-            </div>
-          </div>
-
-          <div class="devtools-section">
-            <h4>Resources ({resources.length})</h4>
-            {#each resources as r}
+          {#if activeTab === 'state'}
+            <div class="devtools-section">
+              <h4>Router</h4>
               <div class="devtools-row">
-                <span class="devtools-label">{r.name}</span>
-                <code class="devtools-value">{r.fields.length} fields</code>
+                <span class="devtools-label">Path</span>
+                <code class="devtools-value">{path}</code>
               </div>
-            {/each}
-          </div>
+            </div>
+
+            <div class="devtools-section">
+              <h4>Theme</h4>
+              <div class="devtools-row">
+                <span class="devtools-label">Mode</span>
+                <code class="devtools-value">{theme}</code>
+              </div>
+              <div class="devtools-row">
+                <span class="devtools-label">Color</span>
+                <code class="devtools-value">{colorTheme}</code>
+              </div>
+            </div>
+
+            <div class="devtools-section">
+              <h4>i18n</h4>
+              <div class="devtools-row">
+                <span class="devtools-label">Locale</span>
+                <code class="devtools-value">{locale}</code>
+              </div>
+            </div>
+
+            <div class="devtools-section">
+              <h4>Resources ({resources.length})</h4>
+              {#each resources as r}
+                <div class="devtools-row">
+                  <span class="devtools-label">{r.name}</span>
+                  <code class="devtools-value">{r.fields.length} fields</code>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <InferencerPanel />
+          {/if}
         </div>
       {/if}
     </div>
@@ -107,7 +122,8 @@
     bottom: 0;
     right: 1rem;
     z-index: 9999;
-    width: 320px;
+    width: 420px;
+    max-width: 95vw;
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-bottom: none;
@@ -161,7 +177,7 @@
   }
 
   .devtools-body {
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     padding: 0.5rem;
   }
@@ -227,5 +243,38 @@
   .devtools-fab:hover {
     opacity: 1;
     transform: scale(1.1);
+  }
+  .devtools-tabs {
+    display: flex;
+    border-bottom: 1px solid hsl(var(--border));
+  }
+
+  .devtools-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: hsl(var(--muted-foreground));
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .devtools-tab:hover {
+    color: hsl(var(--foreground));
+    background: hsl(var(--muted) / 0.3);
+  }
+
+  .devtools-tab.active {
+    color: hsl(var(--primary));
+    border-bottom-color: hsl(var(--primary));
   }
 </style>

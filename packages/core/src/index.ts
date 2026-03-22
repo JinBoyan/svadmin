@@ -59,3 +59,5 @@ export {
 export { useParsed } from './useParsed';
 export { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
 export type { RouterProvider } from './router-provider';
+export { inferFieldType, inferResource } from './inferencer';
+export type { InferResult } from './inferencer';
