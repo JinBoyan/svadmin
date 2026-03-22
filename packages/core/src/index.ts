@@ -61,3 +61,7 @@ export { createHashRouterProvider, createHistoryRouterProvider } from './router-
 export type { RouterProvider } from './router-provider';
 export { inferFieldType, inferResource } from './inferencer';
 export type { InferResult } from './inferencer';
+export { createWebSocketLiveProvider } from './live-websocket';
+export type { WebSocketLiveProviderOptions } from './live-websocket';
+export { createSSELiveProvider } from './live-sse';
+export type { SSELiveProviderOptions } from './live-sse';

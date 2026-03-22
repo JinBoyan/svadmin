@@ -30,6 +30,7 @@ export { default as Authenticated } from './components/Authenticated.svelte';
 export { default as UpdatePasswordPage } from './components/UpdatePasswordPage.svelte';
 export { default as ConfigErrorScreen } from './components/ConfigErrorScreen.svelte';
 export { default as InferencerPanel } from './components/InferencerPanel.svelte';
+export { default as LiveIndicator } from './components/LiveIndicator.svelte';
 
 // CRUD Buttons
 export {
