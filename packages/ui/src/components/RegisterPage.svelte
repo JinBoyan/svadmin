@@ -1,23 +1,22 @@
 <script lang="ts">
-  import type { AuthProvider } from '@svadmin/core';
+  import { useRegister } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
-  import { toast } from '@svadmin/core/toast';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import * as Card from './ui/card/index.js';
   import { UserPlus, Mail, Lock, Eye, EyeOff } from 'lucide-svelte';
 
-  let { authProvider, title = 'Admin', onSuccess } = $props<{
-    authProvider: AuthProvider;
+  let { title = 'Admin', onSuccess } = $props<{
     title?: string;
     onSuccess?: () => void;
   }>();
 
+  const register = useRegister();
+
   let email = $state('');
   let password = $state('');
   let confirmPassword = $state('');
-  let loading = $state(false);
   let showPassword = $state(false);
   let error = $state('');
 
@@ -29,21 +28,11 @@
     if (!password) { error = t('auth.passwordRequired'); return; }
     if (password !== confirmPassword) { error = t('auth.passwordMismatch'); return; }
 
-    loading = true;
-    try {
-      const result = await authProvider.register!({ email, password });
-      if (result.success) {
-        toast.success(t('auth.registerSuccess'));
-        onSuccess?.();
-        navigate(result.redirectTo ?? '/login');
-      } else {
-        error = result.error?.message ?? t('common.operationFailed');
-      }
-    } catch (err) {
-      error = err instanceof Error ? err.message : t('common.operationFailed');
-      toast.error(error);
-    } finally {
-      loading = false;
+    const result = await register.mutate({ email, password });
+    if (result.success) {
+      onSuccess?.();
+    } else {
+      error = result.error?.message ?? t('common.operationFailed');
     }
   }
 </script>
@@ -123,8 +112,8 @@
             </div>
           </div>
 
-          <Button type="submit" class="w-full" disabled={loading}>
-            {#if loading}
+          <Button type="submit" class="w-full" disabled={register.isLoading}>
+            {#if register.isLoading}
               <span class="loading-spinner"></span>
             {/if}
             {t('auth.registerButton')}

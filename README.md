@@ -12,26 +12,36 @@
 
 - 🎯 **Headless Architecture** — DataProvider / AuthProvider interfaces, swap backends freely
 - ⚡ **18 Reactive Hooks** — `useList`, `useOne`, `useCreate`, `useUpdate`, `useDelete`, `useTable`, `useForm`, etc.
+- 🔑 **Auth Hooks** — `useLogin`, `useLogout`, `useRegister`, `useForgotPassword`, `useUpdatePassword`, `useGetIdentity`, `useIsAuthenticated`, `useOnError`, `usePermissions`
 - 🧩 **Pre-built UI** — AdminApp, AutoTable, AutoForm, ShowPage, Sidebar, Layout with shadcn-svelte
+- 🔘 **CRUD Buttons** — CreateButton, EditButton, DeleteButton, ShowButton, ListButton, RefreshButton, ExportButton, ImportButton, SaveButton
+- 🛡️ **`<Authenticated>`** — Conditionally render based on auth state with loading/fallback
+- ⚙️ **ConfigErrorScreen** — Glassmorphism screen for missing env vars with copy-to-clipboard
 - 🌍 **i18n** — Built-in zh-CN/en with browser auto-detection, one-click locale toggle
 - 🔐 **Auth & RBAC** — AuthProvider + permission system with resource-level access control
 - 🌓 **Dark Mode** — Light / Dark / System with one-click toggle, persisted to localStorage
 - 🎨 **Multi-Color Themes** — 6 color palettes (Blue, Green, Rose, Orange, Violet, Zinc) with sidebar picker
 - 🪟 **Glassmorphism UI** — Translucent sidebar with backdrop blur for a premium look
 - 📡 **Real-time** — LiveProvider interface for real-time subscriptions
+- 🔀 **RouterProvider** — Pluggable routing with hash and history router providers
 - 📋 **Audit Logging** — Pluggable audit handler for tracking admin operations
 
 ## ✨ 特性
 
 - 🎯 **Headless 架构** — DataProvider / AuthProvider 接口，自由切换后端
 - ⚡ **18 个响应式 Hook** — `useList`、`useOne`、`useCreate`、`useUpdate`、`useDelete`、`useTable`、`useForm` 等
+- 🔑 **Auth Hooks** — `useLogin`、`useLogout`、`useRegister`、`useForgotPassword`、`useUpdatePassword`、`useGetIdentity`、`useIsAuthenticated`、`useOnError`、`usePermissions`
 - 🧩 **开箱即用 UI** — AdminApp、AutoTable、AutoForm、ShowPage、Sidebar、Layout（基于 shadcn-svelte）
+- 🔘 **CRUD 按钮** — CreateButton、EditButton、DeleteButton、ShowButton、ListButton、RefreshButton、ExportButton、ImportButton、SaveButton
+- 🛡️ **`<Authenticated>`** — 根据认证状态条件渲染，支持 loading/fallback
+- ⚙️ **ConfigErrorScreen** — 环境变量缺失提示页，毛玻璃风格，支持一键复制
 - 🌍 **国际化** — 内置中英文，浏览器自动检测，侧边栏一键切换语言
 - 🔐 **认证与权限** — AuthProvider + 资源级权限控制
 - 🌓 **暗色模式** — 亮色 / 暗色 / 跟随系统，一键切换，持久化到 localStorage
 - 🎨 **多色主题** — 6 种配色方案（Blue、Green、Rose、Orange、Violet、Zinc），侧边栏选色器切换
 - 🪟 **毛玻璃 UI** — 半透明侧边栏 + 背景模糊，质感拉满
 - 📡 **实时订阅** — LiveProvider 接口支持实时数据
+- 🔀 **RouterProvider** — 可插拔路由，内置 Hash 和 History 路由
 - 📋 **审计日志** — 可插拔的审计处理器
 
 ## 📦 Packages / 包

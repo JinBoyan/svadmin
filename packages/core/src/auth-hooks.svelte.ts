@@ -1,5 +1,7 @@
 // Auth Hooks — reactive wrappers around AuthProvider methods
 // Each hook encapsulates the auth call + loading state + error handling + redirect
+// IMPORTANT: getAuthProvider() must be called at hook creation time (during component init),
+//            not inside mutate(), because Svelte's getContext() only works during init.
 
 import { getAuthProvider } from './context';
 import { navigate } from './router';
@@ -10,10 +12,10 @@ import type { AuthActionResult, CheckResult, Identity } from './types';
 // ─── useLogin ─────────────────────────────────────────────────
 
 export function useLogin() {
+  const provider = getAuthProvider();
   let isLoading = $state(false);
 
   async function mutate(params: Record<string, unknown>): Promise<AuthActionResult> {
-    const provider = getAuthProvider();
     if (!provider) throw new Error('AuthProvider not configured');
     isLoading = true;
     try {
@@ -44,10 +46,10 @@ export function useLogin() {
 // ─── useLogout ────────────────────────────────────────────────
 
 export function useLogout() {
+  const provider = getAuthProvider();
   let isLoading = $state(false);
 
   async function mutate(params?: Record<string, unknown>): Promise<AuthActionResult> {
-    const provider = getAuthProvider();
     if (!provider) throw new Error('AuthProvider not configured');
     isLoading = true;
     try {
@@ -74,10 +76,10 @@ export function useLogout() {
 // ─── useRegister ──────────────────────────────────────────────
 
 export function useRegister() {
+  const provider = getAuthProvider();
   let isLoading = $state(false);
 
   async function mutate(params: Record<string, unknown>): Promise<AuthActionResult> {
-    const provider = getAuthProvider();
     if (!provider?.register) throw new Error('AuthProvider.register not implemented');
     isLoading = true;
     try {
@@ -108,10 +110,10 @@ export function useRegister() {
 // ─── useForgotPassword ───────────────────────────────────────
 
 export function useForgotPassword() {
+  const provider = getAuthProvider();
   let isLoading = $state(false);
 
   async function mutate(params: Record<string, unknown>): Promise<AuthActionResult> {
-    const provider = getAuthProvider();
     if (!provider?.forgotPassword) throw new Error('AuthProvider.forgotPassword not implemented');
     isLoading = true;
     try {
@@ -141,10 +143,10 @@ export function useForgotPassword() {
 // ─── useUpdatePassword ───────────────────────────────────────
 
 export function useUpdatePassword() {
+  const provider = getAuthProvider();
   let isLoading = $state(false);
 
   async function mutate(params: Record<string, unknown>): Promise<AuthActionResult> {
-    const provider = getAuthProvider();
     if (!provider?.updatePassword) throw new Error('AuthProvider.updatePassword not implemented');
     isLoading = true;
     try {
@@ -175,11 +177,11 @@ export function useUpdatePassword() {
 // ─── useGetIdentity ──────────────────────────────────────────
 
 export function useGetIdentity() {
+  const provider = getAuthProvider();
   let data = $state<Identity | null>(null);
   let isLoading = $state(true);
   let error = $state<Error | null>(null);
 
-  const provider = getAuthProvider();
   if (provider) {
     provider.getIdentity().then(identity => {
       data = identity;
@@ -203,10 +205,10 @@ export function useGetIdentity() {
 // ─── useIsAuthenticated ──────────────────────────────────────
 
 export function useIsAuthenticated() {
+  const provider = getAuthProvider();
   let isAuthenticated = $state(false);
   let isLoading = $state(true);
 
-  const provider = getAuthProvider();
   if (provider) {
     provider.check().then((result: CheckResult) => {
       isAuthenticated = result.authenticated;
@@ -224,5 +226,68 @@ export function useIsAuthenticated() {
   return {
     get isAuthenticated() { return isAuthenticated; },
     get isLoading() { return isLoading; },
+  };
+}
+
+// ─── useOnError ──────────────────────────────────────────────
+
+/**
+ * Handles errors from data hooks by calling authProvider.onError().
+ * If the provider returns { logout: true }, triggers logout flow.
+ * If it returns { redirectTo }, navigates there.
+ */
+export function useOnError() {
+  const provider = getAuthProvider();
+
+  async function mutate(error: unknown) {
+    if (!provider?.onError) {
+      console.warn('[svadmin] useOnError: authProvider.onError not implemented');
+      return;
+    }
+    try {
+      const result = await provider.onError(error);
+      if (result.logout) {
+        await provider.logout?.();
+        navigate(result.redirectTo ?? '/login');
+      } else if (result.redirectTo) {
+        navigate(result.redirectTo);
+      }
+    } catch (err) {
+      console.warn('[svadmin] useOnError failed:', err);
+    }
+  }
+
+  return { mutate };
+}
+
+// ─── usePermissions ──────────────────────────────────────────
+
+/**
+ * Fetches permissions from authProvider.getPermissions().
+ * Returns a reactive object with data, isLoading, and error.
+ */
+export function usePermissions<T = unknown>() {
+  const provider = getAuthProvider();
+  let data = $state<T | null>(null);
+  let isLoading = $state(true);
+  let error = $state<Error | null>(null);
+
+  if (provider?.getPermissions) {
+    provider.getPermissions().then(permissions => {
+      data = permissions as T;
+      isLoading = false;
+    }).catch(err => {
+      error = err instanceof Error ? err : new Error(String(err));
+      isLoading = false;
+      console.warn('[svadmin] usePermissions failed:', err);
+    });
+  } else {
+    isLoading = false;
+  }
+
+  return {
+    get data() { return data; },
+    get isLoading() { return isLoading; },
+    get error() { return error; },
   };
 }

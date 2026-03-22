@@ -1,20 +1,19 @@
 <script lang="ts">
-  import type { AuthProvider } from '@svadmin/core';
+  import { useForgotPassword } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
-  import { toast } from '@svadmin/core/toast';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import * as Card from './ui/card/index.js';
   import { KeyRound, Mail, ArrowLeft, CheckCircle } from 'lucide-svelte';
 
-  let { authProvider, title = 'Admin' } = $props<{
-    authProvider: AuthProvider;
+  let { title = 'Admin' } = $props<{
     title?: string;
   }>();
 
+  const forgot = useForgotPassword();
+
   let email = $state('');
-  let loading = $state(false);
   let error = $state('');
   let sent = $state(false);
 
@@ -24,20 +23,11 @@
 
     if (!email) { error = t('auth.emailRequired'); return; }
 
-    loading = true;
-    try {
-      const result = await authProvider.forgotPassword!({ email });
-      if (result.success) {
-        sent = true;
-        toast.success(t('auth.resetLinkSent'));
-      } else {
-        error = result.error?.message ?? t('common.operationFailed');
-      }
-    } catch (err) {
-      error = err instanceof Error ? err.message : t('common.operationFailed');
-      toast.error(error);
-    } finally {
-      loading = false;
+    const result = await forgot.mutate({ email });
+    if (result.success) {
+      sent = true;
+    } else {
+      error = result.error?.message ?? t('common.operationFailed');
     }
   }
 </script>
@@ -94,8 +84,8 @@
               </div>
             </div>
 
-            <Button type="submit" class="w-full" disabled={loading}>
-              {#if loading}
+            <Button type="submit" class="w-full" disabled={forgot.isLoading}>
+              {#if forgot.isLoading}
                 <span class="loading-spinner"></span>
               {/if}
               {t('auth.sendResetLink')}

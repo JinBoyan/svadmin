@@ -30,6 +30,12 @@ export { default as Authenticated } from './components/Authenticated.svelte';
 export { default as UpdatePasswordPage } from './components/UpdatePasswordPage.svelte';
 export { default as ConfigErrorScreen } from './components/ConfigErrorScreen.svelte';
 
+// CRUD Buttons
+export {
+  CreateButton, EditButton, DeleteButton, ShowButton, ListButton,
+  RefreshButton, ExportButton, ImportButton, SaveButton,
+} from './components/buttons/index.js';
+
 // Base UI components (shadcn-svelte)
 export { Button, buttonVariants } from './components/ui/button/index.js';
 export { Input } from './components/ui/input/index.js';

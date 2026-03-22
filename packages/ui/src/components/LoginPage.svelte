@@ -1,22 +1,22 @@
 <script lang="ts">
-  import type { AuthProvider } from '@svadmin/core';
+  import { useLogin, getAuthProvider } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
-  import { toast } from '@svadmin/core/toast';
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import * as Card from './ui/card/index.js';
   import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-svelte';
 
-  let { authProvider, title = 'Admin', onSuccess } = $props<{
-    authProvider: AuthProvider;
+  let { title = 'Admin', onSuccess } = $props<{
     title?: string;
     onSuccess?: () => void;
   }>();
 
+  const login = useLogin();
+  const authProvider = getAuthProvider();
+
   let email = $state('');
   let password = $state('');
-  let loading = $state(false);
   let showPassword = $state(false);
   let error = $state('');
 
@@ -27,20 +27,11 @@
     if (!email) { error = t('auth.emailRequired'); return; }
     if (!password) { error = t('auth.passwordRequired'); return; }
 
-    loading = true;
-    try {
-      const result = await authProvider.login({ email, password });
-      if (result.success) {
-        onSuccess?.();
-        if (result.redirectTo) navigate(result.redirectTo);
-      } else {
-        error = result.error?.message ?? t('common.loginFailed');
-      }
-    } catch (err) {
-      error = err instanceof Error ? err.message : t('common.loginFailed');
-      toast.error(error);
-    } finally {
-      loading = false;
+    const result = await login.mutate({ email, password });
+    if (result.success) {
+      onSuccess?.();
+    } else {
+      error = result.error?.message ?? t('common.loginFailed');
     }
   }
 </script>
@@ -114,8 +105,8 @@
             </div>
           </div>
 
-          <Button type="submit" class="w-full" disabled={loading}>
-            {#if loading}
+          <Button type="submit" class="w-full" disabled={login.isLoading}>
+            {#if login.isLoading}
               <span class="loading-spinner"></span>
             {/if}
             {t('auth.loginButton')}

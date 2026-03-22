@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import type { DataProvider, AuthProvider, ResourceDefinition, ThemeMode } from '@svadmin/core';
-  import { setDataProvider, setAuthProvider, setResources, setLocale, setTheme } from '@svadmin/core';
+  import { setDataProvider, setAuthProvider, setResources, setLocale, setTheme, getAuthProvider } from '@svadmin/core';
   import { navigate } from '@svadmin/core/router';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import Layout from './Layout.svelte';
@@ -83,13 +83,13 @@
   {:else if route === '/login' && loginPage}
     {@render loginPage()}
   {:else if route === '/login' && authProvider}
-    <LoginPage {authProvider} {title} onSuccess={() => { isAuthenticated = true; navigate('/'); }} />
+    <LoginPage {title} onSuccess={() => { isAuthenticated = true; navigate('/'); }} />
   {:else if route === '/register' && authProvider?.register}
-    <RegisterPage {authProvider} {title} />
+    <RegisterPage {title} />
   {:else if route === '/forgot-password' && authProvider?.forgotPassword}
-    <ForgotPasswordPage {authProvider} {title} />
+    <ForgotPasswordPage {title} />
   {:else if route === '/update-password' && authProvider?.updatePassword}
-    <UpdatePasswordPage {authProvider} {title} />
+    <UpdatePasswordPage {title} />
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
     <ConfigErrorScreen title="{title} — Configuration Required" />
   {:else if isAuthenticated || !authProvider}

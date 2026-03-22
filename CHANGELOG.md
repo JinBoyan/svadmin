@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2026-03-22
+
+### Added
+
+- **Auth Hooks**: Independent `useLogin`, `useLogout`, `useRegister`, `useForgotPassword`, `useUpdatePassword`, `useGetIdentity`, `useIsAuthenticated` hooks in `@svadmin/core`
+- **`useOnError` Hook**: Handles errors from data hooks by calling `authProvider.onError()`, auto-logout/redirect
+- **`usePermissions` Hook**: Reactive permissions fetcher from `authProvider.getPermissions()`
+- **`<Authenticated>` Component**: Conditionally render children based on auth state with loading/fallback snippets
+- **`<ConfigErrorScreen>` Component**: Glassmorphism env-var error screen with copy-to-clipboard
+- **`<UpdatePasswordPage>` Component**: Password reset form with glassmorphism design
+- **`useParsed` Hook**: Parse current hash URL into structured `{ resource, action, id, params }`
+- **RouterProvider Interface**: `createHashRouterProvider()` and `createHistoryRouterProvider()` for pluggable routing
+- **CRUD Buttons**: `CreateButton`, `EditButton`, `DeleteButton`, `ShowButton`, `ListButton`, `RefreshButton`, `ExportButton`, `ImportButton`, `SaveButton`
+- **StatsCard Enhancements**: `color` prop (primary/success/warning/danger/info) and `variant` prop (default/outline/filled)
+
+### Changed
+
+- Auth pages (`LoginPage`, `RegisterPage`, `ForgotPasswordPage`, `UpdatePasswordPage`) now use independent auth hooks instead of direct `authProvider` prop
+- `AdminApp` no longer passes `authProvider` to auth page components (they use context+hooks)
+
 ## [0.0.3] - 2026-03-22
 
 ### Added

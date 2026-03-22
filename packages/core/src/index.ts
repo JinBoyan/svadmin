@@ -53,5 +53,8 @@ export {
   useLogin, useLogout,
   useRegister, useForgotPassword, useUpdatePassword,
   useGetIdentity, useIsAuthenticated,
+  useOnError, usePermissions,
 } from './auth-hooks.svelte';
 export { useParsed } from './useParsed';
+export { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
+export type { RouterProvider } from './router-provider';
