@@ -5,13 +5,17 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import prompts from 'prompts';
 import pc from 'picocolors';
-import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function init() {
-  console.log(`\n${pc.cyan('Welcome to create-svadmin!')}\n`);
+  console.log();
+  console.log(pc.cyan('  ╔═══════════════════════════════════╗'));
+  console.log(pc.cyan('  ║  ') + pc.bold('create-svadmin') + pc.cyan('                    ║'));
+  console.log(pc.cyan('  ║  ') + pc.dim('Headless Admin for Svelte 5') + pc.cyan('    ║'));
+  console.log(pc.cyan('  ╚═══════════════════════════════════╝'));
+  console.log();
 
   const response = await prompts([
     {
@@ -30,86 +34,57 @@ async function init() {
     {
       type: 'select',
       name: 'dataProvider',
-      message: 'Choose a default Data Provider:',
+      message: 'Data Provider:',
       choices: [
         { title: 'Simple REST', value: 'simple-rest', description: 'Standard JSON APIs / JSON Server' },
         { title: 'Supabase', value: 'supabase', description: 'PostgreSQL Backend-as-a-Service' },
         { title: 'GraphQL', value: 'graphql', description: 'Generic GraphQL endpoints' },
-        { title: 'None (Build Your Own)', value: 'none', description: 'Implement the DataProvider interface yourself' }
+        { title: 'Custom', value: 'none', description: 'Implement your own DataProvider' }
       ],
       initial: 0
+    },
+    {
+      type: 'select',
+      name: 'authProvider',
+      message: 'Auth Provider:',
+      choices: [
+        { title: 'Mock (Demo)', value: 'mock', description: 'Built-in mock for development' },
+        { title: 'Simple REST JWT', value: 'jwt', description: 'JWT-based auth via REST API' },
+        { title: 'Supabase Auth', value: 'supabase', description: 'Supabase authentication' },
+        { title: 'None', value: 'none', description: 'No authentication' }
+      ],
+      initial: 0
+    },
+    {
+      type: 'confirm',
+      name: 'installDeps',
+      message: 'Install dependencies now?',
+      initial: true
     }
   ]);
 
   if (!response.projectName) {
-    console.log(pc.red('Operation cancelled.'));
+    console.log(pc.red('\nOperation cancelled.\n'));
     return;
   }
 
   const projectDir = path.resolve(process.cwd(), response.projectName.trim());
-  
+
   if (!fs.existsSync(projectDir)) {
     fs.mkdirSync(projectDir, { recursive: true });
   }
 
-  console.log(`\nScaffolding project in ${pc.green(projectDir)}...`);
+  console.log(`\n${pc.bold('Scaffolding')} project in ${pc.green(projectDir)}...\n`);
 
-  // Basic template files
+  // 1. Copy template files
   const templateDir = path.join(__dirname, 'template');
-  
-  // We will create the template files dynamically here to avoid needing a complex nested template repo directory.
-  // In a real scenario, we'd copy `templateDir` contents recursively.
-  const packageJson = {
-    name: response.projectName,
-    version: "0.1.0",
-    private: true,
-    type: "module",
-    scripts: {
-      "dev": "vite dev",
-      "build": "vite build",
-      "preview": "vite preview",
-      "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
-    },
-    dependencies: {
-      "@svadmin/core": "latest",
-      "@svadmin/ui": "latest",
-      "lucide-svelte": "^0.475.0",
-    },
-    devDependencies: {
-      "@sveltejs/adapter-auto": "^4.0.0",
-      "@sveltejs/kit": "^2.17.2",
-      "@sveltejs/vite-plugin-svelte": "^5.0.0",
-      "svelte": "^5.20.0",
-      "tailwindcss": "^3.4.17",
-      "vite": "^6.1.0"
-    }
-  };
 
-  if (response.dataProvider === 'simple-rest') {
-    packageJson.dependencies["@svadmin/simple-rest"] = "latest";
-  } else if (response.dataProvider === 'supabase') {
-    packageJson.dependencies["@svadmin/supabase"] = "latest";
-    packageJson.dependencies["@supabase/supabase-js"] = "^2.0.0";
-  } else if (response.dataProvider === 'graphql') {
-    packageJson.dependencies["@svadmin/graphql"] = "latest";
-    packageJson.dependencies["graphql-request"] = "^7.1.0";
-    packageJson.dependencies["graphql"] = "^16.8.0";
-  }
-
-  fs.writeFileSync(
-    path.join(projectDir, 'package.json'),
-    JSON.stringify(packageJson, null, 2)
-  );
-
-  // Copy template files
   function copyDir(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
-    let entries = fs.readdirSync(src, { withFileTypes: true });
-
-    for (let entry of entries) {
-      let srcPath = path.join(src, entry.name);
-      let destPath = path.join(dest, entry.name === '_gitignore' ? '.gitignore' : entry.name);
-
+    const entries = fs.readdirSync(src, { withFileTypes: true });
+    for (const entry of entries) {
+      const srcPath = path.join(src, entry.name);
+      const destPath = path.join(dest, entry.name === '_gitignore' ? '.gitignore' : entry.name);
       if (entry.isDirectory()) {
         copyDir(srcPath, destPath);
       } else {
@@ -120,15 +95,118 @@ async function init() {
 
   if (fs.existsSync(templateDir)) {
     copyDir(templateDir, projectDir);
-    console.log(pc.green('✔') + ' Copied template files');
+    console.log(pc.green('  ✔') + ' Template files copied');
   }
 
-  // Next steps instructions
-  console.log(`\nNext steps:`);
-  console.log(`  1. ${pc.cyan(`cd ${response.projectName}`)}`);
-  console.log(`  2. ${pc.cyan('npm install')} or ${pc.cyan('bun install')}`);
-  console.log(`  3. ${pc.cyan('npm run dev')}`);
-  console.log(`\nFor documentation, visit: ${pc.blue('https://github.com/zuohuadong/svadmin')}\n`);
+  // 2. Generate package.json
+  const packageJson = {
+    name: response.projectName,
+    version: '0.1.0',
+    private: true,
+    type: 'module',
+    scripts: {
+      dev: 'vite',
+      build: 'vite build',
+      preview: 'vite preview',
+      check: 'svelte-check --tsconfig ./tsconfig.json'
+    },
+    dependencies: {
+      '@svadmin/core': '^0.0.6',
+      '@svadmin/ui': '^0.0.6',
+      '@tanstack/svelte-query': '^6.0.0',
+      'lucide-svelte': '^0.475.0',
+    },
+    devDependencies: {
+      '@sveltejs/vite-plugin-svelte': '^5.0.0',
+      'svelte': '^5.20.0',
+      'svelte-check': '^4.0.0',
+      'tailwindcss': '^3.4.17',
+      'typescript': '^5.7.0',
+      'vite': '^6.1.0',
+    }
+  };
+
+  // Add data provider dependency
+  const dpMap = {
+    'simple-rest': { '@svadmin/simple-rest': '^0.0.6' },
+    'supabase': { '@svadmin/supabase': '^0.0.6', '@supabase/supabase-js': '^2.0.0' },
+    'graphql': { '@svadmin/graphql': '^0.0.6', 'graphql-request': '^7.1.0', 'graphql': '^16.8.0' },
+  };
+  if (dpMap[response.dataProvider]) {
+    Object.assign(packageJson.dependencies, dpMap[response.dataProvider]);
+  }
+
+  // Add auth provider dependency
+  if (response.authProvider === 'supabase' && response.dataProvider !== 'supabase') {
+    packageJson.dependencies['@svadmin/supabase'] = '^0.0.6';
+    packageJson.dependencies['@supabase/supabase-js'] = '^2.0.0';
+  }
+  if (response.authProvider === 'jwt' && response.dataProvider !== 'simple-rest') {
+    packageJson.dependencies['@svadmin/simple-rest'] = '^0.0.6';
+  }
+
+  fs.writeFileSync(path.join(projectDir, 'package.json'), JSON.stringify(packageJson, null, 2));
+  console.log(pc.green('  ✔') + ' package.json generated');
+
+  // 3. Generate .gitignore
+  fs.writeFileSync(path.join(projectDir, '.gitignore'), `node_modules
+dist
+.svelte-kit
+.env
+.env.local
+*.local
+`);
+  console.log(pc.green('  ✔') + ' .gitignore generated');
+
+  // 4. Generate README
+  fs.writeFileSync(path.join(projectDir, 'README.md'), `# ${response.projectName}
+
+Built with [svadmin](https://github.com/zuohuadong/svadmin) — Headless Admin Framework for Svelte 5.
+
+## Getting Started
+
+\`\`\`bash
+bun install
+bun run dev
+\`\`\`
+
+## Stack
+
+- **UI**: Svelte 5 + Shadcn Svelte + TailwindCSS
+- **Data**: ${response.dataProvider === 'simple-rest' ? 'Simple REST' : response.dataProvider === 'supabase' ? 'Supabase' : response.dataProvider === 'graphql' ? 'GraphQL' : 'Custom'} DataProvider
+- **Auth**: ${response.authProvider === 'mock' ? 'Mock (demo)' : response.authProvider === 'jwt' ? 'JWT' : response.authProvider === 'supabase' ? 'Supabase Auth' : 'None'}
+- **State**: TanStack Query v6
+`);
+  console.log(pc.green('  ✔') + ' README.md generated');
+
+  // 5. Install dependencies
+  if (response.installDeps) {
+    console.log(`\n${pc.bold('Installing dependencies...')}\n`);
+    const { execSync } = await import('child_process');
+    try {
+      execSync('bun install', { cwd: projectDir, stdio: 'inherit' });
+    } catch {
+      try {
+        execSync('npm install', { cwd: projectDir, stdio: 'inherit' });
+      } catch {
+        console.log(pc.yellow('\n  ⚠ Auto-install failed. Run `bun install` or `npm install` manually.'));
+      }
+    }
+  }
+
+  // 6. Done!
+  console.log();
+  console.log(pc.green(pc.bold('  ✔ Project ready!')));
+  console.log();
+  console.log('  Next steps:');
+  console.log(`    ${pc.cyan(`cd ${response.projectName}`)}`);
+  if (!response.installDeps) {
+    console.log(`    ${pc.cyan('bun install')}`);
+  }
+  console.log(`    ${pc.cyan('bun run dev')}`);
+  console.log();
+  console.log(`  Docs: ${pc.blue('https://github.com/zuohuadong/svadmin')}`);
+  console.log();
 }
 
 init().catch(console.error);
