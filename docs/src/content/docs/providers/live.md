@@ -37,6 +37,31 @@ import { createSSELiveProvider } from '@svadmin/core';
 const liveProvider = createSSELiveProvider({ url: 'http://localhost:3001/events' });
 ```
 
+### Supabase Realtime
+
+```typescript
+import { createSupabaseLiveProvider } from '@svadmin/supabase';
+const liveProvider = createSupabaseLiveProvider(supabaseClient);
+```
+
+Supports `publish()` via Supabase Realtime broadcast channels.
+
+### Appwrite Realtime
+
+```typescript
+import { createAppwriteLiveProvider } from '@svadmin/appwrite';
+const liveProvider = createAppwriteLiveProvider({ client, databaseId: 'main' });
+```
+
+### PocketBase Realtime
+
+```typescript
+import { createPocketBaseLiveProvider } from '@svadmin/pocketbase';
+const liveProvider = createPocketBaseLiveProvider({ pb });
+```
+
+PocketBase uses SSE-based realtime subscriptions.
+
 ## Hooks
 
 ### `useLive` — Auto-invalidate queries

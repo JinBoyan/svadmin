@@ -53,6 +53,33 @@ import { createGraphQLDataProvider } from '@svadmin/graphql';
 const dataProvider = createGraphQLDataProvider('https://api.example.com/graphql');
 ```
 
+### Appwrite
+
+```typescript
+import { Client, Databases } from 'appwrite';
+import { createAppwriteDataProvider } from '@svadmin/appwrite';
+
+const client = new Client()
+  .setEndpoint('https://cloud.appwrite.io/v1')
+  .setProject('PROJECT_ID');
+const databases = new Databases(client);
+const dataProvider = createAppwriteDataProvider({ databases, databaseId: 'main' });
+```
+
+Supports sorters, 10+ filter operators, and bulk operations (`getMany`, `deleteMany`).
+
+### PocketBase
+
+```typescript
+import PocketBase from 'pocketbase';
+import { createPocketBaseDataProvider } from '@svadmin/pocketbase';
+
+const pb = new PocketBase('http://127.0.0.1:8090');
+const dataProvider = createPocketBaseDataProvider({ pb });
+```
+
+Supports sorters, filters, and bulk operations. PocketBase also provides `createPocketBaseAuthProvider` and `createPocketBaseLiveProvider`.
+
 ## Multiple Data Providers
 
 Use different backends for different resources:

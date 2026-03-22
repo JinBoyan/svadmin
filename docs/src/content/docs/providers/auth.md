@@ -84,3 +84,35 @@ export const mockAuthProvider: AuthProvider = {
   },
 };
 ```
+
+## Built-in Auth Providers
+
+### Supabase
+
+```typescript
+import { createSupabaseAuthProvider } from '@svadmin/supabase';
+const authProvider = createSupabaseAuthProvider(supabaseClient);
+```
+
+### Appwrite
+
+```typescript
+import { Account, Client } from 'appwrite';
+import { createAppwriteAuthProvider } from '@svadmin/appwrite';
+
+const client = new Client().setEndpoint('https://cloud.appwrite.io/v1').setProject('PROJECT_ID');
+const account = new Account(client);
+const authProvider = createAppwriteAuthProvider({ account });
+```
+
+### PocketBase
+
+```typescript
+import PocketBase from 'pocketbase';
+import { createPocketBaseAuthProvider } from '@svadmin/pocketbase';
+
+const pb = new PocketBase('http://127.0.0.1:8090');
+const authProvider = createPocketBaseAuthProvider({ pb });
+```
+
+PocketBase auth supports custom collection names via the `collection` param in `login()` and `register()`.

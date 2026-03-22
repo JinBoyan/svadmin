@@ -24,7 +24,7 @@ svadmin is inspired by [Refine.dev](https://refine.dev) but built natively for *
 - 🎨 **Themeable** — 7 color themes, light/dark mode, glassmorphism
 - 🛡️ **Access Control** — Role-based and attribute-based permissions
 - 🔍 **Inferencer** — Auto-generate admin UI from sample data or OpenAPI specs
-- 📦 **Multiple Packages** — `simple-rest`, `supabase`, `graphql` data providers
+- 📦 **Multiple Packages** — `simple-rest`, `supabase`, `graphql`, `appwrite`, `pocketbase` data providers
 
 ## Packages
 
@@ -33,6 +33,8 @@ svadmin is inspired by [Refine.dev](https://refine.dev) but built natively for *
 | `@svadmin/core` | Hooks, providers, types, utilities |
 | `@svadmin/ui` | Pre-built Svelte 5 components |
 | `@svadmin/simple-rest` | REST API data provider |
-| `@svadmin/supabase` | Supabase data provider |
+| `@svadmin/supabase` | Supabase data + auth + live provider |
 | `@svadmin/graphql` | GraphQL data provider |
+| `@svadmin/appwrite` | Appwrite data + auth + live provider |
+| `@svadmin/pocketbase` | PocketBase data + auth + live provider |
 | `create-svadmin` | CLI scaffolding tool |

@@ -6,9 +6,9 @@ export default defineConfig({
     starlight({
       title: 'svadmin',
       description: 'Headless admin framework for Svelte 5',
-      social: {
-        github: 'https://github.com/zuohuadong/svadmin',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/zuohuadong/svadmin' },
+      ],
       editLink: {
         baseUrl: 'https://github.com/zuohuadong/svadmin/edit/main/docs/',
       },
