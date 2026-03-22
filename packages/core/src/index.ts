@@ -65,3 +65,5 @@ export { createWebSocketLiveProvider } from './live-websocket';
 export type { WebSocketLiveProviderOptions } from './live-websocket';
 export { createSSELiveProvider } from './live-sse';
 export type { SSELiveProviderOptions } from './live-sse';
+export { inferFromOpenAPI } from './inferencer-openapi';
+export type { InferFromOpenAPIOptions } from './inferencer-openapi';
