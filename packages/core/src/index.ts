@@ -24,8 +24,8 @@ export { useLive } from './live';
 export { toast } from './toast.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations } from './i18n.svelte';
 export { audit, setAuditHandler } from './audit';
-export { getTheme, setTheme, toggleTheme, getResolvedTheme } from './theme.svelte';
-export type { ThemeMode } from './theme.svelte';
+export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, colorThemes } from './theme.svelte';
+export type { ThemeMode, ColorTheme } from './theme.svelte';
 
 export type {
   DataProvider, AuthProvider, NotificationProvider, MutationMode,

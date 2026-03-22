@@ -102,7 +102,7 @@
       selectedIds = new Set();
       selectAll = false;
     } else {
-      const allIds = ($query.data?.data ?? []).map(r => r[primaryKey] as string | number);
+      const allIds = (query.data?.data ?? []).map(r => r[primaryKey] as string | number);
       selectedIds = new Set(allIds);
       selectAll = true;
     }
@@ -111,7 +111,7 @@
   function confirmDelete(id: string | number) {
     confirmMessage = t('common.deleteConfirm');
     confirmAction = async () => {
-      await $deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync(id);
       confirmOpen = false;
     };
     confirmOpen = true;
@@ -121,7 +121,7 @@
     confirmMessage = t('common.batchDeleteConfirm', { count: selectedIds.size });
     confirmAction = async () => {
       for (const id of selectedIds) {
-        await $deleteMutation.mutateAsync(id);
+        await deleteMutation.mutateAsync(id);
       }
       selectedIds = new Set();
       selectAll = false;
@@ -132,7 +132,7 @@
 
   // CSV Export
   function exportCSV() {
-    const data = $query.data?.data ?? [];
+    const data = query.data?.data ?? [];
     if (data.length === 0) return;
 
     const headers = listFields.map(f => f.label);
@@ -173,7 +173,7 @@
   const canDelete = canAccess(resourceName, 'delete').can && resource.canDelete !== false;
   const canExport = canAccess(resourceName, 'export').can;
 
-  const totalPages = $derived(Math.ceil(($query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
+  const totalPages = $derived(Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
 </script>
 
 <div class="space-y-4">
@@ -217,14 +217,14 @@
   {/if}
 
   <!-- Table -->
-  <div class="rounded-xl border border-border bg-card shadow-sm">
-    {#if $query.isLoading}
+  <div class="rounded-xl border border-border/60 bg-card shadow-md overflow-hidden">
+    {#if query.isLoading}
       <div class="flex h-64 items-center justify-center">
         <Loader2 class="h-6 w-6 animate-spin text-primary" />
       </div>
-    {:else if $query.error}
+    {:else if query.error}
       <div class="flex h-64 items-center justify-center text-destructive text-sm">
-        {t('common.loadFailed', { message: ($query.error as Error).message })}
+        {t('common.loadFailed', { message: (query.error as Error).message })}
       </div>
     {:else}
       <Table.Root>
@@ -247,9 +247,9 @@
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {#each $query.data?.data ?? [] as record}
+          {#each query.data?.data ?? [] as record}
             {@const id = record[primaryKey] as string | number}
-            <Table.Row class={selectedIds.has(id) ? 'bg-accent' : ''}>
+            <Table.Row class="transition-colors {selectedIds.has(id) ? 'bg-accent' : ''}">
               {#if canDelete}
                 <Table.Cell>
                   <Checkbox checked={selectedIds.has(id)} onCheckedChange={() => toggleSelect(id)} />
@@ -313,7 +313,7 @@
 
   <!-- Pagination -->
   <div class="flex items-center justify-between text-sm text-muted-foreground">
-    <span>{t('common.total', { total: $query.data?.total ?? 0 })}</span>
+    <span>{t('common.total', { total: query.data?.total ?? 0 })}</span>
     <div class="flex items-center gap-2">
       <Button
         variant="outline" size="icon-sm"

@@ -2,13 +2,14 @@
   import type { Snippet } from 'svelte';
   import type { DataProvider, AuthProvider, ResourceDefinition, ThemeMode } from '@svadmin/core';
   import { setDataProvider, setAuthProvider, setResources, setLocale, setTheme } from '@svadmin/core';
-  import { matchRoute, currentPath, navigate } from '@svadmin/core/router';
+  import { navigate } from '@svadmin/core/router';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import Layout from './Layout.svelte';
   import AutoTable from './AutoTable.svelte';
   import AutoForm from './AutoForm.svelte';
   import ShowPage from './ShowPage.svelte';
   import Toast from './Toast.svelte';
+  import { initRouter, getRoute, getParams } from '../router-state.svelte.js';
 
   interface Props {
     dataProvider: DataProvider;
@@ -45,27 +46,12 @@
     },
   });
 
-  // Router state
-  const routes = [
-    '/login',
-    '/',
-    '/:resource',
-    '/:resource/create',
-    '/:resource/edit/:id',
-    '/:resource/show/:id',
-  ];
+  // Initialize hash router
+  initRouter();
 
-  let hash = $state(window.location.hash);
-
-  $effect(() => {
-    const handler = () => { hash = window.location.hash; };
-    window.addEventListener('hashchange', handler);
-    return () => window.removeEventListener('hashchange', handler);
-  });
-
-  const match = $derived(matchRoute(hash, routes));
-  const route = $derived(match?.route ?? '/');
-  const params = $derived(match?.params ?? {});
+  // Reactive getters for route state
+  const route = $derived(getRoute());
+  const params = $derived(getParams());
 
   // Auth check
   let isAuthenticated = $state(!authProvider);
@@ -104,18 +90,26 @@
           {@render dashboard()}
         {:else}
           <div class="space-y-4">
-            <h1 class="text-2xl font-bold text-gray-900">Welcome to {title}</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome to {title}</h1>
             <p class="text-gray-500">Select a resource from the sidebar to get started.</p>
           </div>
         {/if}
       {:else if route === '/:resource'}
-        <AutoTable resourceName={params.resource} />
+        {#key params.resource}
+          <AutoTable resourceName={params.resource} />
+        {/key}
       {:else if route === '/:resource/create'}
-        <AutoForm resourceName={params.resource} mode="create" />
+        {#key params.resource}
+          <AutoForm resourceName={params.resource} mode="create" />
+        {/key}
       {:else if route === '/:resource/edit/:id'}
-        <AutoForm resourceName={params.resource} mode="edit" id={params.id} />
+        {#key `${params.resource}-${params.id}`}
+          <AutoForm resourceName={params.resource} mode="edit" id={params.id} />
+        {/key}
       {:else if route === '/:resource/show/:id'}
-        <ShowPage resourceName={params.resource} id={params.id} />
+        {#key `${params.resource}-${params.id}`}
+          <ShowPage resourceName={params.resource} id={params.id} />
+        {/key}
       {/if}
     </Layout>
   {:else}

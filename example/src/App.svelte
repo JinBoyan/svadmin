@@ -8,4 +8,4 @@
   });
 </script>
 
-<AdminApp {dataProvider} {resources} title="svadmin Demo" />
+<AdminApp {dataProvider} {resources} title="svadmin Demo" locale="en" />

@@ -13,24 +13,26 @@
 - 🎯 **Headless Architecture** — DataProvider / AuthProvider interfaces, swap backends freely
 - ⚡ **18 Reactive Hooks** — `useList`, `useOne`, `useCreate`, `useUpdate`, `useDelete`, `useTable`, `useForm`, etc.
 - 🧩 **Pre-built UI** — AdminApp, AutoTable, AutoForm, ShowPage, Sidebar, Layout with shadcn-svelte
-- 🌍 **i18n** — Built-in zh-CN/en with browser auto-detection, extensible
+- 🌍 **i18n** — Built-in zh-CN/en with browser auto-detection, one-click locale toggle
 - 🔐 **Auth & RBAC** — AuthProvider + permission system with resource-level access control
 - 🌓 **Dark Mode** — Light / Dark / System with one-click toggle, persisted to localStorage
+- 🎨 **Multi-Color Themes** — 6 color palettes (Blue, Green, Rose, Orange, Violet, Zinc) with sidebar picker
+- 🪟 **Glassmorphism UI** — Translucent sidebar with backdrop blur for a premium look
 - 📡 **Real-time** — LiveProvider interface for real-time subscriptions
 - 📋 **Audit Logging** — Pluggable audit handler for tracking admin operations
-- 🎨 **OKLCH Theming** — Semantic color tokens, fully customizable
 
 ## ✨ 特性
 
 - 🎯 **Headless 架构** — DataProvider / AuthProvider 接口，自由切换后端
 - ⚡ **18 个响应式 Hook** — `useList`、`useOne`、`useCreate`、`useUpdate`、`useDelete`、`useTable`、`useForm` 等
 - 🧩 **开箱即用 UI** — AdminApp、AutoTable、AutoForm、ShowPage、Sidebar、Layout（基于 shadcn-svelte）
-- 🌍 **国际化** — 内置中英文，浏览器自动检测语言，可扩展
+- 🌍 **国际化** — 内置中英文，浏览器自动检测，侧边栏一键切换语言
 - 🔐 **认证与权限** — AuthProvider + 资源级权限控制
 - 🌓 **暗色模式** — 亮色 / 暗色 / 跟随系统，一键切换，持久化到 localStorage
+- 🎨 **多色主题** — 6 种配色方案（Blue、Green、Rose、Orange、Violet、Zinc），侧边栏选色器切换
+- 🪟 **毛玻璃 UI** — 半透明侧边栏 + 背景模糊，质感拉满
 - 📡 **实时订阅** — LiveProvider 接口支持实时数据
 - 📋 **审计日志** — 可插拔的审计处理器
-- 🎨 **OKLCH 主题** — 语义化颜色 Token，完全可定制
 
 ## 📦 Packages / 包
 
@@ -149,6 +151,23 @@ toggleTheme();        // toggle between light/dark
 getTheme();           // current setting
 getResolvedTheme();   // resolved to 'light' or 'dark'
 ```
+
+## 🎨 Color Themes / 多色主题
+
+Switch between 6 color palettes via sidebar picker or programmatically:
+
+通过侧边栏选色器或编程式切换 6 种配色：
+
+```typescript
+import { getColorTheme, setColorTheme, colorThemes } from '@svadmin/core';
+import type { ColorTheme } from '@svadmin/core';
+
+setColorTheme('rose');   // 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'zinc'
+getColorTheme();         // current color theme
+console.log(colorThemes); // [{ id: 'blue', label: 'Blue', color: '#3b82f6' }, ...]
+```
+
+Available themes / 可用主题: `blue` (default), `green`, `rose`, `orange`, `violet`, `zinc`
 
 ## 🔌 Custom DataProvider / 自定义数据源
 

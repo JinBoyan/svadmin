@@ -61,8 +61,8 @@
       }
       formData = defaults;
       initialized = true;
-    } else if (existingQuery && $existingQuery?.data) {
-      formData = { ...$existingQuery.data as Record<string, unknown> };
+    } else if (existingQuery && existingQuery?.data) {
+      formData = { ...existingQuery.data as Record<string, unknown> };
       initialized = true;
     }
   });
@@ -98,9 +98,9 @@
       }
 
       if (mode === 'create') {
-        await $createMut.mutateAsync(cleanData);
+        await createMut.mutateAsync(cleanData);
       } else if (id != null) {
-        await $updateMut.mutateAsync({ id, variables: cleanData });
+        await updateMut.mutateAsync({ id, variables: cleanData });
       }
 
       isDirty = false;
@@ -117,7 +117,7 @@
     isDirty = true;
   }
 
-  const isLoading = $derived(mode === 'edit' && existingQuery ? $existingQuery?.isLoading : false);
+  const isLoading = $derived(mode === 'edit' && existingQuery ? existingQuery?.isLoading : false);
 
   const pageTitle = $derived(
     mode === 'create'

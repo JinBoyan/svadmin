@@ -51,10 +51,10 @@
     <Loader2 class="h-8 w-8 animate-spin text-primary" />
   </div>
 {:else}
-  <div class="flex h-screen">
+  <div class="flex h-screen bg-gradient-to-br from-background via-background to-muted/30">
     <Sidebar {collapsed} {identity} {title} onToggle={() => collapsed = !collapsed} onLogout={handleLogout} />
     <main
-      class="flex-1 overflow-y-auto p-6 transition-all duration-300"
+      class="flex-1 overflow-y-auto p-8 transition-all duration-300"
       class:ml-64={!collapsed}
       class:ml-16={collapsed}
     >
