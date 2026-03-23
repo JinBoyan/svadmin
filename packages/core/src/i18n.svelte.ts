@@ -47,6 +47,9 @@ const locales: Record<string, Locale> = {
     'common.retry': '重试',
     'common.yes': '是',
     'common.no': '否',
+    'common.welcome': '欢迎使用 {title}',
+    'common.dashboardHint': '从侧边栏选择一个资源开始。',
+    'common.redirecting': '正在跳转到登录页...',
     // Field
     'field.enterValue': '输入{label}',
     'field.selectPlaceholder': '请选择',
@@ -134,6 +137,9 @@ const locales: Record<string, Locale> = {
     'common.retry': 'Retry',
     'common.yes': 'Yes',
     'common.no': 'No',
+    'common.welcome': 'Welcome to {title}',
+    'common.dashboardHint': 'Select a resource from the sidebar to get started.',
+    'common.redirecting': 'Redirecting to login...',
     // Field
     'field.enterValue': 'Enter {label}',
     'field.selectPlaceholder': 'Select...',

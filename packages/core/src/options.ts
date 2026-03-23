@@ -47,7 +47,7 @@ export interface AdminOptions {
   breadcrumb?: false | 'default';
   disableRouteChangeHandler?: boolean;
   onLiveEvent?: (event: unknown) => void;
-  menuItems?: (items: any[]) => any[];
+  menuItems?: (items: { name: string; route: string; label: string; icon?: string; parentName?: string; order?: number }[]) => { name: string; route: string; label: string; icon?: string; parentName?: string; order?: number }[];
 }
 
 const defaultTextTransformers: TextTransformers = {

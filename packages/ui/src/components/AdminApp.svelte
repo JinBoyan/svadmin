@@ -2,6 +2,7 @@
   import type { Snippet } from 'svelte';
   import type { DataProvider, AuthProvider, ResourceDefinition, ThemeMode, RouterProvider } from '@svadmin/core';
   import { setDataProvider, setAuthProvider, setResources, setLocale, setTheme, setRouterProvider, getAuthProvider, createHashRouterProvider } from '@svadmin/core';
+  import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
   import Layout from './Layout.svelte';
@@ -109,8 +110,8 @@
           {@render dashboard()}
         {:else}
           <div class="space-y-4">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Welcome to {title}</h1>
-            <p class="text-gray-500">Select a resource from the sidebar to get started.</p>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('common.welcome', { title })}</h1>
+            <p class="text-gray-500">{t('common.dashboardHint')}</p>
           </div>
         {/if}
       {:else if route === '/:resource'}
@@ -133,7 +134,7 @@
     </Layout>
   {:else}
     <div class="flex h-screen items-center justify-center">
-      <p class="text-gray-500">Redirecting to login...</p>
+      <p class="text-gray-500">{t('common.redirecting')}</p>
     </div>
   {/if}
   <Toast />

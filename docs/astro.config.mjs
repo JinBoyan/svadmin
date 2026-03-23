@@ -18,6 +18,7 @@ export default defineConfig({
           items: [
             { label: 'Introduction', slug: 'guides/introduction' },
             { label: 'Quick Start', slug: 'guides/quick-start' },
+            { label: 'Resource Type Registry', slug: 'guides/resource-type-registry' },
           ],
         },
         {
@@ -27,6 +28,7 @@ export default defineConfig({
             { label: 'Auth Provider', slug: 'providers/auth' },
             { label: 'Router Provider', slug: 'providers/router' },
             { label: 'Live Provider', slug: 'providers/live' },
+            { label: 'Elysia', slug: 'providers/elysia' },
           ],
         },
         {
