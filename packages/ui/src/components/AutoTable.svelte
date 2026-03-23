@@ -1,15 +1,14 @@
 <script lang="ts">
   import {
-    createSvelteTable,
+    createTable,
     getCoreRowModel,
     type ColumnDef,
     type SortingState,
     type RowSelectionState,
     type VisibilityState,
     type ExpandedState,
-    flexRender,
   } from '@tanstack/svelte-table';
-  import { get } from 'svelte/store';
+
   import { useList, useDelete, getResource } from '@svadmin/core';
   import type { Pagination as PaginationState, Sort, Filter, FieldDefinition } from '@svadmin/core';
   import { navigate } from '@svadmin/core/router';
@@ -194,7 +193,7 @@
   ]);
 
   // ─── Create TanStack Table ────────────────────────────────────
-  const tableStore = createSvelteTable({
+  const tbl = createTable({
     get data() { return query.data?.data ?? []; },
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -223,8 +222,6 @@
     enableExpanding: !!expandedRowRender,
   });
 
-  // Unwrap the Readable<Table> store into a reactive value
-  const tbl = $derived(get(tableStore));
   const selectedCount = $derived(Object.keys(rowSelection).length);
   const totalPages = $derived(Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
 
