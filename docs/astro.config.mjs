@@ -17,9 +17,9 @@ export default defineConfig({
       ],
       title: 'svadmin',
       description: 'Headless admin framework for Svelte 5',
-      defaultLocale: 'en',
+      defaultLocale: 'root',
       locales: {
-        en: { label: 'English', lang: 'en' },
+        root: { label: 'English', lang: 'en' },
         'zh-cn': { label: '简体中文', lang: 'zh-CN' },
       },
       social: [
