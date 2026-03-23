@@ -87,3 +87,8 @@ export { createSSELiveProvider } from './live-sse';
 export type { SSELiveProviderOptions } from './live-sse';
 export { inferFromOpenAPI } from './inferencer-openapi';
 export type { InferFromOpenAPIOptions } from './inferencer-openapi';
+export {
+  getDefaultFilter, getDefaultSortOrder,
+  unionFilters, unionSorters,
+  file2Base64, generateDefaultDocumentTitle,
+} from './helpers';
