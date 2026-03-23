@@ -6,7 +6,7 @@ import starlightLinksValidator from 'starlight-links-validator';
 import svelte from '@astrojs/svelte';
 
 export default defineConfig({
-  site: 'https://svadmin.pages.dev',
+  site: 'https://svadmin.nestjs.cn',
   integrations: [
     svelte(),
     starlight({

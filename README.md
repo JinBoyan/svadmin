@@ -4,7 +4,10 @@
 >
 > 面向 Svelte 5 的 Headless 管理后台框架 — 自带后端适配
 
-[English](#-features) | [中文](#-特性)
+[![npm](https://img.shields.io/npm/v/@svadmin/core?color=ff3e00&label=npm)](https://www.npmjs.com/package/@svadmin/core)
+[![license](https://img.shields.io/github/license/zuohuadong/svadmin)](LICENSE)
+
+[English](#-features) | [中文](#-特性) | [📖 Documentation / 文档](https://svadmin.nestjs.cn)
 
 ---
 
@@ -292,6 +295,12 @@ const myProvider: DataProvider = {
 │ /appwrite│ /graphql  │ /elysia  ... │
 └──────────┴───────────┴───────────────┘
 ```
+
+## 📖 Documentation / 文档
+
+Full documentation is available at / 完整文档请访问：
+
+**[svadmin.nestjs.cn](https://svadmin.nestjs.cn)**
 
 ## 🤝 Contributing / 贡献
 
