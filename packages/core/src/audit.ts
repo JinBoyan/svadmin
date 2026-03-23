@@ -1,5 +1,5 @@
 // Audit logging — record admin operations
-// Full AuditLogProvider interface (refine-compatible)
+// Full AuditLogProvider interface
 
 export interface AuditEntry {
   timestamp: string;
@@ -16,7 +16,7 @@ export interface AuditEntry {
 export type AuditHandler = (entry: AuditEntry) => void | Promise<void>;
 
 /**
- * Full AuditLogProvider interface (refine-compatible).
+ * Full AuditLogProvider interface.
  * - create: log a new entry
  * - get: retrieve entries for a resource
  * - update: update an existing entry (e.g. mark as reviewed)

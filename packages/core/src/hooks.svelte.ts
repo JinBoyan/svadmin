@@ -69,8 +69,8 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
       return result;
     },
     initialPageParam: 1,
-    getNextPageParam: (lastPage: any, allPages: any) => {
-      const totalFetched = allPages.reduce((acc: number, p: any) => acc + (p.data?.length ?? 0), 0);
+    getNextPageParam: (lastPage: { data: TData[]; total: number }, allPages: { data: TData[]; total: number }[]) => {
+      const totalFetched = allPages.reduce((acc: number, p) => acc + (p.data?.length ?? 0), 0);
       if (totalFetched >= (lastPage.total ?? 0)) return undefined;
       return allPages.length + 1;
     },
@@ -145,18 +145,20 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
     : null;
 
   const selectOptions = $derived.by(() => {
-    const data = (query.data as any)?.data ?? [];
+    const queryResult = query.data as { data: TData[]; total: number } | undefined;
+    const data: TData[] = queryResult?.data ?? [];
     // Merge default value items if not already in data
-    const defaultData = (defaultValueQuery as any)?.data?.data ?? [];
+    const defaultQueryResult = defaultValueQuery as { data: { data: TData[] } | undefined } | null;
+    const defaultData: TData[] = defaultQueryResult?.data?.data ?? [];
     const allData: TData[] = [...data];
-    const existingIds = new Set(data.map((d: any) => String(d[typeof optionValue === 'string' ? optionValue : 'id'])));
+    const existingIds = new Set(data.map((d: TData) => String((d as Record<string, unknown>)[typeof optionValue === 'string' ? optionValue : 'id'])));
     for (const item of defaultData) {
-      const itemId = String((item as any)[typeof optionValue === 'string' ? optionValue : 'id']);
+      const itemId = String((item as Record<string, unknown>)[typeof optionValue === 'string' ? optionValue : 'id']);
       if (!existingIds.has(itemId)) allData.push(item);
     }
     return allData.map((item: TData) => {
-      const label = typeof optionLabel === 'function' ? optionLabel(item) : String((item as any)[optionLabel] ?? '');
-      const value = typeof optionValue === 'function' ? optionValue(item) : (item as any)[optionValue];
+      const label = typeof optionLabel === 'function' ? optionLabel(item) : String((item as Record<string, unknown>)[optionLabel] ?? '');
+      const value = typeof optionValue === 'function' ? optionValue(item) : (item as Record<string, unknown>)[optionValue];
       return { label, value } as unknown as TOption;
     });
   });

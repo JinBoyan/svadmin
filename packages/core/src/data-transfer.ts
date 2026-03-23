@@ -17,7 +17,7 @@ export interface UseExportOptions<TData extends BaseRecord = BaseRecord> {
 
 /**
  * useExport — export records from a resource as CSV download
- * Refine v5 compatible: supports mapData, sorters, filters, maxItemCount, pageSize
+ * Supports mapData, sorters, filters, maxItemCount, pageSize
  */
 export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExportOptions<TData> = {}) {
   const parsed = useParsed();
@@ -105,7 +105,7 @@ export interface UseImportOptions<TData = Record<string, unknown>> {
 
 /**
  * useImport — import records from a CSV file
- * Refine v5 compatible: supports mapData, batchSize, onFinish, onProgress, meta
+ * Supports mapData, batchSize, onFinish, onProgress, meta
  */
 export function useImport<TData = Record<string, unknown>>(options: UseImportOptions<TData> = {}) {
   const parsed = useParsed();

@@ -5,7 +5,7 @@ import { getResource, getResources } from './context';
 import { getAdminOptions } from './options';
 import { navigate } from './router';
 import { t } from './i18n.svelte';
-import type { BaseRecord, HttpError, Filter, KnownResources } from './types';
+import type { BaseRecord, HttpError, Filter, KnownResources, ResourceDefinition } from './types';
 import { useList, type UseListOptions } from './query-hooks.svelte';
 import { toast } from './toast.svelte';
 
@@ -80,8 +80,8 @@ export function useMenu() {
 
   const menuItems = $derived.by<MenuConfig[]>(() => {
     let items = resources
-      .filter((r: any) => r.showInMenu !== false)
-      .map((r: any) => ({
+      .filter((r: ResourceDefinition) => r.showInMenu !== false)
+      .map((r: ResourceDefinition) => ({
         name: r.name,
         route: `/${r.name}`,
         label: r.label || r.name, // Usually handled by i18n label mapping

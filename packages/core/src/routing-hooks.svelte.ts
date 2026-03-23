@@ -17,7 +17,6 @@ export function useGetToPath() {
 
     // Apply router mapping if the router provider defines custom path transformers
     if (routerProvider?.go) {
-      // In Refine, go accepts 'to' configs.
       // SvelteKit path generation can be injected here.
     }
     return path;
@@ -28,10 +27,10 @@ export function useGo() {
   const getToPath = useGetToPath();
   const routerProvider = getRouterProvider();
 
-  return (options: { to?: string; query?: Record<string, unknown>; type?: 'push' | 'replace'; resource?: string; action?: 'list' | 'create' | 'edit' | 'show'; id?: string | number }) => {
+  return (options: { to?: string; query?: Record<string, unknown>; type?: 'push' | 'replace'; resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number }) => {
     let targetUrl = options.to;
     if (!targetUrl && options.resource) {
-      targetUrl = getToPath({ resource: options.resource, action: options.action, id: options.id });
+      targetUrl = getToPath({ resource: options.resource, action: options.action === 'clone' ? 'edit' : options.action, id: options.id });
     }
     if (!targetUrl) targetUrl = '/';
 
@@ -65,8 +64,8 @@ export function useBack() {
  * (to avoid full page reloads in SSR apps)
  */
 export function useLink() {
-  const routerProvider = getRouterProvider() as any;
-  return routerProvider?.Link ?? 'a';
+  const routerProvider = getRouterProvider() as Record<string, unknown> | undefined;
+  return (routerProvider?.Link as string) ?? 'a';
 }
 
 export function useResource(resourceName?: string) {
@@ -90,7 +89,7 @@ export function useNavigation() {
   return {
     create: (resource?: string) => go({ type: 'push', resource: resource ?? parsed.resource, action: 'create' }),
     edit: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resource, action: 'edit', id: id ?? parsed.id }),
-    clone: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resource, action: 'clone' as any, id: id ?? parsed.id }),
+    clone: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resource, action: 'clone', id: id ?? parsed.id }),
     show: (resource?: string, id?: string | number) => go({ type: 'push', resource: resource ?? parsed.resource, action: 'show', id: id ?? parsed.id }),
     list: (resource?: string) => go({ type: 'push', resource: resource ?? parsed.resource, action: 'list' }),
     push: (url: string) => go({ to: url, type: 'push' }),

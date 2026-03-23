@@ -1,4 +1,4 @@
-// Core type definitions — 100% Refine-compatible DataProvider + AuthProvider + Providers
+// Core type definitions — DataProvider + AuthProvider + Providers
 
 // ─── HttpError ─────────────────────────────────────────────────
 
@@ -252,6 +252,9 @@ export interface ResourceDefinition {
   canEdit?: boolean;
   canDelete?: boolean;
   canShow?: boolean;
+  showInMenu?: boolean;
+  parentName?: string;
+  menuOrder?: number;
   meta?: Record<string, unknown> & { dataProviderName?: string; parent?: string };
 }
 

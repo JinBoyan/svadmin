@@ -4,7 +4,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, DeleteManyParams, DeleteManyResult,
+  GetManyParams, GetManyResult, DeleteManyParams, DeleteManyResult, BaseRecord,
 } from '@svadmin/core';
 
 interface AppwriteProviderOptions {
@@ -67,7 +67,7 @@ export function createAppwriteDataProvider(options: AppwriteProviderOptions): Da
   return {
     getApiUrl: () => 'appwrite',
 
-    async getList<T>(params: GetListParams): Promise<GetListResult<T>> {
+    async getList<TData extends BaseRecord = BaseRecord>(params: GetListParams): Promise<GetListResult<TData>> {
       const { resource, pagination, sorters, filters } = params;
       const queries: string[] = [];
 
@@ -95,44 +95,44 @@ export function createAppwriteDataProvider(options: AppwriteProviderOptions): Da
 
       const result = await db.listDocuments(databaseId, resource, queries);
       return {
-        data: result.documents as T[],
+        data: result.documents as TData[],
         total: result.total,
       };
     },
 
-    async getOne<T>(params: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<TData extends BaseRecord = BaseRecord>(params: GetOneParams): Promise<GetOneResult<TData>> {
       const doc = await db.getDocument(databaseId, params.resource, String(params.id));
-      return { data: doc as T };
+      return { data: doc as TData };
     },
 
-    async create<T>(params: CreateParams): Promise<CreateResult<T>> {
-      const doc = await db.createDocument(databaseId, params.resource, 'unique()', params.variables);
-      return { data: doc as T };
+    async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateParams<TVariables>): Promise<CreateResult<TData>> {
+      const doc = await db.createDocument(databaseId, params.resource, 'unique()', params.variables as Record<string, unknown>);
+      return { data: doc as TData };
     },
 
-    async update<T>(params: UpdateParams): Promise<UpdateResult<T>> {
-      const doc = await db.updateDocument(databaseId, params.resource, String(params.id), params.variables);
-      return { data: doc as T };
+    async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
+      const doc = await db.updateDocument(databaseId, params.resource, String(params.id), params.variables as Record<string, unknown>);
+      return { data: doc as TData };
     },
 
-    async deleteOne<T>(params: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
       await db.deleteDocument(databaseId, params.resource, String(params.id));
-      return { data: { id: params.id } as T };
+      return { data: { id: params.id } as unknown as TData };
     },
 
-    async getMany<T>(params: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<TData extends BaseRecord = BaseRecord>(params: GetManyParams): Promise<GetManyResult<TData>> {
       const queries = [`equal("$id", ${JSON.stringify(params.ids.map(String))})`];
       const result = await db.listDocuments(databaseId, params.resource, queries);
-      return { data: result.documents as T[] };
+      return { data: result.documents as TData[] };
     },
 
-    async deleteMany<T>(params: DeleteManyParams): Promise<DeleteManyResult<T>> {
+    async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
       const results: unknown[] = [];
       for (const id of params.ids) {
         await db.deleteDocument(databaseId, params.resource, String(id));
         results.push({ id });
       }
-      return { data: results as T[] };
+      return { data: results as TData[] };
     },
   };
 }

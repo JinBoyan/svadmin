@@ -155,15 +155,16 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (updater?.detail) {
         queryClient.setQueryData([resName, 'one', targetId], (old: unknown) => updater.detail!(old, params.variables, targetId));
       } else {
-        queryClient.setQueryData([resName, 'one', targetId], (old: any) => old ? { ...old, ...params.variables } : old);
+        queryClient.setQueryData([resName, 'one', targetId], (old: Record<string, unknown> | undefined) => old ? { ...old, ...params.variables } : old);
       }
       
       if (updater?.list) {
         queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => updater.list!(old, params.variables, targetId));
       } else {
-        queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: any) => {
-          if (!old?.data) return old;
-          return { ...old, data: old.data.map((item: any) => String(item.id) === String(targetId) ? { ...item, ...params.variables } : item) };
+        queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => {
+          if (!old || typeof old !== 'object' || !('data' in old)) return old;
+          const o = old as { data: Record<string, unknown>[] };
+          return { ...o, data: o.data.map((item) => String(item.id) === String(targetId) ? { ...item, ...params.variables } : item) };
         });
       }
 
@@ -178,12 +179,13 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       fireSuccessNotification(params.successNotification, 'Updated successfully', data.data, params.variables, resName);
       audit({ action: 'update', resource: resName, recordId: String(targetId) });
     },
-    onError: (error, params, context: any) => {
+    onError: (error, params, context: unknown) => {
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      if (context?.previousDetail) queryClient.setQueryData([resName, 'one', targetId], context.previousDetail);
-      if (context?.previousList) {
-        context.previousList.forEach(([qk, data]: any) => queryClient.setQueryData(qk, data));
+      const ctx = context as { previousDetail?: unknown; previousList?: [unknown, unknown][] } | undefined;
+      if (ctx?.previousDetail) queryClient.setQueryData([resName, 'one', targetId], ctx.previousDetail);
+      if (ctx?.previousList) {
+        ctx.previousList.forEach(([qk, data]) => queryClient.setQueryData(qk as string[], data));
       }
       if (error instanceof UndoError) return;
       fireErrorNotification(params.errorNotification, 'Update failed', error);
@@ -268,9 +270,10 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       await queryClient.cancelQueries({ queryKey: [resName] });
       const previousList = queryClient.getQueriesData({ queryKey: [resName, 'list'] });
       
-      queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: any) => {
-        if (!old?.data) return old;
-        return { ...old, data: old.data.filter((item: any) => String(item.id) !== String(targetId)) };
+      queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => {
+        if (!old || typeof old !== 'object' || !('data' in old)) return old;
+        const o = old as { data: Record<string, unknown>[] };
+        return { ...o, data: o.data.filter((item) => String(item.id) !== String(targetId)) };
       });
 
       return { previousList };
@@ -284,9 +287,10 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       fireSuccessNotification(params.successNotification, 'Deleted successfully', data.data, params.variables, resName);
       audit({ action: 'delete', resource: resName, recordId: String(targetId) });
     },
-    onError: (error, params, context: any) => {
-      if (context?.previousList) {
-        context.previousList.forEach(([qk, data]: any) => queryClient.setQueryData(qk, data));
+    onError: (error, params, context: unknown) => {
+      const ctx = context as { previousList?: [unknown, unknown][] } | undefined;
+      if (ctx?.previousList) {
+        ctx.previousList.forEach(([qk, data]) => queryClient.setQueryData(qk as string[], data));
       }
       if (error instanceof UndoError) return;
       fireErrorNotification(params.errorNotification, 'Delete failed', error);

@@ -223,7 +223,7 @@ export function addTranslations(locale: string, translations: Record<string, str
 }
 
 /**
- * useTranslation — Refine v5 compatible i18n hook
+ * useTranslation — standard i18n hook
  * Returns { translate, getLocale, changeLocale }
  */
 export function useTranslation() {

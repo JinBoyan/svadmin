@@ -4,7 +4,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, DeleteManyParams, DeleteManyResult,
+  GetManyParams, GetManyResult, DeleteManyParams, DeleteManyResult, BaseRecord,
 } from '@svadmin/core';
 
 interface PocketBaseProviderOptions {
@@ -71,7 +71,7 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
   return {
     getApiUrl: () => pb.buildUrl('/api'),
 
-    async getList<T>(params: GetListParams): Promise<GetListResult<T>> {
+    async getList<TData extends BaseRecord = BaseRecord>(params: GetListParams): Promise<GetListResult<TData>> {
       const page = params.pagination?.current ?? 1;
       const perPage = params.pagination?.pageSize ?? 10;
       const result = await pb.collection(params.resource).getList(page, perPage, {
@@ -79,44 +79,44 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
         filter: buildFilter(params.filters),
       });
       return {
-        data: result.items as T[],
+        data: result.items as TData[],
         total: result.totalItems,
       };
     },
 
-    async getOne<T>(params: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<TData extends BaseRecord = BaseRecord>(params: GetOneParams): Promise<GetOneResult<TData>> {
       const record = await pb.collection(params.resource).getOne(String(params.id));
-      return { data: record as T };
+      return { data: record as TData };
     },
 
-    async create<T>(params: CreateParams): Promise<CreateResult<T>> {
-      const record = await pb.collection(params.resource).create(params.variables);
-      return { data: record as T };
+    async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateParams<TVariables>): Promise<CreateResult<TData>> {
+      const record = await pb.collection(params.resource).create(params.variables as Record<string, unknown>);
+      return { data: record as TData };
     },
 
-    async update<T>(params: UpdateParams): Promise<UpdateResult<T>> {
-      const record = await pb.collection(params.resource).update(String(params.id), params.variables);
-      return { data: record as T };
+    async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
+      const record = await pb.collection(params.resource).update(String(params.id), params.variables as Record<string, unknown>);
+      return { data: record as TData };
     },
 
-    async deleteOne<T>(params: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
       await pb.collection(params.resource).delete(String(params.id));
-      return { data: { id: params.id } as T };
+      return { data: { id: params.id } as unknown as TData };
     },
 
-    async getMany<T>(params: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<TData extends BaseRecord = BaseRecord>(params: GetManyParams): Promise<GetManyResult<TData>> {
       const filter = params.ids.map(id => `id = '${id}'`).join(' || ');
       const records = await pb.collection(params.resource).getFullList({ filter });
-      return { data: records as T[] };
+      return { data: records as TData[] };
     },
 
-    async deleteMany<T>(params: DeleteManyParams): Promise<DeleteManyResult<T>> {
+    async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
       const results: unknown[] = [];
       for (const id of params.ids) {
         await pb.collection(params.resource).delete(String(id));
         results.push({ id });
       }
-      return { data: results as T[] };
+      return { data: results as TData[] };
     },
   };
 }
