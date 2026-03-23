@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Wifi, WifiOff, Loader2 } from 'lucide-svelte';
+  import { Badge } from './ui/badge/index.js';
 
   let {
     status = 'disconnected',
@@ -14,12 +15,12 @@
   }>();
 
   const statusConfigs = {
-    connected: { color: 'var(--live-connected, #22c55e)', label: 'Live', icon: Wifi },
-    connecting: { color: 'var(--live-connecting, #f59e0b)', label: 'Connecting...', icon: Loader2 as typeof Wifi },
-    disconnected: { color: 'var(--live-disconnected, #ef4444)', label: 'Offline', icon: WifiOff },
+    connected: { variant: 'default' as const, dotClass: 'bg-emerald-500', label: 'Live', icon: Wifi },
+    connecting: { variant: 'secondary' as const, dotClass: 'bg-amber-500', label: 'Connecting...', icon: Loader2 as typeof Wifi },
+    disconnected: { variant: 'destructive' as const, dotClass: 'bg-red-500', label: 'Offline', icon: WifiOff },
   } as const;
   type StatusKey = 'connected' | 'connecting' | 'disconnected';
-  const statusConfig = $derived(statusConfigs[status as StatusKey]);
+  const cfg = $derived(statusConfigs[status as StatusKey]);
 
   const timeSinceEvent = $derived(
     lastEvent?.timestamp
@@ -28,88 +29,25 @@
   );
 </script>
 
-<div class="live-indicator" title={statusConfig.label}>
-  <span class="live-dot" style="--dot-color: {statusConfig.color}">
+<Badge variant={cfg.variant} class="gap-1.5 select-none" title={cfg.label}>
+  <span class="relative flex h-2 w-2">
+    <span class="{cfg.dotClass} rounded-full h-2 w-2"></span>
     {#if status === 'connected'}
-      <span class="live-pulse"></span>
+      <span class="absolute inset-0 rounded-full {cfg.dotClass} opacity-40 animate-ping"></span>
     {/if}
   </span>
-  <span class="live-label" style="color: {statusConfig.color}">
-    {statusConfig.label}
-  </span>
+  <span class="text-[0.6875rem] font-semibold uppercase tracking-wide">{cfg.label}</span>
 
   {#if showDetails && resource}
-    <span class="live-resource">{resource}</span>
+    <span class="text-[0.625rem] font-mono opacity-70">{resource}</span>
   {/if}
 
   {#if showDetails && lastEvent}
-    <span class="live-event">
+    <span class="text-[0.625rem] opacity-70">
       {lastEvent.type}
       {#if timeSinceEvent !== null && timeSinceEvent < 60}
-        <span class="live-time">{timeSinceEvent}s ago</span>
+        <span class="opacity-60">{timeSinceEvent}s ago</span>
       {/if}
     </span>
   {/if}
-</div>
-
-<style>
-  .live-indicator {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    font-size: 0.75rem;
-    font-weight: 500;
-    padding: 0.25rem 0.5rem;
-    border-radius: 9999px;
-    background: hsl(var(--muted) / 0.3);
-    user-select: none;
-  }
-
-  .live-dot {
-    position: relative;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--dot-color);
-    flex-shrink: 0;
-  }
-
-  .live-pulse {
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    background: var(--dot-color);
-    opacity: 0.4;
-    animation: live-pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes live-pulse {
-    0%, 100% { transform: scale(1); opacity: 0.4; }
-    50% { transform: scale(1.8); opacity: 0; }
-  }
-
-  .live-label {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .live-resource {
-    font-size: 0.625rem;
-    color: hsl(var(--muted-foreground));
-    font-family: monospace;
-  }
-
-  .live-event {
-    font-size: 0.625rem;
-    color: hsl(var(--muted-foreground));
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-  }
-
-  .live-time {
-    opacity: 0.6;
-  }
-</style>
+</Badge>

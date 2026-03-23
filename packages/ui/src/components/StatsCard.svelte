@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Loader2 } from 'lucide-svelte';
+  import { Skeleton } from './ui/skeleton/index.js';
 
   type ColorVariant = 'primary' | 'success' | 'warning' | 'danger' | 'info';
   type StyleVariant = 'default' | 'outline' | 'filled';
@@ -21,7 +21,7 @@
   interface Props {
     label: string;
     value: string | number;
-    icon?: typeof Loader2;
+    icon?: import('svelte').Component<{ class?: string }>;
     trend?: { value: number; label?: string };
     loading?: boolean;
     color?: ColorVariant;
@@ -50,7 +50,7 @@
   <div class="flex-1 min-w-0">
     <p class="text-sm text-muted-foreground">{label}</p>
     {#if loading}
-      <Loader2 class="mt-1 h-5 w-5 animate-spin text-muted-foreground" />
+      <Skeleton class="mt-1 h-7 w-20" />
     {:else}
       <div class="flex items-baseline gap-2">
         <p class="text-2xl font-bold text-foreground">{value}</p>

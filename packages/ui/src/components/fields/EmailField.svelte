@@ -3,13 +3,7 @@
   let { value }: Props = $props();
 </script>
 {#if value}
-  <a href="mailto:{value}" class="field-email">{value}</a>
+  <a href="mailto:{value}" class="text-primary hover:underline no-underline">{value}</a>
 {:else}
-  <span class="field-email field-empty">—</span>
+  <span class="text-muted-foreground">—</span>
 {/if}
-
-<style>
-  .field-email { color: var(--color-primary, #3b82f6); text-decoration: none; }
-  .field-email:hover { text-decoration: underline; }
-  .field-empty { color: var(--color-text-muted, #9ca3af); }
-</style>

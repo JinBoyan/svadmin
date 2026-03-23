@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/nestjsx-crud",
-  "version": "0.3.0",
+  "version": "0.3.17",
   "description": "NestJSX CRUD DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -14,7 +14,7 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "^0.3.0"
+    "@svadmin/core": "^0.3.10"
   },
   "dependencies": {
     "query-string": "^9.0.0"

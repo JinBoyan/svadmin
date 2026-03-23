@@ -5,7 +5,8 @@
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import * as Card from './ui/card/index.js';
-  import { Lock, Eye, EyeOff, ShieldCheck } from 'lucide-svelte';
+  import * as Alert from './ui/alert/index.js';
+  import { Lock, Eye, EyeOff, ShieldCheck, Loader2, AlertCircle } from 'lucide-svelte';
 
   let { title = 'Admin' } = $props<{
     title?: string;
@@ -32,11 +33,11 @@
   }
 </script>
 
-<div class="auth-page">
-  <div class="auth-container">
-    <Card.Card class="auth-card">
-      <Card.CardHeader class="auth-header">
-        <div class="auth-icon">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/[0.08] via-background to-primary/[0.04] p-4">
+  <div class="w-full max-w-[420px]">
+    <Card.Card class="backdrop-blur-xl border-border/50 shadow-[0_8px_32px_hsl(var(--primary)/0.08),0_2px_8px_hsl(0_0%_0%/0.06)]">
+      <Card.CardHeader class="text-center pb-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mx-auto mb-3">
           <ShieldCheck class="h-6 w-6" />
         </div>
         <Card.CardTitle class="text-2xl font-bold">{t('auth.resetPassword')}</Card.CardTitle>
@@ -45,15 +46,16 @@
       <Card.CardContent>
         <form onsubmit={handleSubmit} class="space-y-4">
           {#if error}
-            <div class="error-alert">
-              <p>{error}</p>
-            </div>
+            <Alert.Root variant="destructive">
+              <AlertCircle class="h-4 w-4" />
+              <Alert.Description>{error}</Alert.Description>
+            </Alert.Root>
           {/if}
 
           <div class="space-y-2">
             <label for="new-password" class="text-sm font-medium text-foreground">{t('auth.password')}</label>
-            <div class="input-with-icon">
-              <Lock class="input-icon h-4 w-4" />
+            <div class="relative">
+              <Lock class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
               <Input
                 id="new-password"
                 type={showPassword ? 'text' : 'password'}
@@ -64,7 +66,7 @@
               />
               <button
                 type="button"
-                class="password-toggle"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-0.5 z-[1]"
                 onclick={() => showPassword = !showPassword}
                 tabindex={-1}
               >
@@ -79,8 +81,8 @@
 
           <div class="space-y-2">
             <label for="confirm-password" class="text-sm font-medium text-foreground">{t('auth.confirmPassword')}</label>
-            <div class="input-with-icon">
-              <Lock class="input-icon h-4 w-4" />
+            <div class="relative">
+              <Lock class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
               <Input
                 id="confirm-password"
                 type={showPassword ? 'text' : 'password'}
@@ -94,12 +96,12 @@
 
           <Button type="submit" class="w-full" disabled={updatePw.isLoading}>
             {#if updatePw.isLoading}
-              <span class="loading-spinner"></span>
+              <Loader2 class="h-4 w-4 animate-spin mr-2" />
             {/if}
             {t('auth.resetPassword')}
           </Button>
 
-          <div class="auth-link">
+          <div class="flex items-center justify-center mt-2">
             <button
               type="button"
               class="text-sm text-primary hover:underline font-medium"
@@ -115,103 +117,3 @@
     </p>
   </div>
 </div>
-
-<style>
-  .auth-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 50%, hsl(var(--primary) / 0.04) 100%);
-    padding: 1rem;
-  }
-
-  .auth-container {
-    width: 100%;
-    max-width: 420px;
-  }
-
-  :global(.auth-card) {
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 0 8px 32px hsl(var(--primary) / 0.08), 0 2px 8px hsl(0 0% 0% / 0.06);
-  }
-
-  :global(.auth-header) {
-    text-align: center;
-    padding-bottom: 0.5rem;
-  }
-
-  .auth-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary));
-    margin: 0 auto 0.75rem;
-  }
-
-  .input-with-icon {
-    position: relative;
-  }
-
-  :global(.input-icon) {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: hsl(var(--muted-foreground));
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: hsl(var(--muted-foreground));
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 2px;
-    z-index: 1;
-  }
-  .password-toggle:hover {
-    color: hsl(var(--foreground));
-  }
-
-  .error-alert {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    background: hsl(var(--destructive) / 0.1);
-    border: 1px solid hsl(var(--destructive) / 0.3);
-    color: hsl(var(--destructive));
-    font-size: 0.875rem;
-  }
-
-  .loading-spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-    margin-right: 0.5rem;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .auth-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.5rem;
-  }
-</style>

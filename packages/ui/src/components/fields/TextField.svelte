@@ -5,12 +5,7 @@
   const needsTooltip = $derived(value && maxLength && value.length > maxLength);
 </script>
 {#if value}
-  <span class="field-text" title={needsTooltip ? value : undefined}>{display}</span>
+  <span class="inline-block" title={needsTooltip ? value : undefined}>{display}</span>
 {:else}
-  <span class="field-text field-empty">—</span>
+  <span class="text-muted-foreground">—</span>
 {/if}
-
-<style>
-  .field-text { display: inline-block; }
-  .field-empty { color: var(--color-text-muted, #9ca3af); }
-</style>

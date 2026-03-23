@@ -30,11 +30,11 @@
   }
 </script>
 
-<div class="config-error-page">
-  <div class="config-error-container">
-    <Card.Card class="config-error-card">
-      <Card.CardHeader class="config-error-header">
-        <div class="config-error-icon">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-destructive/[0.05] via-background to-destructive/[0.03] p-4">
+  <div class="w-full max-w-[480px]">
+    <Card.Card class="backdrop-blur-xl border-border/50 shadow-[0_8px_32px_hsl(var(--destructive)/0.08),0_2px_8px_hsl(0_0%_0%/0.06)]">
+      <Card.CardHeader class="text-center pb-2">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-[14px] bg-destructive/10 text-destructive mx-auto mb-3">
           <AlertTriangle class="h-7 w-7" />
         </div>
         <Card.CardTitle class="text-xl font-bold">{title}</Card.CardTitle>
@@ -44,17 +44,17 @@
       </Card.CardHeader>
       <Card.CardContent class="space-y-4">
         {#if missingVars.length > 0}
-          <div class="env-var-list">
-            {#each missingVars as v (v.key)}
-              <div class="env-var-row">
-                <div class="env-var-info">
-                  <code class="env-var-key">{v.key}</code>
+          <div class="rounded-lg border overflow-hidden">
+            {#each missingVars as v, i (v.key)}
+              <div class="flex items-center justify-between px-3 py-2.5 gap-2 {i < missingVars.length - 1 ? 'border-b border-border/50' : ''}">
+                <div class="flex flex-col gap-0.5 min-w-0">
+                  <code class="text-[0.8125rem] font-semibold text-foreground font-mono">{v.key}</code>
                   {#if v.description}
-                    <span class="env-var-desc">{v.description}</span>
+                    <span class="text-[0.6875rem] text-muted-foreground">{v.description}</span>
                   {/if}
                 </div>
                 <button
-                  class="copy-btn"
+                  class="flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded px-2 py-1 transition-all shrink-0"
                   onclick={() => copyToClipboard(`${v.key}=`, v.key)}
                   title="Copy"
                 >
@@ -70,11 +70,11 @@
         {/if}
 
         {#if envTemplate}
-          <div class="env-template">
-            <div class="env-template-header">
+          <div class="rounded-lg border overflow-hidden">
+            <div class="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border/50">
               <span class="text-xs font-medium text-muted-foreground">{t('config.envFilePath')}</span>
               <button
-                class="copy-btn"
+                class="flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded px-2 py-1 transition-all shrink-0"
                 onclick={copyAll}
               >
                 {#if copied['__all__']}
@@ -86,7 +86,7 @@
                 {/if}
               </button>
             </div>
-            <pre class="env-template-code">{envTemplate}</pre>
+            <pre class="px-3 py-3 text-xs font-mono leading-relaxed text-foreground bg-muted/20 m-0 whitespace-pre-wrap break-all">{envTemplate}</pre>
           </div>
         {/if}
 
@@ -101,124 +101,3 @@
     </Card.Card>
   </div>
 </div>
-
-<style>
-  .config-error-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, hsl(var(--destructive) / 0.05) 0%, hsl(var(--background)) 50%, hsl(var(--destructive) / 0.03) 100%);
-    padding: 1rem;
-  }
-
-  .config-error-container {
-    width: 100%;
-    max-width: 480px;
-  }
-
-  :global(.config-error-card) {
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 0 8px 32px hsl(var(--destructive) / 0.08), 0 2px 8px hsl(0 0% 0% / 0.06);
-  }
-
-  :global(.config-error-header) {
-    text-align: center;
-    padding-bottom: 0.5rem;
-  }
-
-  .config-error-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    background: hsl(var(--destructive) / 0.1);
-    color: hsl(var(--destructive));
-    margin: 0 auto 0.75rem;
-  }
-
-  .env-var-list {
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-
-  .env-var-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.625rem 0.75rem;
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
-    gap: 0.5rem;
-  }
-  .env-var-row:last-child {
-    border-bottom: none;
-  }
-
-  .env-var-info {
-    display: flex;
-    flex-direction: column;
-    gap: 0.125rem;
-    min-width: 0;
-  }
-
-  .env-var-key {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: hsl(var(--foreground));
-    font-family: monospace;
-  }
-
-  .env-var-desc {
-    font-size: 0.6875rem;
-    color: hsl(var(--muted-foreground));
-  }
-
-  .copy-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    color: hsl(var(--muted-foreground));
-    border-radius: 0.25rem;
-    transition: all 0.15s;
-    flex-shrink: 0;
-  }
-  .copy-btn:hover {
-    color: hsl(var(--foreground));
-    background: hsl(var(--muted) / 0.5);
-  }
-
-  .env-template {
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-
-  .env-template-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 0.75rem;
-    background: hsl(var(--muted) / 0.5);
-    border-bottom: 1px solid hsl(var(--border) / 0.5);
-  }
-
-  .env-template-code {
-    padding: 0.75rem;
-    font-size: 0.75rem;
-    font-family: monospace;
-    line-height: 1.6;
-    color: hsl(var(--foreground));
-    background: hsl(var(--muted) / 0.2);
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-all;
-  }
-</style>

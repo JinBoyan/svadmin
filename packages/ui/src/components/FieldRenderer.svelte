@@ -9,6 +9,8 @@
   import { Textarea } from './ui/textarea/index.js';
   import { Switch } from './ui/switch/index.js';
   import { Badge } from './ui/badge/index.js';
+  import { Label } from './ui/label/index.js';
+  import { Select } from './ui/select/index.js';
   import type { Snippet } from 'svelte';
 
   let { field, value, onchange, children } = $props<{
@@ -43,12 +45,12 @@
 </script>
 
 <div class="space-y-1.5">
-  <label class="block text-sm font-medium text-foreground" for={field.key}>
+  <Label for={field.key}>
     {field.label}
     {#if field.required}
       <span class="text-destructive">*</span>
     {/if}
-  </label>
+  </Label>
 
   {#if children}
     {@render children()}
@@ -84,18 +86,17 @@
     />
 
   {:else if field.type === 'select'}
-    <select
+    <Select
       id={field.key}
       value={strVal}
       onchange={(e) => onchange((e.target as HTMLSelectElement).value)}
       required={field.required}
-      class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      placeholder={t('field.selectPlaceholder')}
     >
-      <option value="">{t('field.selectPlaceholder')}</option>
       {#each field.options ?? [] as opt}
         <option value={opt.value}>{opt.label}</option>
       {/each}
-    </select>
+    </Select>
 
   {:else if field.type === 'boolean'}
     <div class="flex items-center gap-2 pt-1">

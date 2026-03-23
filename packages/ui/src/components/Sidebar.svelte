@@ -6,11 +6,12 @@
   import { toggleTheme, getResolvedTheme, colorThemes, getColorTheme, setColorTheme, canAccessAsync } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
   import * as Tooltip from './ui/tooltip/index.js';
+  import * as DropdownMenu from './ui/dropdown-menu/index.js';
   import { Separator } from './ui/separator/index.js';
   import { ScrollArea } from './ui/scroll-area/index.js';
   import {
     LayoutDashboard, FileText, Users, Settings, Home,
-    ChevronLeft, ChevronRight, LogOut, Sun, Moon, Languages
+    ChevronLeft, ChevronRight, LogOut, Sun, Moon, Languages, Palette
   } from 'lucide-svelte';
 
   let { collapsed, identity, title, onToggle, onLogout } = $props<{
@@ -43,7 +44,7 @@
   $effect(() => {
     // Re-run when locale or resources change
     const localeVal = getLocale();
-    
+
     Promise.all(resources.map(async (r) => {
       try {
         const { can } = await canAccessAsync(r.name, 'list');
@@ -158,18 +159,36 @@
   <!-- Footer -->
   <Separator class="bg-sidebar-border" />
   <div class="p-3 space-y-2">
-    <!-- Color theme picker -->
+    <!-- Color theme picker via DropdownMenu -->
     {#if !collapsed}
-      <div class="flex items-center justify-center gap-1.5 px-2 py-1">
-        {#each colorThemes as ct}
-          <button
-            class="h-5 w-5 rounded-full transition-all duration-200 hover:scale-110 {getColorTheme() === ct.id ? 'ring-2 ring-offset-2 ring-offset-sidebar scale-110' : 'opacity-70 hover:opacity-100'}"
-            style="background-color: {ct.color}; {getColorTheme() === ct.id ? `--tw-ring-color: ${ct.color}` : ''}"
-            title={ct.label}
-            onclick={() => setColorTheme(ct.id)}
-          ></button>
-        {/each}
-      </div>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          {#snippet child({ props })}
+            <button
+              {...props}
+              class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+            >
+              <Palette class="h-4 w-4" />
+              <span class="flex-1 text-left text-xs">{t('common.toggleTheme')}</span>
+              <span
+                class="h-4 w-4 rounded-full ring-1 ring-offset-1 ring-offset-sidebar"
+                style="background-color: {colorThemes.find(c => c.id === getColorTheme())?.color ?? '#3b82f6'}; --tw-ring-color: {colorThemes.find(c => c.id === getColorTheme())?.color ?? '#3b82f6'}"
+              ></span>
+            </button>
+          {/snippet}
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content side="right" align="end" class="w-40">
+          {#each colorThemes as ct}
+            <DropdownMenu.Item onclick={() => setColorTheme(ct.id)} class="gap-2">
+              <span
+                class="h-4 w-4 rounded-full {getColorTheme() === ct.id ? 'ring-2 ring-offset-2 scale-110' : 'opacity-70'}"
+                style="background-color: {ct.color}; {getColorTheme() === ct.id ? `--tw-ring-color: ${ct.color}` : ''}"
+              ></span>
+              {ct.label}
+            </DropdownMenu.Item>
+          {/each}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
     {/if}
 
     {#if !collapsed && identity}
@@ -195,19 +214,40 @@
         </Button>
       </div>
     {:else if collapsed}
-      <Button variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground" title="Switch language">
-        <span class="text-xs font-bold">{localeLabel}</span>
-      </Button>
-      <Button variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground" title={t('common.toggleTheme')}>
-        {#if getResolvedTheme() === 'dark'}
-          <Sun class="h-5 w-5" />
-        {:else}
-          <Moon class="h-5 w-5" />
-        {/if}
-      </Button>
-      <Button variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground hover:text-destructive" title={t('common.logout')}>
-        <LogOut class="h-5 w-5" />
-      </Button>
+      <Tooltip.Root>
+        <Tooltip.Trigger>
+          {#snippet child({ props })}
+            <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground" title="Switch language">
+              <span class="text-xs font-bold">{localeLabel}</span>
+            </Button>
+          {/snippet}
+        </Tooltip.Trigger>
+        <Tooltip.Content side="right">Switch language</Tooltip.Content>
+      </Tooltip.Root>
+      <Tooltip.Root>
+        <Tooltip.Trigger>
+          {#snippet child({ props })}
+            <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground" title={t('common.toggleTheme')}>
+              {#if getResolvedTheme() === 'dark'}
+                <Sun class="h-5 w-5" />
+              {:else}
+                <Moon class="h-5 w-5" />
+              {/if}
+            </Button>
+          {/snippet}
+        </Tooltip.Trigger>
+        <Tooltip.Content side="right">{t('common.toggleTheme')}</Tooltip.Content>
+      </Tooltip.Root>
+      <Tooltip.Root>
+        <Tooltip.Trigger>
+          {#snippet child({ props })}
+            <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground hover:text-destructive" title={t('common.logout')}>
+              <LogOut class="h-5 w-5" />
+            </Button>
+          {/snippet}
+        </Tooltip.Trigger>
+        <Tooltip.Content side="right">{t('common.logout')}</Tooltip.Content>
+      </Tooltip.Root>
     {:else}
       <div class="flex gap-1">
         <Button variant="ghost" size="icon" onclick={toggleLocale} class="flex-1 text-sidebar-foreground" title="Switch language">

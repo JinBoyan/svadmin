@@ -9,7 +9,6 @@
   import { getAuthProvider } from '@svadmin/core';
   import type { Identity } from '@svadmin/core';
   import { navigate } from '@svadmin/core/router';
-  import { Loader2 } from 'lucide-svelte';
   import { currentPath } from '@svadmin/core/router';
   import { Skeleton } from './ui/skeleton/index.js';
 
@@ -55,8 +54,23 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div onkeydown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); commandOpen = true; } }}>
 {#if loading}
-  <div class="flex h-screen items-center justify-center" transition:fade={{ duration: 150 }}>
-    <Loader2 class="h-8 w-8 animate-spin text-primary" />
+  <div class="flex h-screen" in:fade={{ duration: 150 }}>
+    <div class="w-64 border-r bg-sidebar/80 p-4 space-y-4">
+      <Skeleton class="h-8 w-32" />
+      <div class="space-y-2 mt-6">
+        {#each Array(5) as _}
+          <Skeleton class="h-9 w-full rounded-lg" />
+        {/each}
+      </div>
+    </div>
+    <div class="flex-1 p-8 space-y-6">
+      <Skeleton class="h-8 w-48" />
+      <div class="space-y-3">
+        {#each Array(4) as _}
+          <Skeleton class="h-12 w-full" />
+        {/each}
+      </div>
+    </div>
   </div>
 {:else}
   <div class="flex h-screen bg-gradient-to-br from-background via-background to-muted/30" in:fade={{ duration: 200, delay: 50 }}>

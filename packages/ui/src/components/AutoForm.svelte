@@ -7,8 +7,10 @@
   import { Button } from './ui/button/index.js';
   import * as Card from './ui/card/index.js';
   import { Badge } from './ui/badge/index.js';
-  import { Save, ArrowLeft, Loader2 } from 'lucide-svelte';
+  import { Save, ArrowLeft, Loader2, AlertCircle } from 'lucide-svelte';
   import FieldRenderer from './FieldRenderer.svelte';
+  import * as Alert from './ui/alert/index.js';
+  import { Skeleton } from './ui/skeleton/index.js';
 
   import type { Snippet } from 'svelte';
 
@@ -194,21 +196,29 @@
   </div>
 
   {#if isLoading}
-    <div class="flex h-64 items-center justify-center">
-      <Loader2 class="h-6 w-6 animate-spin text-primary" />
+    <div class="max-w-3xl space-y-6">
+      <div class="rounded-xl border p-6 space-y-5">
+        {#each Array(4) as _}
+          <div class="space-y-2">
+            <Skeleton class="h-4 w-24" />
+            <Skeleton class="h-10 w-full" />
+          </div>
+        {/each}
+      </div>
     </div>
   {:else}
     <form onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="max-w-3xl space-y-6">
       {#if error}
-        <div class="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
-          {error}
-        </div>
+        <Alert.Root variant="destructive">
+          <AlertCircle class="h-4 w-4" />
+          <Alert.Description>{error}</Alert.Description>
+        </Alert.Root>
       {/if}
 
       <Card.Root>
         <Card.Content class="space-y-5">
           {#each formFields as field (field.key)}
-            <div class="field-wrapper" class:has-error={fieldErrors[field.key]}>
+            <div class:border-destructive={!!fieldErrors[field.key]}>
               {#if fieldRenderer}
                 {@render fieldRenderer({ field, value: formData[field.key], onchange: (val: unknown) => handleFieldChange(field.key, val) })}
               {:else}
@@ -219,7 +229,7 @@
                 />
               {/if}
               {#if fieldErrors[field.key]}
-                <p class="field-error">{fieldErrors[field.key]}</p>
+                <p class="text-destructive text-[0.8125rem] mt-1">{fieldErrors[field.key]}</p>
               {/if}
             </div>
           {/each}
@@ -253,17 +263,3 @@
     </form>
   {/if}
 </div>
-
-<style>
-  .field-error {
-    color: hsl(var(--destructive));
-    font-size: 0.8125rem;
-    margin-top: 0.25rem;
-  }
-
-  .field-wrapper.has-error :global(input),
-  .field-wrapper.has-error :global(textarea),
-  .field-wrapper.has-error :global(select) {
-    border-color: hsl(var(--destructive));
-  }
-</style>

@@ -11,7 +11,7 @@
   } from '@tanstack/svelte-table';
   import { get } from 'svelte/store';
   import { useList, useDelete, getResource } from '@svadmin/core';
-  import type { Pagination, Sort, Filter, FieldDefinition } from '@svadmin/core';
+  import type { Pagination as PaginationState, Sort, Filter, FieldDefinition } from '@svadmin/core';
   import { navigate } from '@svadmin/core/router';
   import { canAccess } from '@svadmin/core/permissions';
   import { readURLState, writeURLState } from '@svadmin/core';
@@ -24,9 +24,13 @@
   import * as Table from './ui/table/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import * as Popover from './ui/popover/index.js';
+  import * as DropdownMenu from './ui/dropdown-menu/index.js';
+  import * as PaginationUI from './ui/pagination/index.js';
+  import * as ContextMenu from './ui/context-menu/index.js';
   import {
-    Plus, Pencil, Trash2, ChevronLeft, ChevronRight,
+    Plus, Pencil, Trash2,
     Search, Download, Upload, ChevronDown, ChevronUp, SlidersHorizontal, Filter as FilterIcon,
+    Eye, Copy
   } from 'lucide-svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import type { Snippet } from 'svelte';
@@ -63,7 +67,7 @@
   // ─── URL state + server-side state ────────────────────────────
   const urlState = readURLState();
 
-  let pagination = $state<Pagination>({
+  let pagination = $state<{ current: number; pageSize: number }>({
     current: urlState.page ?? 1,
     pageSize: urlState.pageSize ?? resource.pageSize ?? 10,
   });
@@ -137,7 +141,6 @@
       field: s.id,
       order: s.desc ? 'desc' as const : 'asc' as const,
     }));
-    // Only update if actually different
     if (JSON.stringify(newSorters) !== JSON.stringify(sorters)) {
       sorters = newSorters;
     }
@@ -147,14 +150,6 @@
   const visibleFields = $derived(
     resource.fields.filter(f => f.showInList !== false)
   );
-
-  function renderCellValue(field: FieldDefinition, value: unknown, record: Record<string, unknown>): string {
-    if (value == null) return '—';
-    if (field.type === 'date') return new Date(value as string).toLocaleDateString();
-    if (field.type === 'boolean') return value ? '✓' : '✗';
-    if (typeof value === 'object') return JSON.stringify(value);
-    return String(value);
-  }
 
   const columns = $derived<ColumnDef<Record<string, unknown>>[]>([
     // Selection column
@@ -225,6 +220,24 @@
   const selectedCount = $derived(Object.keys(rowSelection).length);
   const totalPages = $derived(Math.ceil((query.data?.total ?? 0) / (pagination.pageSize ?? 10)));
 
+  // ─── Pagination helpers ───────────────────────────────────────
+  const currentPage = $derived(pagination.current ?? 1);
+  const pages = $derived.by(() => {
+    const p: (number | '...')[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) p.push(i);
+    } else {
+      p.push(1);
+      if (currentPage > 3) p.push('...');
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) p.push(i);
+      if (currentPage < totalPages - 2) p.push('...');
+      p.push(totalPages);
+    }
+    return p;
+  });
+
   // ─── Confirm dialog ───────────────────────────────────────────
   let confirmOpen = $state(false);
   let confirmMessage = $state('');
@@ -274,8 +287,9 @@
     URL.revokeObjectURL(link.href);
   }
 
-  // Column picker
-  let showColumnPicker = $state(false);
+  function goToPage(page: number) {
+    pagination = { ...pagination, current: page };
+  }
 </script>
 
 <div class="space-y-4">
@@ -293,25 +307,26 @@
           <Trash2 class="h-4 w-4" data-icon="inline-start" /> {t('common.batchDelete', { count: selectedCount })}
         </Button>
       {/if}
-      <!-- Column Visibility Picker -->
-      <div class="relative">
-        <Button variant="outline" size="sm" onclick={() => showColumnPicker = !showColumnPicker}>
-          <SlidersHorizontal class="h-4 w-4" data-icon="inline-start" /> {t('common.columns') || 'Columns'}
-        </Button>
-        {#if showColumnPicker}
-          <div class="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg border bg-popover p-2 shadow-lg">
-            {#each tbl.getAllLeafColumns().filter(c => !c.id.startsWith('_')) as column}
-              <label class="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent cursor-pointer">
-                <Checkbox
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(v: boolean) => column.toggleVisibility(!!v)}
-                />
-                {visibleFields.find(f => f.key === column.id)?.label ?? column.id}
-              </label>
-            {/each}
-          </div>
-        {/if}
-      </div>
+      <!-- Column Visibility Picker (DropdownMenu) -->
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          {#snippet child({ props })}
+            <Button variant="outline" size="sm" {...props}>
+              <SlidersHorizontal class="h-4 w-4" data-icon="inline-start" /> {t('common.columns') || 'Columns'}
+            </Button>
+          {/snippet}
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content align="end" class="w-48">
+          {#each tbl.getAllLeafColumns().filter(c => !c.id.startsWith('_')) as column}
+            <DropdownMenu.CheckboxItem
+              checked={column.getIsVisible()}
+              onCheckedChange={(v) => column.toggleVisibility(!!v)}
+            >
+              {visibleFields.find(f => f.key === column.id)?.label ?? column.id}
+            </DropdownMenu.CheckboxItem>
+          {/each}
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
       {#if headerActions}
         {@render headerActions()}
       {/if}
@@ -447,63 +462,88 @@
             {#each tbl.getRowModel().rows as row}
               {@const record = row.original}
               {@const id = record[primaryKey] as string | number}
-              <Table.Row class="transition-colors {row.getIsSelected() ? 'bg-accent' : ''}">
-                {#each row.getVisibleCells() as cell}
-                  <Table.Cell>
-                    {#if cell.column.id === '_select'}
-                      <Checkbox
-                        checked={row.getIsSelected()}
-                        onCheckedChange={() => row.toggleSelected()}
-                      />
-                    {:else if cell.column.id === '_expand'}
-                      <button class="p-1 hover:bg-accent rounded" onclick={() => row.toggleExpanded()}>
-                        {#if row.getIsExpanded()}
-                          <ChevronUp class="h-4 w-4" />
-                        {:else}
-                          <ChevronDown class="h-4 w-4" />
-                        {/if}
-                      </button>
-                    {:else if cell.column.id === '_actions'}
-                      <div class="flex items-center justify-end gap-1">
-                        {#if rowActions}
-                          {@render rowActions({ record, id })}
-                        {:else}
-                          {#if canEdit}
-                            <Button variant="ghost" size="icon-sm" onclick={() => navigate(`/${resourceName}/edit/${id}`)} title={t('common.edit')}>
-                              <Pencil class="h-4 w-4" />
-                            </Button>
+              <ContextMenu.Root>
+                <ContextMenu.Trigger>
+                  {#snippet child({ props })}
+                    <Table.Row {...props} class="transition-colors {row.getIsSelected() ? 'bg-accent' : ''}">
+                      {#each row.getVisibleCells() as cell}
+                        <Table.Cell>
+                          {#if cell.column.id === '_select'}
+                            <Checkbox
+                              checked={row.getIsSelected()}
+                              onCheckedChange={() => row.toggleSelected()}
+                            />
+                          {:else if cell.column.id === '_expand'}
+                            <button class="p-1 hover:bg-accent rounded" onclick={() => row.toggleExpanded()}>
+                              {#if row.getIsExpanded()}
+                                <ChevronUp class="h-4 w-4" />
+                              {:else}
+                                <ChevronDown class="h-4 w-4" />
+                              {/if}
+                            </button>
+                          {:else if cell.column.id === '_actions'}
+                            <div class="flex items-center justify-end gap-1">
+                              {#if rowActions}
+                                {@render rowActions({ record, id })}
+                              {:else}
+                                {#if canEdit}
+                                  <Button variant="ghost" size="icon-sm" onclick={() => navigate(`/${resourceName}/edit/${id}`)} title={t('common.edit')}>
+                                    <Pencil class="h-4 w-4" />
+                                  </Button>
+                                {/if}
+                                {#if canDelete}
+                                  <Button variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} title={t('common.delete')} class="hover:text-destructive">
+                                    <Trash2 class="h-4 w-4" />
+                                  </Button>
+                                {/if}
+                              {/if}
+                            </div>
+                          {:else}
+                            {@const field = visibleFields.find(f => f.key === cell.column.id)}
+                            {#if cellRenderer && field}
+                              {@render cellRenderer({ field, value: cell.getValue(), record })}
+                            {:else if field?.type === 'boolean'}
+                              <span class="inline-block h-2 w-2 rounded-full {cell.getValue() ? 'bg-green-500' : 'bg-muted-foreground/30'}"></span>
+                            {:else if field?.type === 'date' && cell.getValue()}
+                              {new Date(cell.getValue() as string).toLocaleDateString()}
+                            {:else if field?.type === 'tags' && Array.isArray(cell.getValue())}
+                              <div class="flex flex-wrap gap-1">
+                                {#each (cell.getValue() as string[]).slice(0, 3) as tag}
+                                  <Badge variant="secondary">{tag}</Badge>
+                                {/each}
+                              </div>
+                            {:else if field?.type === 'select' && field.options}
+                              {@const opt = field.options.find(o => o.value === cell.getValue())}
+                              <Badge variant="outline">{opt?.label ?? cell.getValue() ?? '—'}</Badge>
+                            {:else}
+                              {cell.getValue() ?? '—'}
+                            {/if}
                           {/if}
-                          {#if canDelete}
-                            <Button variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} title={t('common.delete')} class="hover:text-destructive">
-                              <Trash2 class="h-4 w-4" />
-                            </Button>
-                          {/if}
-                        {/if}
-                      </div>
-                    {:else}
-                      {@const field = visibleFields.find(f => f.key === cell.column.id)}
-                      {#if cellRenderer && field}
-                        {@render cellRenderer({ field, value: cell.getValue(), record })}
-                      {:else if field?.type === 'boolean'}
-                        <span class="inline-block h-2 w-2 rounded-full {cell.getValue() ? 'bg-green-500' : 'bg-muted-foreground/30'}"></span>
-                      {:else if field?.type === 'date' && cell.getValue()}
-                        {new Date(cell.getValue() as string).toLocaleDateString()}
-                      {:else if field?.type === 'tags' && Array.isArray(cell.getValue())}
-                        <div class="flex flex-wrap gap-1">
-                          {#each (cell.getValue() as string[]).slice(0, 3) as tag}
-                            <Badge variant="secondary">{tag}</Badge>
-                          {/each}
-                        </div>
-                      {:else if field?.type === 'select' && field.options}
-                        {@const opt = field.options.find(o => o.value === cell.getValue())}
-                        <Badge variant="outline">{opt?.label ?? cell.getValue() ?? '—'}</Badge>
-                      {:else}
-                        {cell.getValue() ?? '—'}
-                      {/if}
-                    {/if}
-                  </Table.Cell>
-                {/each}
-              </Table.Row>
+                        </Table.Cell>
+                      {/each}
+                    </Table.Row>
+                  {/snippet}
+                </ContextMenu.Trigger>
+                <ContextMenu.Content class="w-48">
+                  {#if canEdit}
+                    <ContextMenu.Item onclick={() => navigate(`/${resourceName}/edit/${id}`)} class="gap-2">
+                      <Pencil class="h-4 w-4" /> {t('common.edit')}
+                    </ContextMenu.Item>
+                  {/if}
+                  <ContextMenu.Item onclick={() => navigate(`/${resourceName}/show/${id}`)} class="gap-2">
+                    <Eye class="h-4 w-4" /> {t('common.detail')}
+                  </ContextMenu.Item>
+                  <ContextMenu.Item onclick={() => navigator.clipboard?.writeText(String(id))} class="gap-2">
+                    <Copy class="h-4 w-4" /> Copy ID
+                  </ContextMenu.Item>
+                  {#if canDelete}
+                    <ContextMenu.Separator />
+                    <ContextMenu.Item onclick={() => confirmDelete(id)} class="gap-2 text-destructive">
+                      <Trash2 class="h-4 w-4" /> {t('common.delete')}
+                    </ContextMenu.Item>
+                  {/if}
+                </ContextMenu.Content>
+              </ContextMenu.Root>
               {#if expandedRowRender && row.getIsExpanded()}
                 <Table.Row class="bg-muted/30">
                   <Table.Cell colspan={row.getVisibleCells().length}>
@@ -528,24 +568,8 @@
     {/if}
   </div>
 
-  <!-- Pagination -->
+  <!-- Pagination (shadcn) -->
   {#if totalPages > 0}
-  {@const currentPage = pagination.current ?? 1}
-  {@const pages = (() => {
-    const p: (number | '...')[] = [];
-    if (totalPages <= 7) {
-      for (let i = 1; i <= totalPages; i++) p.push(i);
-    } else {
-      p.push(1);
-      if (currentPage > 3) p.push('...');
-      const start = Math.max(2, currentPage - 1);
-      const end = Math.min(totalPages - 1, currentPage + 1);
-      for (let i = start; i <= end; i++) p.push(i);
-      if (currentPage < totalPages - 2) p.push('...');
-      p.push(totalPages);
-    }
-    return p;
-  })()}
   <div class="flex items-center justify-between text-sm text-muted-foreground">
     <div class="flex items-center gap-2">
       <span>{t('common.total', { total: query.data?.total ?? 0 })}</span>
@@ -562,35 +586,36 @@
         {/each}
       </select>
     </div>
-    <div class="flex items-center gap-1">
-      <Button
-        variant="outline" size="icon-sm"
-        onclick={() => { pagination = { ...pagination, current: Math.max(1, currentPage - 1) }; }}
-        disabled={currentPage <= 1}
-      >
-        <ChevronLeft class="h-4 w-4" />
-      </Button>
-      {#each pages as page}
-        {#if page === '...'}
-          <span class="px-2 text-muted-foreground">…</span>
-        {:else}
-          <Button
-            variant={page === currentPage ? 'default' : 'outline'}
-            size="icon-sm"
-            onclick={() => { pagination = { ...pagination, current: page as number }; }}
-          >
-            {page}
-          </Button>
-        {/if}
-      {/each}
-      <Button
-        variant="outline" size="icon-sm"
-        onclick={() => { pagination = { ...pagination, current: Math.min(totalPages, currentPage + 1) }; }}
-        disabled={currentPage >= totalPages}
-      >
-        <ChevronRight class="h-4 w-4" />
-      </Button>
-    </div>
+    <PaginationUI.Root>
+      <PaginationUI.Content>
+        <PaginationUI.Item>
+          <PaginationUI.Previous
+            onclick={() => goToPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage <= 1}
+          />
+        </PaginationUI.Item>
+        {#each pages as page}
+          <PaginationUI.Item>
+            {#if page === '...'}
+              <PaginationUI.Ellipsis />
+            {:else}
+              <PaginationUI.Link
+                isActive={page === currentPage}
+                onclick={() => goToPage(page as number)}
+              >
+                {page}
+              </PaginationUI.Link>
+            {/if}
+          </PaginationUI.Item>
+        {/each}
+        <PaginationUI.Item>
+          <PaginationUI.Next
+            onclick={() => goToPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage >= totalPages}
+          />
+        </PaginationUI.Item>
+      </PaginationUI.Content>
+    </PaginationUI.Root>
   </div>
   {/if}
 </div>

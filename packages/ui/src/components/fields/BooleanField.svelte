@@ -2,12 +2,12 @@
   interface Props { value: boolean | null | undefined; trueIcon?: string; falseIcon?: string }
   let { value, trueIcon = '✓', falseIcon = '✗' }: Props = $props();
 </script>
-<span class="field-boolean" class:is-true={!!value} class:is-false={!value}>
-  {value ? trueIcon : falseIcon}
-</span>
-
-<style>
-  .field-boolean { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; font-size: 14px; }
-  .is-true { background: var(--color-success-bg, #dcfce7); color: var(--color-success, #16a34a); }
-  .is-false { background: var(--color-error-bg, #fef2f2); color: var(--color-error, #dc2626); }
-</style>
+{#if value}
+  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-sm bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+    {trueIcon}
+  </span>
+{:else}
+  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-sm bg-red-50 text-red-600 dark:bg-red-500/20 dark:text-red-400">
+    {falseIcon}
+  </span>
+{/if}

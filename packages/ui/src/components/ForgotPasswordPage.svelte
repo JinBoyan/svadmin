@@ -5,7 +5,8 @@
   import { Button } from './ui/button/index.js';
   import { Input } from './ui/input/index.js';
   import * as Card from './ui/card/index.js';
-  import { KeyRound, Mail, ArrowLeft, CheckCircle } from 'lucide-svelte';
+  import * as Alert from './ui/alert/index.js';
+  import { KeyRound, Mail, ArrowLeft, CheckCircle, Loader2, AlertCircle } from 'lucide-svelte';
 
   let { title = 'Admin' } = $props<{
     title?: string;
@@ -32,11 +33,11 @@
   }
 </script>
 
-<div class="forgot-page">
-  <div class="forgot-container">
-    <Card.Card class="login-card">
-      <Card.CardHeader class="login-header">
-        <div class="forgot-icon">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/[0.08] via-background to-primary/[0.04] p-4">
+  <div class="w-full max-w-[420px]">
+    <Card.Card class="backdrop-blur-xl border-border/50 shadow-[0_8px_32px_hsl(var(--primary)/0.08),0_2px_8px_hsl(0_0%_0%/0.06)]">
+      <Card.CardHeader class="text-center pb-2">
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mx-auto mb-3">
           {#if sent}
             <CheckCircle class="h-6 w-6" />
           {:else}
@@ -52,7 +53,7 @@
       </Card.CardHeader>
       <Card.CardContent>
         {#if sent}
-          <div class="success-state">
+          <div class="py-2">
             <p class="text-sm text-muted-foreground text-center mb-4">
               {t('auth.resetLinkSent')}
             </p>
@@ -64,15 +65,16 @@
         {:else}
           <form onsubmit={handleSubmit} class="space-y-4">
             {#if error}
-              <div class="error-alert">
-                <p>{error}</p>
-              </div>
+              <Alert.Root variant="destructive">
+                <AlertCircle class="h-4 w-4" />
+                <Alert.Description>{error}</Alert.Description>
+              </Alert.Root>
             {/if}
 
             <div class="space-y-2">
               <label for="forgot-email" class="text-sm font-medium text-foreground">{t('auth.email')}</label>
-              <div class="input-with-icon">
-                <Mail class="input-icon h-4 w-4" />
+              <div class="relative">
+                <Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
                 <Input
                   id="forgot-email"
                   type="email"
@@ -86,13 +88,13 @@
 
             <Button type="submit" class="w-full" disabled={forgot.isLoading}>
               {#if forgot.isLoading}
-                <span class="loading-spinner"></span>
+                <Loader2 class="h-4 w-4 animate-spin mr-2" />
               {/if}
               {t('auth.sendResetLink')}
             </Button>
           </form>
 
-          <div class="auth-link">
+          <div class="flex items-center justify-center mt-5 pt-5 border-t">
             <button
               type="button"
               class="text-sm text-primary hover:underline font-medium inline-flex items-center gap-1"
@@ -111,93 +113,3 @@
     </p>
   </div>
 </div>
-
-<style>
-  .forgot-page {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, hsl(var(--primary) / 0.08) 0%, hsl(var(--background)) 50%, hsl(var(--primary) / 0.04) 100%);
-    padding: 1rem;
-  }
-
-  .forgot-container {
-    width: 100%;
-    max-width: 420px;
-  }
-
-  .forgot-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: hsl(var(--primary) / 0.1);
-    color: hsl(var(--primary));
-    margin: 0 auto 0.75rem;
-  }
-
-  :global(.login-card) {
-    backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 0 8px 32px hsl(var(--primary) / 0.08), 0 2px 8px hsl(0 0% 0% / 0.06);
-  }
-
-  :global(.login-header) {
-    text-align: center;
-    padding-bottom: 0.5rem;
-  }
-
-  .input-with-icon {
-    position: relative;
-  }
-
-  :global(.input-icon) {
-    position: absolute;
-    left: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: hsl(var(--muted-foreground));
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  .error-alert {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    background: hsl(var(--destructive) / 0.1);
-    border: 1px solid hsl(var(--destructive) / 0.3);
-    color: hsl(var(--destructive));
-    font-size: 0.875rem;
-  }
-
-  .success-state {
-    padding: 0.5rem 0;
-  }
-
-  .loading-spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: spin 0.6s linear infinite;
-    margin-right: 0.5rem;
-  }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
-  .auth-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 1.25rem;
-    padding-top: 1.25rem;
-    border-top: 1px solid hsl(var(--border));
-  }
-</style>

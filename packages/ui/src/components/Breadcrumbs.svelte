@@ -2,6 +2,7 @@
   import { getResources } from '@svadmin/core';
   import { currentPath } from '@svadmin/core/router';
   import { t } from '@svadmin/core/i18n';
+  import * as Breadcrumb from './ui/breadcrumb/index.js';
 
   const resources = getResources();
   let path = $state(currentPath());
@@ -38,16 +39,20 @@
 </script>
 
 {#if crumbs.length > 1}
-  <nav class="mb-4 flex items-center gap-1.5 text-sm text-gray-500">
-    {#each crumbs as crumb, i}
-      {#if i > 0}
-        <span class="text-gray-300">/</span>
-      {/if}
-      {#if i === crumbs.length - 1}
-        <span class="font-medium text-gray-700">{crumb.label}</span>
-      {:else}
-        <a href={crumb.href} class="hover:text-primary transition">{crumb.label}</a>
-      {/if}
-    {/each}
-  </nav>
+  <Breadcrumb.Root class="mb-4">
+    <Breadcrumb.List>
+      {#each crumbs as crumb, i}
+        {#if i > 0}
+          <Breadcrumb.Separator />
+        {/if}
+        <Breadcrumb.Item>
+          {#if i === crumbs.length - 1}
+            <Breadcrumb.Page>{crumb.label}</Breadcrumb.Page>
+          {:else}
+            <Breadcrumb.Link href={crumb.href}>{crumb.label}</Breadcrumb.Link>
+          {/if}
+        </Breadcrumb.Item>
+      {/each}
+    </Breadcrumb.List>
+  </Breadcrumb.Root>
 {/if}

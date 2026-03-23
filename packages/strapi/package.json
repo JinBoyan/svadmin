@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/strapi",
-  "version": "0.3.0",
+  "version": "0.3.17",
   "description": "Strapi v4/v5 DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -14,7 +14,7 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "^0.3.0"
+    "@svadmin/core": "^0.3.10"
   },
   "license": "MIT"
 }

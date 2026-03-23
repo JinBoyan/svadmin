@@ -80,6 +80,15 @@ export * as Tabs from './components/ui/tabs/index.js';
 export * as Tooltip from './components/ui/tooltip/index.js';
 export * as DropdownMenu from './components/ui/dropdown-menu/index.js';
 
+// Additional shadcn components
+export * as Breadcrumb from './components/ui/breadcrumb/index.js';
+export * as Pagination from './components/ui/pagination/index.js';
+export * as ContextMenu from './components/ui/context-menu/index.js';
+export * as Drawer from './components/ui/drawer/index.js';
+export * as Collapsible from './components/ui/collapsible/index.js';
+export { Label } from './components/ui/label/index.js';
+export { Command } from './components/ui/command/index.js';
+
 // Utils
 export { cn } from './utils';
 
