@@ -1,4 +1,5 @@
 import { useForm, type UseFormOptions } from './form-hooks.svelte';
+import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed';
 import { getResource, getResources } from './context';
 import { getAdminOptions } from './options';
@@ -12,6 +13,9 @@ import { toast } from './toast.svelte';
 
 export interface UseModalFormOptions<TQueryFnData extends BaseRecord = BaseRecord, TError = HttpError, TVariables = Record<string, unknown>, TData extends BaseRecord = TQueryFnData> extends UseFormOptions<TQueryFnData, TError, TVariables, TData> {
   defaultVisible?: boolean;
+  autoSave?: UseFormOptions<TQueryFnData, TError, TVariables, TData>['autoSave'] & {
+    invalidateOnClose?: boolean;
+  };
 }
 
 export function useModalForm<
@@ -20,6 +24,7 @@ export function useModalForm<
   TVariables = Record<string, unknown>,
   TData extends BaseRecord = TQueryFnData
 >(options: UseModalFormOptions<TQueryFnData, TError, TVariables, TData> = {}) {
+  const queryClient = useQueryClient();
   const formState = useForm(options);
   let visible = $state(options.defaultVisible ?? false);
 
@@ -31,6 +36,9 @@ export function useModalForm<
   function close() {
     visible = false;
     formState.clearErrors();
+    if (options.autoSave?.invalidateOnClose) {
+      queryClient.invalidateQueries({ queryKey: [formState.resource] });
+    }
   }
 
   return {

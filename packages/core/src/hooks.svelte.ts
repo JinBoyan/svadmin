@@ -92,9 +92,11 @@ export interface UseSelectOptions<TData extends BaseRecord = BaseRecord, TOption
   sorters?: Sort[];
   filters?: Filter[];
   defaultValue?: (string | number)[];
+  fetchSize?: number;
   pagination?: Pagination;
   debounce?: number;
   queryOptions?: { staleTime?: number; enabled?: boolean };
+  defaultValueQueryOptions?: { staleTime?: number; enabled?: boolean };
   meta?: Record<string, unknown>;
   dataProviderName?: string;
   onSearch?: (value: string) => Filter[];
@@ -118,16 +120,41 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
 
   const allFilters = $derived([...(filters ?? []), ...searchFilters]);
 
+  const effectivePageSize = options.fetchSize ?? pagination?.pageSize ?? 999;
+
   const query = createQuery<{ data: TData[]; total: number }>(() => ({
     queryKey: [resource, 'select', allFilters, sorters, pagination, meta],
-    queryFn: () => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: pagination ?? { current: 1, pageSize: 999 }, meta }),
+    queryFn: () => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: { current: 1, pageSize: effectivePageSize }, meta }),
     enabled: options.queryOptions?.enabled ?? true,
     staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
   }));
 
+  // Parallel query to ensure default values are always available in options
+  const defaultValueIds = options.defaultValue ?? [];
+  const defaultValueQuery = defaultValueIds.length > 0
+    ? createQuery<{ data: TData[] }>(() => ({
+        queryKey: [resource, 'select-defaults', defaultValueIds],
+        queryFn: async () => {
+          if (provider.getMany) return provider.getMany<TData>({ resource, ids: defaultValueIds, meta });
+          const results = await Promise.all(defaultValueIds.map(id => provider.getOne<TData>({ resource, id, meta })));
+          return { data: results.map(r => r.data) };
+        },
+        enabled: (options.defaultValueQueryOptions?.enabled ?? true) && defaultValueIds.length > 0,
+        staleTime: options.defaultValueQueryOptions?.staleTime ?? Infinity,
+      }))
+    : null;
+
   const selectOptions = $derived.by(() => {
     const data = (query.data as any)?.data ?? [];
-    return data.map((item: TData) => {
+    // Merge default value items if not already in data
+    const defaultData = (defaultValueQuery as any)?.data?.data ?? [];
+    const allData: TData[] = [...data];
+    const existingIds = new Set(data.map((d: any) => String(d[typeof optionValue === 'string' ? optionValue : 'id'])));
+    for (const item of defaultData) {
+      const itemId = String((item as any)[typeof optionValue === 'string' ? optionValue : 'id']);
+      if (!existingIds.has(itemId)) allData.push(item);
+    }
+    return allData.map((item: TData) => {
       const label = typeof optionLabel === 'function' ? optionLabel(item) : String((item as any)[optionLabel] ?? '');
       const value = typeof optionValue === 'function' ? optionValue(item) : (item as any)[optionValue];
       return { label, value } as unknown as TOption;

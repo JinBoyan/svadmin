@@ -63,6 +63,7 @@ export type UseFormResult<TQueryFnData extends BaseRecord = BaseRecord, TError =
   setId: (newId: string | number) => void;
   readonly mutationMode: MutationMode;
   redirect: (to: 'list' | 'edit' | 'show' | false) => void;
+  readonly autoSaveProps: { status: 'idle' | 'loading' | 'success' | 'error'; data: unknown; error: unknown };
 };
 
 export function useForm<
@@ -206,12 +207,18 @@ export function useForm<
           else if (scope === 'list') queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
         }
         autoSaveStatus = 'saved';
+        lastAutoSaveData = undefined; // placeholder for returned data
+        lastAutoSaveError = null;
         setTimeout(() => { autoSaveStatus = 'idle'; }, 2000);
-      } catch {
+      } catch (e) {
         autoSaveStatus = 'error';
+        lastAutoSaveError = e;
       }
     }, autoSave.debounce ?? 1000);
   }
+
+  let lastAutoSaveData = $state<unknown>(null);
+  let lastAutoSaveError = $state<unknown>(null);
 
   if (autoSave?.invalidateOnUnmount) {
     $effect(() => {
@@ -248,5 +255,12 @@ export function useForm<
     resource, action,
     get id() { return currentId; },
     setId, mutationMode, redirect: doRedirect,
+    get autoSaveProps() {
+      return {
+        status: autoSaveStatus as 'idle' | 'loading' | 'success' | 'error',
+        data: lastAutoSaveData,
+        error: lastAutoSaveError,
+      };
+    },
   };
 }

@@ -10,10 +10,20 @@
   import { Checkbox } from './ui/checkbox/index.js';
   import { Badge } from './ui/badge/index.js';
   import * as Table from './ui/table/index.js';
-  import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search, Loader2, Download, Upload } from 'lucide-svelte';
+  import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, Search, Loader2, Download, Upload, ChevronDown, ChevronUp, SlidersHorizontal } from 'lucide-svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
 
-  let { resourceName } = $props<{ resourceName: string }>();
+  import type { Snippet } from 'svelte';
+
+  let {
+    resourceName,
+    expandedRowRender,
+    selectable = true,
+  } = $props<{
+    resourceName: string;
+    expandedRowRender?: Snippet<[record: Record<string, unknown>]>;
+    selectable?: boolean;
+  }>();
 
   const resource = getResource(resourceName);
   const primaryKey = $derived(resource.primaryKey ?? 'id');
@@ -32,6 +42,25 @@
   );
   let filters = $state<Filter[]>([]);
   let searchText = $state(urlState.search ?? '');
+
+  // Column visibility
+  let columnVisibility = $state<Record<string, boolean>>({});
+  function initColumnVisibility() {
+    const vis: Record<string, boolean> = {};
+    for (const f of resource.fields) vis[f.key] = f.showInList !== false;
+    return vis;
+  }
+  columnVisibility = initColumnVisibility();
+  const visibleFields = $derived(resource.fields.filter(f => columnVisibility[f.key] !== false && f.showInList !== false));
+  let showColumnPicker = $state(false);
+
+  // Expanded rows
+  let expandedRowIds = $state<Set<string | number>>(new Set());
+  function toggleExpand(id: string | number) {
+    const next = new Set(expandedRowIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    expandedRowIds = next;
+  }
 
   // Batch selection
   let selectedIds = $state<Set<string | number>>(new Set());
@@ -54,7 +83,7 @@
   });
 
   const searchableFields = resource.fields.filter(f => f.searchable);
-  const listFields = resource.fields.filter(f => f.showInList !== false);
+  const listFields = $derived(visibleFields);
 
   const activeFilters = $derived.by(() => {
     const result: Filter[] = [...filters];
@@ -64,14 +93,16 @@
     return result;
   });
 
-  const query = useList({
+  const listResult = useList({
     resource: resourceName,
     pagination,
     sorters,
     filters: activeFilters,
   });
+  const query = listResult.query;
 
-  const deleteMutation = useDelete(resourceName);
+  const deleteResult = useDelete({ resource: resourceName });
+  const deleteMutation = deleteResult.mutation;
 
   function toggleSort(field: string) {
     const existing = sorters.find(s => s.field === field);
@@ -111,7 +142,7 @@
   function confirmDelete(id: string | number) {
     confirmMessage = t('common.deleteConfirm');
     confirmAction = async () => {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync({ id, resource: resourceName });
       confirmOpen = false;
     };
     confirmOpen = true;
@@ -121,7 +152,7 @@
     confirmMessage = t('common.batchDeleteConfirm', { count: selectedIds.size });
     confirmAction = async () => {
       for (const id of selectedIds) {
-        await deleteMutation.mutateAsync(id);
+        await deleteMutation.mutateAsync({ id, resource: resourceName });
       }
       selectedIds = new Set();
       selectAll = false;
@@ -194,6 +225,25 @@
           <Trash2 class="h-4 w-4" data-icon="inline-start" /> {t('common.batchDelete', { count: selectedIds.size })}
         </Button>
       {/if}
+      <!-- Column Visibility Picker -->
+      <div class="relative">
+        <Button variant="outline" size="sm" onclick={() => showColumnPicker = !showColumnPicker}>
+          <SlidersHorizontal class="h-4 w-4" data-icon="inline-start" /> {t('common.columns') || 'Columns'}
+        </Button>
+        {#if showColumnPicker}
+          <div class="absolute right-0 top-full mt-1 z-50 w-48 rounded-lg border bg-popover p-2 shadow-lg">
+            {#each resource.fields.filter(f => f.showInList !== false) as field}
+              <label class="flex items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent cursor-pointer">
+                <Checkbox
+                  checked={columnVisibility[field.key] !== false}
+                  onCheckedChange={(v) => { columnVisibility = { ...columnVisibility, [field.key]: !!v }; }}
+                />
+                {field.label}
+              </label>
+            {/each}
+          </div>
+        {/if}
+      </div>
       {#if canCreate}
         <Button onclick={() => navigate(`/${resourceName}/create`)}>
           <Plus class="h-4 w-4" data-icon="inline-start" /> {t('common.create')}
@@ -230,10 +280,13 @@
       <Table.Root>
         <Table.Header>
           <Table.Row class="bg-muted/50 hover:bg-muted/50">
-            {#if canDelete}
+            {#if selectable && canDelete}
               <Table.Head class="w-10">
                 <Checkbox checked={selectAll} onCheckedChange={() => toggleSelectAll()} />
               </Table.Head>
+            {/if}
+            {#if expandedRowRender}
+              <Table.Head class="w-10"></Table.Head>
             {/if}
             {#each listFields as field}
               <Table.Head style={field.width ? `width:${field.width}` : undefined}>
@@ -250,9 +303,20 @@
           {#each query.data?.data ?? [] as record}
             {@const id = record[primaryKey] as string | number}
             <Table.Row class="transition-colors {selectedIds.has(id) ? 'bg-accent' : ''}">
-              {#if canDelete}
+              {#if selectable && canDelete}
                 <Table.Cell>
                   <Checkbox checked={selectedIds.has(id)} onCheckedChange={() => toggleSelect(id)} />
+                </Table.Cell>
+              {/if}
+              {#if expandedRowRender}
+                <Table.Cell>
+                  <button class="p-1 hover:bg-accent rounded" onclick={() => toggleExpand(id)}>
+                    {#if expandedRowIds.has(id)}
+                      <ChevronUp class="h-4 w-4" />
+                    {:else}
+                      <ChevronDown class="h-4 w-4" />
+                    {/if}
+                  </button>
                 </Table.Cell>
               {/if}
               {#each listFields as field}
@@ -299,9 +363,16 @@
                 </div>
               </Table.Cell>
             </Table.Row>
+            {#if expandedRowRender && expandedRowIds.has(id)}
+              <Table.Row class="bg-muted/30">
+                <Table.Cell colspan={listFields.length + (selectable && canDelete ? 1 : 0) + (expandedRowRender ? 1 : 0) + 1}>
+                  {@render expandedRowRender(record)}
+                </Table.Cell>
+              </Table.Row>
+            {/if}
           {:else}
             <Table.Row>
-              <Table.Cell colspan={listFields.length + (canDelete ? 2 : 1)} class="h-24 text-center text-muted-foreground">
+              <Table.Cell colspan={listFields.length + (selectable && canDelete ? 2 : 1) + (expandedRowRender ? 1 : 0)} class="h-24 text-center text-muted-foreground">
                 {t('common.noData')}
               </Table.Cell>
             </Table.Row>

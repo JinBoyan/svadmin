@@ -144,6 +144,7 @@ export function useTable<
     get sorters() { return currentSorters; },
     get filters() { return currentFilters; },
     setSorters, setFilters, setPage, setPageSize,
+    setCurrentPage: setPage,
     createLinkForSyncWithLocation,
     get totalPages() {
       // ts-expect-error reactive access
