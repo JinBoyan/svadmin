@@ -1,0 +1,39 @@
+---
+title: svadmin
+description: Svelte 5 无头 Admin 框架 — 零锁定构建全功能管理后台。
+template: splash
+hero:
+  tagline: 基于 Svelte 5 构建全功能管理后台。无头架构、类型安全、零锁定。
+  image:
+    dark: ../../../assets/logo-dark.svg
+    light: ../../../assets/logo-light.svg
+  actions:
+    - text: 快速开始
+      link: /zh-cn/guides/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub 仓库
+      link: https://github.com/zuohuadong/svadmin
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="无头架构" icon="puzzle">
+    与任何 UI 库完全解耦。可以使用 shadcn-svelte、自定义组件，或混合搭配。
+  </Card>
+
+  <Card title="类型安全" icon="approve-check">
+    端到端 TypeScript 严格泛型 — 无 `any` 类型。每个 Hook 和 Provider 都有完整的智能提示。
+  </Card>
+
+  <Card title="20+ 数据提供者" icon="cloud">
+    连接 REST、Supabase、PocketBase、Appwrite、GraphQL、Elysia、Strapi、Directus、Firebase 等。
+  </Card>
+
+  <Card title="Svelte 5 原生" icon="rocket">
+    从底层使用 Runes（`$state`、`$derived`、`$effect`）和 Svelte 5 的模块级响应性构建。
+  </Card>
+</CardGrid>
