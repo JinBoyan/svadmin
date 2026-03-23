@@ -3,7 +3,8 @@
 
 import { setContext, getContext } from 'svelte';
 import type { MutationMode } from './types';
-import type { InvalidateScope } from './hooks.svelte';
+
+export type InvalidateScope = 'all' | 'resourceAll' | 'detail' | 'list' | false | string[];
 
 const OPTIONS_KEY = Symbol('admin-options');
 
@@ -46,6 +47,7 @@ export interface AdminOptions {
   breadcrumb?: false | 'default';
   disableRouteChangeHandler?: boolean;
   onLiveEvent?: (event: unknown) => void;
+  menuItems?: (items: any[]) => any[];
 }
 
 const defaultTextTransformers: TextTransformers = {

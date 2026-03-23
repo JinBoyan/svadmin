@@ -23,6 +23,10 @@ export class UndoError extends Error {
   }
 }
 
+// ─── Base Types ───────────────────────────────────────────────
+
+export type BaseRecord = Record<string, unknown>;
+
 // ─── DataProvider ─────────────────────────────────────────────
 
 export interface Pagination {
@@ -63,8 +67,8 @@ export interface GetListParams {
   meta?: Record<string, unknown>;
 }
 
-export interface GetListResult<T = Record<string, unknown>> {
-  data: T[];
+export interface GetListResult<TData extends BaseRecord = BaseRecord> {
+  data: TData[];
   total: number;
 }
 
@@ -74,8 +78,8 @@ export interface GetOneParams {
   meta?: Record<string, unknown>;
 }
 
-export interface GetOneResult<T = Record<string, unknown>> {
-  data: T;
+export interface GetOneResult<TData extends BaseRecord = BaseRecord> {
+  data: TData;
 }
 
 export interface GetManyParams {
@@ -84,78 +88,78 @@ export interface GetManyParams {
   meta?: Record<string, unknown>;
 }
 
-export interface GetManyResult<T = Record<string, unknown>> {
-  data: T[];
+export interface GetManyResult<TData extends BaseRecord = BaseRecord> {
+  data: TData[];
 }
 
-export interface CreateParams {
+export interface CreateParams<TVariables = unknown> {
   resource: string;
-  variables: Record<string, unknown>;
+  variables: TVariables;
   meta?: Record<string, unknown>;
 }
 
-export interface CreateResult<T = Record<string, unknown>> {
-  data: T;
+export interface CreateResult<TData extends BaseRecord = BaseRecord> {
+  data: TData;
 }
 
-export interface CreateManyParams {
+export interface CreateManyParams<TVariables = unknown> {
   resource: string;
-  variables: Record<string, unknown>[];
+  variables: TVariables[];
   meta?: Record<string, unknown>;
 }
 
-export interface CreateManyResult<T = Record<string, unknown>> {
-  data: T[];
+export interface CreateManyResult<TData extends BaseRecord = BaseRecord> {
+  data: TData[];
 }
 
-export interface UpdateParams {
-  resource: string;
-  id: string | number;
-  variables: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-}
-
-export interface UpdateResult<T = Record<string, unknown>> {
-  data: T;
-}
-
-export interface UpdateManyParams {
-  resource: string;
-  ids: (string | number)[];
-  variables: Record<string, unknown>;
-  meta?: Record<string, unknown>;
-}
-
-export interface UpdateManyResult<T = Record<string, unknown>> {
-  data: T[];
-}
-
-export interface DeleteParams {
+export interface UpdateParams<TVariables = unknown> {
   resource: string;
   id: string | number;
-  variables?: Record<string, unknown>;
+  variables: TVariables;
   meta?: Record<string, unknown>;
 }
 
-export interface DeleteResult<T = Record<string, unknown>> {
-  data: T;
+export interface UpdateResult<TData extends BaseRecord = BaseRecord> {
+  data: TData;
 }
 
-export interface DeleteManyParams {
+export interface UpdateManyParams<TVariables = unknown> {
   resource: string;
   ids: (string | number)[];
-  variables?: Record<string, unknown>;
+  variables: TVariables;
   meta?: Record<string, unknown>;
 }
 
-export interface DeleteManyResult<T = Record<string, unknown>> {
-  data: T[];
+export interface UpdateManyResult<TData extends BaseRecord = BaseRecord> {
+  data: TData[];
 }
 
-export interface CustomParams {
+export interface DeleteParams<TVariables = unknown> {
+  resource: string;
+  id: string | number;
+  variables?: TVariables;
+  meta?: Record<string, unknown>;
+}
+
+export interface DeleteResult<TData extends BaseRecord = BaseRecord> {
+  data: TData;
+}
+
+export interface DeleteManyParams<TVariables = unknown> {
+  resource: string;
+  ids: (string | number)[];
+  variables?: TVariables;
+  meta?: Record<string, unknown>;
+}
+
+export interface DeleteManyResult<TData extends BaseRecord = BaseRecord> {
+  data: TData[];
+}
+
+export interface CustomParams<TVariables = unknown> {
   url: string;
   method: 'get' | 'post' | 'put' | 'patch' | 'delete';
-  payload?: Record<string, unknown>;
+  payload?: TVariables;
   query?: Record<string, unknown>;
   headers?: Record<string, string>;
   sorters?: Sort[];
@@ -163,27 +167,27 @@ export interface CustomParams {
   meta?: Record<string, unknown>;
 }
 
-export interface CustomResult<T = unknown> {
-  data: T;
+export interface CustomResult<TData = unknown> {
+  data: TData;
 }
 
 export interface DataProvider {
   // Required methods
-  getList: <T = Record<string, unknown>>(params: GetListParams) => Promise<GetListResult<T>>;
-  getOne: <T = Record<string, unknown>>(params: GetOneParams) => Promise<GetOneResult<T>>;
-  create: <T = Record<string, unknown>>(params: CreateParams) => Promise<CreateResult<T>>;
-  update: <T = Record<string, unknown>>(params: UpdateParams) => Promise<UpdateResult<T>>;
-  deleteOne: <T = Record<string, unknown>>(params: DeleteParams) => Promise<DeleteResult<T>>;
+  getList: <TData extends BaseRecord = BaseRecord>(params: GetListParams) => Promise<GetListResult<TData>>;
+  getOne: <TData extends BaseRecord = BaseRecord>(params: GetOneParams) => Promise<GetOneResult<TData>>;
+  create: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateParams<TVariables>) => Promise<CreateResult<TData>>;
+  update: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateParams<TVariables>) => Promise<UpdateResult<TData>>;
+  deleteOne: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteParams<TVariables>) => Promise<DeleteResult<TData>>;
   getApiUrl: () => string;
 
   // Optional bulk methods
-  getMany?: <T = Record<string, unknown>>(params: GetManyParams) => Promise<GetManyResult<T>>;
-  createMany?: <T = Record<string, unknown>>(params: CreateManyParams) => Promise<CreateManyResult<T>>;
-  updateMany?: <T = Record<string, unknown>>(params: UpdateManyParams) => Promise<UpdateManyResult<T>>;
-  deleteMany?: <T = Record<string, unknown>>(params: DeleteManyParams) => Promise<DeleteManyResult<T>>;
+  getMany?: <TData extends BaseRecord = BaseRecord>(params: GetManyParams) => Promise<GetManyResult<TData>>;
+  createMany?: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateManyParams<TVariables>) => Promise<CreateManyResult<TData>>;
+  updateMany?: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateManyParams<TVariables>) => Promise<UpdateManyResult<TData>>;
+  deleteMany?: <TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteManyParams<TVariables>) => Promise<DeleteManyResult<TData>>;
 
   // Optional custom method
-  custom?: <T = unknown>(params: CustomParams) => Promise<CustomResult<T>>;
+  custom?: <TData = unknown, TVariables = unknown>(params: CustomParams<TVariables>) => Promise<CustomResult<TData>>;
 }
 
 // ─── AuthProvider ─────────────────────────────────────────────
@@ -274,3 +278,35 @@ export interface FieldDefinition {
   // Validation
   validate?: (value: unknown) => string | null;
 }
+
+// ─── Resource Type Registry ───────────────────────────────────
+
+/**
+ * Extend this interface via declaration merging to register resource types.
+ * When registered, all hooks automatically infer data types from resource names.
+ *
+ * @example
+ * ```ts
+ * declare module '@svadmin/core' {
+ *   interface ResourceTypeMap {
+ *     users: { id: string; name: string; email: string }
+ *     posts: { id: string; title: string; content: string }
+ *   }
+ * }
+ *
+ * // Now hooks auto-infer:
+ * const list = useList({ resource: 'users' })
+ * // list.data → { id: string; name: string; email: string }[]
+ * ```
+ */
+export interface ResourceTypeMap {}
+
+/** When ResourceTypeMap is empty → string (backward compatible); otherwise → registered keys */
+export type KnownResources = keyof ResourceTypeMap extends never
+  ? string
+  : Extract<keyof ResourceTypeMap, string>
+
+/** Infer data type from resource name. Falls back to Record<string, unknown> for unregistered resources */
+export type InferData<R extends string> = R extends keyof ResourceTypeMap
+  ? ResourceTypeMap[R]
+  : Record<string, unknown>

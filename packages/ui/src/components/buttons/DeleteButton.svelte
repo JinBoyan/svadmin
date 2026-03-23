@@ -16,8 +16,8 @@
     class?: string;
   }>();
 
-  const deleteMut = useDelete(resource, { mutationMode: undoable ? 'undoable' : 'pessimistic' });
-  const can = accessControl?.enabled ? useCan({ resource, action: 'delete' }) : null;
+  const deleteMut = useDelete({ resource, mutationMode: undoable ? 'undoable' : 'pessimistic' });
+  const can = accessControl?.enabled ? useCan(resource, 'delete') : null;
   const hidden = $derived(accessControl?.hideIfUnauthorized && can && !can.allowed);
   let confirming = $state(false);
 
@@ -27,8 +27,7 @@
       return;
     }
     confirming = false;
-    // @ts-expect-error $ rune prefix
-    await $deleteMut.mutateAsync(recordItemId);
+    await deleteMut.mutation.mutateAsync({ id: recordItemId, resource });
     onSuccess?.();
   }
 

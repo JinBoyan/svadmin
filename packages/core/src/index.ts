@@ -18,6 +18,7 @@ export {
   useDelete, useDeleteMany,
   useForm, useTable,
   useNavigation, useGo, useBack,
+  useGetToPath, useLink,
   useResource,
   useLog, useLogList,
   useModalForm, useDrawerForm,
@@ -58,8 +59,10 @@ export type {
   Pagination, Sort, Filter, Identity,
   ResourceDefinition, FieldDefinition,
   AuthActionResult, CheckResult,
+  ResourceTypeMap, KnownResources, InferData,
+  BaseRecord,
 } from './types';
-export type { InvalidateScope } from './hooks.svelte';
+export type { InvalidateScope } from './options';
 export type { LiveProvider, LiveEvent, LiveMode } from './live';
 export type { Action, AccessControlResult, AccessControlFn } from './permissions';
 export type { AuditEntry, AuditHandler } from './audit';

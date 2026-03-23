@@ -37,6 +37,9 @@ export { default as EditPage } from './components/EditPage.svelte';
 export { default as AutoSaveIndicator } from './components/AutoSaveIndicator.svelte';
 export { default as ErrorComponent } from './components/ErrorComponent.svelte';
 export { default as PageSkeleton } from './components/PageSkeleton.svelte';
+export { default as NavigateToResource } from './components/NavigateToResource.svelte';
+export { default as CatchAllNavigate } from './components/CatchAllNavigate.svelte';
+export { default as ThemedTitle } from './components/ThemedTitle.svelte';
 
 // Field display components
 export { default as NumberField } from './components/fields/NumberField.svelte';
