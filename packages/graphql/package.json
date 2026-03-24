@@ -21,5 +21,10 @@
   "dependencies": {
     "graphql-request": "^7.1.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zuohuadong/svadmin.git",
+    "directory": "packages/graphql"
+  }
 }

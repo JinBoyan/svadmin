@@ -22,7 +22,8 @@
   "author": "zuohuadong",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zuohuadong/svadmin.git"
+    "url": "https://github.com/zuohuadong/svadmin.git",
+    "directory": "packages/simple-rest"
   },
   "homepage": "https://github.com/zuohuadong/svadmin#readme",
   "bugs": {
