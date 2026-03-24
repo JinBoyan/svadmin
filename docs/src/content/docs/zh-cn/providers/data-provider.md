@@ -101,6 +101,20 @@ const dataProvider = createElysiaDataProvider<App>('http://localhost:3000');
 
 `@svadmin/elysia` 包通过从 Elysia 后端路由直接推断 `ResourceTypeMap` 实现端到端类型安全。
 
+### Drizzle ORM
+
+```typescript
+import { createDrizzleDataProvider } from '@svadmin/drizzle';
+import { drizzle } from 'drizzle-orm/bun-sqlite';
+import { Database } from 'bun:sqlite';
+import * as schema from './schema';
+
+const db = drizzle(new Database('./app.db'), { schema });
+const dataProvider = await createDrizzleDataProvider({ connection: db, schema });
+```
+
+通过 Drizzle ORM 直接访问数据库 — 支持 SQLite、PostgreSQL、MySQL 和 Cloudflare D1。内置软删除、关联查询、事务、聚合查询和安全控制。详见 [Drizzle ORM 指南](/zh-cn/providers/drizzle)。
+
 ## 多数据 Provider
 
 为不同资源使用不同后端：

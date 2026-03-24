@@ -35,6 +35,7 @@ export default defineConfig({
             { label: 'Introduction', slug: 'guides/introduction' },
             { label: 'Quick Start', slug: 'guides/quick-start' },
             { label: 'Resource Type Registry', slug: 'guides/resource-type-registry' },
+            { label: 'Comparison', slug: 'guides/comparison' },
           ],
         },
         {
@@ -45,6 +46,7 @@ export default defineConfig({
             { label: 'Router Provider', slug: 'providers/router' },
             { label: 'Live Provider', slug: 'providers/live' },
             { label: 'Elysia', slug: 'providers/elysia' },
+            { label: 'Drizzle ORM', slug: 'providers/drizzle' },
           ],
         },
         {

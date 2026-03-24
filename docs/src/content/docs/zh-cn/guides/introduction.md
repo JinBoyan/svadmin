@@ -29,7 +29,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 - 🔄 **变更模式** — 悲观、乐观和可撤销三种变更模式
 - 📤 **数据导入导出** — CSV 导出/导入，支持批量操作
 - 🧰 **工具函数** — `unionFilters`、`unionSorters`、`file2Base64`、`getDefaultFilter`、`getDefaultSortOrder`
-- 📦 **15 个数据 Provider** — REST、Supabase、PocketBase、Appwrite、GraphQL、Elysia、Strapi、Directus、Firebase、Hasura、Sanity、Airtable、Medusa、NestJS 等
+- 📦 **16 个数据 Provider** — REST、Supabase、PocketBase、Appwrite、GraphQL、Elysia、Drizzle ORM、Strapi、Directus、Firebase、Hasura、Sanity、Airtable、Medusa、NestJS 等
 
 ## 包列表
 
@@ -43,6 +43,7 @@ svadmin 原生基于 **Svelte 5 runes** 构建，采用基于 Provider 的架构
 | `@svadmin/appwrite` | Appwrite 数据 + 认证 + 实时 Provider |
 | `@svadmin/graphql` | GraphQL 数据 Provider |
 | `@svadmin/elysia` | Elysia 数据 Provider（自动类型推断） |
+| `@svadmin/drizzle` | Drizzle ORM 数据 Provider — SQLite、PostgreSQL、MySQL、D1 |
 | `@svadmin/strapi` | Strapi CMS 数据 Provider |
 | `@svadmin/directus` | Directus 数据 Provider |
 | `@svadmin/firebase` | Firebase / Firestore 数据 Provider |

@@ -29,7 +29,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 - 🔄 **Mutation Modes** — Pessimistic, optimistic, and undoable mutations
 - 📤 **Data Transfer** — CSV export/import with batch support
 - 🧰 **Helpers** — `unionFilters`, `unionSorters`, `file2Base64`, `getDefaultFilter`, `getDefaultSortOrder`
-- 📦 **15 Data Providers** — REST, Supabase, PocketBase, Appwrite, GraphQL, Elysia, Strapi, Directus, Firebase, Hasura, Sanity, Airtable, Medusa, NestJS variants
+- 📦 **16 Data Providers** — REST, Supabase, PocketBase, Appwrite, GraphQL, Elysia, Drizzle ORM, Strapi, Directus, Firebase, Hasura, Sanity, Airtable, Medusa, NestJS variants
 
 ## Packages
 
@@ -43,6 +43,7 @@ svadmin is built natively for **Svelte 5 runes** and uses a provider-based archi
 | `@svadmin/appwrite` | Appwrite data + auth + live provider |
 | `@svadmin/graphql` | GraphQL data provider |
 | `@svadmin/elysia` | Elysia data provider (auto type inference) |
+| `@svadmin/drizzle` | Drizzle ORM data provider — SQLite, PostgreSQL, MySQL, D1 |
 | `@svadmin/strapi` | Strapi CMS data provider |
 | `@svadmin/directus` | Directus data provider |
 | `@svadmin/firebase` | Firebase / Firestore data provider |

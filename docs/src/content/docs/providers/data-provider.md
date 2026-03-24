@@ -101,6 +101,20 @@ const dataProvider = createElysiaDataProvider<App>('http://localhost:3000');
 
 The `@svadmin/elysia` package provides end-to-end type safety by inferring `ResourceTypeMap` directly from your Elysia backend routes.
 
+### Drizzle ORM
+
+```typescript
+import { createDrizzleDataProvider } from '@svadmin/drizzle';
+import { drizzle } from 'drizzle-orm/bun-sqlite';
+import { Database } from 'bun:sqlite';
+import * as schema from './schema';
+
+const db = drizzle(new Database('./app.db'), { schema });
+const dataProvider = await createDrizzleDataProvider({ connection: db, schema });
+```
+
+Direct database access via Drizzle ORM — supports SQLite, PostgreSQL, MySQL, and Cloudflare D1. Includes built-in soft delete, relations, transactions, aggregations, and security guard. See the [Drizzle ORM guide](/providers/drizzle) for full documentation.
+
 ## Multiple Data Providers
 
 Use different backends for different resources:
