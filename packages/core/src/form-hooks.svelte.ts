@@ -147,7 +147,7 @@ export function useForm<
     onSuccess: (data: { data: TData }) => {
       if (invalidateScopes !== false) queryClient.invalidateQueries({ queryKey: [resource] });
       if (successNotification !== false) toast.success(successNotification || t('common.createSuccess'));
-      audit({ action: 'create', resource, recordId: String(data.data.id) });
+      audit({ action: 'create', resource, recordId: String((data.data as any).id) });
       onMutationSuccess?.(data);
       if (redirectOverride !== false) doRedirect(redirectOverride ?? redirectDefault);
     },

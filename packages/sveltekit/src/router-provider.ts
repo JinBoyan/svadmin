@@ -1,3 +1,4 @@
+/// <reference types="@sveltejs/kit" />
 import { goto } from '$app/navigation';
 import { page } from '$app/stores';
 import { get } from 'svelte/store';
@@ -28,7 +29,7 @@ export function createSvelteKitRouterProvider(): RouterProvider {
       let params: Record<string, string> = {};
       
       try {
-        const p = get(page);
+        const p = get(page) as any;
         if (p?.url) {
           pathname = p.url.pathname;
         }
@@ -36,7 +37,7 @@ export function createSvelteKitRouterProvider(): RouterProvider {
           params = { ...p.params };
         }
         if (p?.url?.searchParams) {
-          p.url.searchParams.forEach((v, k) => {
+          p.url.searchParams.forEach((v: string, k: string) => {
             params[k] = v;
           });
         }

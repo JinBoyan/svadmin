@@ -1,7 +1,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, CustomParams, CustomResult, Filter, Sort
+  GetManyParams, GetManyResult, CustomParams, CustomResult, Filter, Sort, BaseRecord
 } from '@svadmin/core';
 
 interface SanityDoc {
@@ -59,7 +59,7 @@ export function createSanityDataProvider(projectId: string, dataset: string, tok
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<T>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const start = (current - 1) * pageSize;
       const end = start + pageSize;
@@ -75,35 +75,35 @@ export function createSanityDataProvider(projectId: string, dataset: string, tok
       return { data: ((data as SanityDoc[]) ?? []).map((d) => ({ ...d, id: d._id })) as T[], total: (total as number) ?? 0 };
     },
 
-    async getOne<T>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
       const raw = await query(`*[_type == "${resource}" && _id == $id][0]`, { id });
       const data = raw as SanityDoc;
       return { data: { ...data, id: data._id } as T };
     },
 
-    async create<T>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
-      const doc = { _type: resource, ...variables };
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
+      const doc = { _type: resource, ...(variables as Record<string, unknown>) };
       const result = await mutate([{ create: doc }]);
       const id = result.results?.[0]?.id;
-      return { data: { ...variables, id, _id: id } as T };
+      return { data: { ...(variables as Record<string, unknown>), id, _id: id } as unknown as T };
     },
 
-    async update<T>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
       await mutate([{ patch: { id, set: variables } }]);
-      return { data: { ...variables, id, _id: id } as T };
+      return { data: { ...(variables as Record<string, unknown>), id, _id: id } as unknown as T };
     },
 
-    async deleteOne<T>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
       await mutate([{ delete: { id } }]);
       return { data: { id } as T };
     },
 
-    async getMany<T>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
       const data = await query(`*[_type == "${resource}" && _id in $ids]`, { ids });
       return { data: ((data as SanityDoc[]) ?? []).map((d) => ({ ...d, id: d._id })) as T[] };
     },
 
-    async custom<T>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
       const res = await fetch(url, { method: method.toUpperCase(), headers: { ...headers, ...h }, body: payload ? JSON.stringify(payload) : undefined });
       if (!res.ok) throw new Error(`Custom request failed: ${res.status}`);
       return { data: (await res.json()) as T };

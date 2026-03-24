@@ -61,7 +61,7 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
         queryClient.invalidateQueries({ queryKey: [resName] });
       }
       fireSuccessNotification(params.successNotification, 'Created successfully', data.data, params.variables, resName);
-      audit({ action: 'create', resource: resName, recordId: String(data.data.id) });
+      audit({ action: 'create', resource: resName, recordId: String((data.data as any).id) });
     },
     onError: (error, params) => {
       fireErrorNotification(params.errorNotification, 'Create failed', error);

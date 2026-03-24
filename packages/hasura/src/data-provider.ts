@@ -145,7 +145,7 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
         }
       `;
       const data = await executeGraphQL(endpoint, query, { ids }, defaultHeaders);
-      return { data: data[resource] || [] };
+      return { data: (data[resource] as T[]) || [] };
     },
 
     async custom<T>({ url, method, payload, headers }: CustomParams): Promise<CustomResult<T>> {

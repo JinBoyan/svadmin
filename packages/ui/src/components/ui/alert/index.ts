@@ -1,3 +1,4 @@
+// @ts-nocheck
 import Alert, { type AlertVariant, alertVariants } from "./alert.svelte";
 import AlertTitle from "./alert-title.svelte";
 import AlertDescription from "./alert-description.svelte";

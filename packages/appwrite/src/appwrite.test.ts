@@ -222,6 +222,6 @@ describe('Appwrite LiveProvider', () => {
 
     handler!({ events: ['databases.main.collections.posts.documents.*.create'], payload: { $id: '1' } });
     expect(cb).toHaveBeenCalledTimes(1);
-    expect(cb.mock.calls[0][0].type).toBe('INSERT');
+    expect((cb.mock.calls as any)[0][0].type).toBe('INSERT');
   });
 });

@@ -61,7 +61,7 @@ describe('PocketBase DataProvider', () => {
     const { pb, mockCollection } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });
     await dp.getList({ resource: 'posts', sorters: [{ field: 'name', order: 'desc' }] });
-    const opts = mockCollection.getList.mock.calls[0][2] as { sort?: string };
+    const opts = (mockCollection.getList.mock.calls as any)[0][2] as { sort?: string };
     expect(opts.sort).toBe('-name');
   });
 
@@ -69,7 +69,7 @@ describe('PocketBase DataProvider', () => {
     const { pb, mockCollection } = createMockPB();
     const dp = createPocketBaseDataProvider({ pb });
     await dp.getList({ resource: 'posts', filters: [{ field: 'status', operator: 'eq', value: 'active' }] });
-    const opts = mockCollection.getList.mock.calls[0][2] as { filter?: string };
+    const opts = (mockCollection.getList.mock.calls as any)[0][2] as { filter?: string };
     expect(opts.filter).toContain("status = 'active'");
   });
 
@@ -106,7 +106,7 @@ describe('PocketBase DataProvider', () => {
     const dp = createPocketBaseDataProvider({ pb });
     const result = await dp.getMany!({ resource: 'posts', ids: ['1', '2'] });
     expect(result.data).toHaveLength(2);
-    const filterArg = mockCollection.getFullList.mock.calls[0][0] as { filter?: string };
+    const filterArg = (mockCollection.getFullList.mock.calls as any)[0][0] as { filter?: string };
     expect(filterArg.filter).toContain("id = '1'");
   });
 

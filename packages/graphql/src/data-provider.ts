@@ -56,14 +56,14 @@ export function createGraphQLDataProvider(options: GraphQLDataProviderOptions): 
 
     async create<T>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
       const query = getQuery(meta, 'create', resource);
-      const allVars: Variables = { ...variables, ...getMetaVars(meta) };
+      const allVars: Variables = { ...(variables as Record<string, unknown>), ...getMetaVars(meta) };
       const response = await client.request<{ data: T }>(query, allVars);
       return { data: response.data };
     },
 
     async update<T>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
       const query = getQuery(meta, 'update', resource);
-      const allVars: Variables = { id, ...variables, ...getMetaVars(meta) };
+      const allVars: Variables = { id, ...(variables as Record<string, unknown>), ...getMetaVars(meta) };
       const response = await client.request<{ data: T }>(query, allVars);
       return { data: response.data };
     },

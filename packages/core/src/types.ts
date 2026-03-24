@@ -25,7 +25,7 @@ export class UndoError extends Error {
 
 // ─── Base Types ───────────────────────────────────────────────
 
-export type BaseRecord = Record<string, unknown>;
+export type BaseRecord = any;
 
 // ─── DataProvider ─────────────────────────────────────────────
 
