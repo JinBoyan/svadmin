@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { canAccess } from '@svadmin/core/permissions';
-  import type { Action } from '@svadmin/core/permissions';
+  import { useCan } from '@svadmin/core';
+  import type { Action } from '@svadmin/core';
 
   let { resource, action, params, children, fallback } = $props<{
     resource: string;
@@ -11,10 +11,12 @@
     fallback?: Snippet;
   }>();
 
-  const result = $derived(canAccess(resource, action, params));
+  const can = $derived(useCan(resource, action, params));
 </script>
 
-{#if result.can}
+{#if can.isLoading}
+  <!-- Loading: nothing rendered -->
+{:else if can.allowed}
   {@render children()}
 {:else if fallback}
   {@render fallback()}

@@ -195,6 +195,16 @@
         "@svadmin/core": "^0.4.0",
       },
     },
+    "packages/sso": {
+      "name": "@svadmin/sso",
+      "version": "0.4.1",
+      "devDependencies": {
+        "typescript": "^5.7.0",
+      },
+      "peerDependencies": {
+        "@svadmin/core": ">=0.4.0",
+      },
+    },
     "packages/strapi": {
       "name": "@svadmin/strapi",
       "version": "0.4.1",
@@ -627,6 +637,8 @@
     "@svadmin/sanity": ["@svadmin/sanity@workspace:packages/sanity"],
 
     "@svadmin/simple-rest": ["@svadmin/simple-rest@workspace:packages/simple-rest"],
+
+    "@svadmin/sso": ["@svadmin/sso@workspace:packages/sso"],
 
     "@svadmin/strapi": ["@svadmin/strapi@workspace:packages/strapi"],
 
