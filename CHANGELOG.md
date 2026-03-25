@@ -2,6 +2,44 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.7](https://github.com/zuohuadong/svadmin/compare/svadmin-v0.5.6...svadmin-v0.5.7) (2026-03-25)
+
+
+### Features
+
+* **core,sso:** add AccessControlProvider, CASL/Casbin adapters, and @svadmin/sso OIDC plugin ([271e135](https://github.com/zuohuadong/svadmin/commit/271e135aead8c32cea080e807912a51dec9fb48e))
+* **docs:** add Chinese (zh-cn) i18n translations for all 16 pages ([f2207c6](https://github.com/zuohuadong/svadmin/commit/f2207c6ee6929134b980fb4c8c0cb00f861e19fa))
+* **docs:** upgrade to Astro 6, add homepage, plugins and Cloudflare Pages deploy ([589fdd1](https://github.com/zuohuadong/svadmin/commit/589fdd1af1e957cf03058c52773ffe89d0fc8ef5))
+* **drizzle:** add @svadmin/drizzle data provider for Drizzle ORM via refine-sqlx ([2150689](https://github.com/zuohuadong/svadmin/commit/21506892a961553fef6fad9f2756bbc543a9ef32))
+* svadmin — headless admin framework for Svelte 5 ([d67041a](https://github.com/zuohuadong/svadmin/commit/d67041a4b6aec77702b0490fe934d3207a88daac))
+* **ui:** Sheet, Collapsible, 8 new components + 12 UI enhancements (v0.3.19-v0.3.22) ([58b0a57](https://github.com/zuohuadong/svadmin/commit/58b0a57e24f7caaa9cd5d445a4ada1b20edda261))
+* **ui:** upgrade design tokens to Shadcn New York style with Bunny Fonts CDN ([c6191c3](https://github.com/zuohuadong/svadmin/commit/c6191c3c180329c46b6b0b4deee657c2f6f7de2e))
+
+
+### Bug Fixes
+
+* **ci:** gracefully skip already published packages and isolate cd scope ([8e8452c](https://github.com/zuohuadong/svadmin/commit/8e8452c578ec38edc350148ecd8e60cf5349c40a))
+* **ci:** sync versions to 0.5.6 and add npm publish job to release workflow ([a209d20](https://github.com/zuohuadong/svadmin/commit/a209d20c01c7ae958a254f60bd04eccb3d096acf))
+* **core:** rename rune-using .ts files to .svelte.ts to fix runtime errors ([d007d75](https://github.com/zuohuadong/svadmin/commit/d007d75aa5ad3e1112efb568e269dba5311c2fbf))
+* **core:** resolve strict ts constraints across all data providers and stabilize tests ([028a2a6](https://github.com/zuohuadong/svadmin/commit/028a2a6205a9bbe2afd2db558546fb862a4a8bac))
+* **core:** update missing import paths in context.svelte.ts for live.svelte ([9b07010](https://github.com/zuohuadong/svadmin/commit/9b070108647210ded9ec94a18113d851137c913d))
+* **docs:** localize sidebar for zh-CN, prevent theme flash, merge duplicate comparison rows ([f09eb80](https://github.com/zuohuadong/svadmin/commit/f09eb800ba3de6909e917b09f63f784c50c871cd))
+* **docs:** use root locale for English to fix slug resolution ([dfe24aa](https://github.com/zuohuadong/svadmin/commit/dfe24aae8c7e56746cc195f56e088540b380d303))
+* **packages:** add repository URLs to all package.json for npm provenance ([e84978c](https://github.com/zuohuadong/svadmin/commit/e84978cda2d616d37caf388d48adf5315dfe6f13))
+* resolve code standards violations and add engineering config ([91b2c8a](https://github.com/zuohuadong/svadmin/commit/91b2c8a0c92b61223187b8e78900444188386cbf))
+* **ui:** add [@source](https://github.com/source) directives for Tailwind 4 auto-scanning of svadmin components ([cda5982](https://github.com/zuohuadong/svadmin/commit/cda5982afd545e17b588dfb4b1a73046a66560b7))
+* **ui:** add Tailwind 4 [@theme](https://github.com/theme) inline mapping for design token utility classes ([ca3dd0e](https://github.com/zuohuadong/svadmin/commit/ca3dd0ef2bc20c4a746a8e278a08b8f0ece3e696))
+* **ui:** auto-import design tokens CSS in AdminApp ([291c6d4](https://github.com/zuohuadong/svadmin/commit/291c6d4312e95452863fc8982ecf15a039ab5225))
+* **ui:** auto-import design tokens CSS in AdminApp to fix unstyled components ([ff7ff77](https://github.com/zuohuadong/svadmin/commit/ff7ff77fdd786270922c8222eb2e43f88ca77e4b))
+* **ui:** emulate new-york style shadows and radii in nova components ([cb9ff48](https://github.com/zuohuadong/svadmin/commit/cb9ff48eadbc7de5a43b905381df3585ab3033ae))
+* **ui:** use explicit bare package [@source](https://github.com/source) glob and fix font import order ([440e2a7](https://github.com/zuohuadong/svadmin/commit/440e2a72097b547f14ceab2122bc94d7e3528a13))
+* upgrade @tanstack/svelte-table to v9 for Svelte 5 compatibility ([b0be339](https://github.com/zuohuadong/svadmin/commit/b0be339b2689440c89851288015a4325dcb932e5))
+
+
+### Reverts
+
+* **ci:** remove duplicate publish from release.yml, ci.yml already handles it on tag push ([9a27f0b](https://github.com/zuohuadong/svadmin/commit/9a27f0b9604211cae51d5c555e91f583b2d17015))
+
 ## [0.4.3](https://github.com/zuohuadong/svadmin/compare/svadmin-v0.4.2...svadmin-v0.4.3) (2026-03-25)
 
 
