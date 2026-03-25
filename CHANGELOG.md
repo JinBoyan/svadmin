@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.4.3](https://github.com/zuohuadong/svadmin/compare/svadmin-v0.4.2...svadmin-v0.4.3) (2026-03-25)
+
+
+### Bug Fixes
+
+* **core:** rename rune-using .ts files to .svelte.ts to fix runtime errors ([d007d75](https://github.com/zuohuadong/svadmin/commit/d007d75aa5ad3e1112efb568e269dba5311c2fbf))
+* **ui:** add [@source](https://github.com/source) directives for Tailwind 4 auto-scanning of svadmin components ([cda5982](https://github.com/zuohuadong/svadmin/commit/cda5982afd545e17b588dfb4b1a73046a66560b7))
+* **ui:** add Tailwind 4 [@theme](https://github.com/theme) inline mapping for design token utility classes ([ca3dd0e](https://github.com/zuohuadong/svadmin/commit/ca3dd0ef2bc20c4a746a8e278a08b8f0ece3e696))
+
 ## [0.4.2](https://github.com/zuohuadong/svadmin/compare/svadmin-v0.4.1...svadmin-v0.4.2) (2026-03-25)
 
 
