@@ -136,14 +136,14 @@
       {/if}
     </div>
   {:else}
-    <Button
+    <TooltipButton
+      tooltip={t('devtools.title')}
       variant="default"
       size="icon"
       class="fixed bottom-4 right-4 z-[9999] h-9 w-9 rounded-full shadow-lg opacity-60 hover:opacity-100 hover:scale-110 transition-all"
       onclick={toggle}
-      title={t('devtools.title')}
     >
       <Bug class="h-4 w-4" />
-    </Button>
+    </TooltipButton>
   {/if}
 {/if}

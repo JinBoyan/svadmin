@@ -107,7 +107,7 @@
   {:else if route === '/update-password' && authProvider?.updatePassword}
     <UpdatePasswordPage {title} />
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
-    <ConfigErrorScreen title="{title} — Configuration Required" />
+    <ConfigErrorScreen title="{title} — {t('common.configRequired')}" />
   {:else if isAuthenticated || !authProvider}
     <Layout {title}>
       {#if route === '/'}

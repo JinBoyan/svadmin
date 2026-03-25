@@ -33,6 +33,7 @@
     Eye, Copy
   } from 'lucide-svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import TooltipButton from './TooltipButton.svelte';
   import type { Snippet } from 'svelte';
 
   // ─── Props with Snippet composability ─────────────────────────
@@ -481,27 +482,27 @@
                               onCheckedChange={() => row.toggleSelected()}
                             />
                           {:else if cell.column.id === '_expand'}
-                            <Button variant="ghost" size="icon" class="h-7 w-7" onclick={() => row.toggleExpanded()}>
+                            <TooltipButton tooltip={row.getIsExpanded() ? t('common.collapse') : t('common.expand')} variant="ghost" size="icon" class="h-7 w-7" onclick={() => row.toggleExpanded()}>
                               {#if row.getIsExpanded()}
                                 <ChevronUp class="h-4 w-4" />
                               {:else}
                                 <ChevronDown class="h-4 w-4" />
                               {/if}
-                            </Button>
+                            </TooltipButton>
                           {:else if cell.column.id === '_actions'}
                             <div class="flex items-center justify-end gap-1">
                               {#if rowActions}
                                 {@render rowActions({ record, id })}
                               {:else}
                                 {#if canEdit}
-                                  <Button variant="ghost" size="icon-sm" onclick={() => navigate(`/${resourceName}/edit/${id}`)} title={t('common.edit')}>
+                                  <TooltipButton tooltip={t('common.edit')} variant="ghost" size="icon-sm" onclick={() => navigate(`/${resourceName}/edit/${id}`)}>
                                     <Pencil class="h-4 w-4" />
-                                  </Button>
+                                  </TooltipButton>
                                 {/if}
                                 {#if canDelete}
-                                  <Button variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} title={t('common.delete')} class="hover:text-destructive">
+                                  <TooltipButton tooltip={t('common.delete')} variant="ghost" size="icon-sm" onclick={() => confirmDelete(id)} class="hover:text-destructive">
                                     <Trash2 class="h-4 w-4" />
-                                  </Button>
+                                  </TooltipButton>
                                 {/if}
                               {/if}
                             </div>

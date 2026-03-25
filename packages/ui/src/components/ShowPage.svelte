@@ -7,8 +7,9 @@
   import * as Card from './ui/card/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import PageHeader from './PageHeader.svelte';
+  import TooltipButton from './TooltipButton.svelte';
   import { getDisplayComponent } from './fieldComponentMap';
-  import { Pencil } from 'lucide-svelte';
+  import { ArrowLeft, Pencil } from 'lucide-svelte';
 
   let { resourceName, id } = $props<{ resourceName: string; id: string | number }>();
 
@@ -21,9 +22,9 @@
 <div class="space-y-6">
   <PageHeader title="{resource.label} {t('common.detail')}">
     {#snippet actions()}
-      <Button variant="ghost" size="icon" onclick={() => navigate(`/${resourceName}`)}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
-      </Button>
+      <TooltipButton tooltip={t('common.back')} onclick={() => navigate(`/${resourceName}`)}>
+        <ArrowLeft class="h-5 w-5" />
+      </TooltipButton>
       {#if resource.canEdit !== false}
         <Button onclick={() => navigate(`/${resourceName}/edit/${id}`)}>
           <Pencil class="h-4 w-4" data-icon="inline-start" /> {t('common.edit')}

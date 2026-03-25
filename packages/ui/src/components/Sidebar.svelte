@@ -5,6 +5,7 @@
   import { t, getLocale, setLocale, getAvailableLocales } from '@svadmin/core/i18n';
   import { toggleTheme, getResolvedTheme, colorThemes, getColorTheme, setColorTheme, canAccessAsync } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
+  import TooltipButton from './TooltipButton.svelte';
   import * as Tooltip from './ui/tooltip/index.js';
   import * as DropdownMenu from './ui/dropdown-menu/index.js';
   import { Separator } from './ui/separator/index.js';
@@ -134,13 +135,13 @@
     {:else}
       <span class="text-lg font-bold text-sidebar-primary">{title.charAt(0)}</span>
     {/if}
-    <Button variant="ghost" size="icon-sm" onclick={onToggle}>
+    <TooltipButton tooltip={t('common.toggleSidebar')} variant="ghost" size="icon-sm" onclick={onToggle}>
       {#if collapsed}
         <ChevronRight class="h-4 w-4" />
       {:else}
         <ChevronLeft class="h-4 w-4" />
       {/if}
-    </Button>
+    </TooltipButton>
   </div>
 
   <ScrollArea class="flex-1">
@@ -269,25 +270,25 @@
         <div class="flex-1 min-w-0">
           <p class="truncate text-sm font-medium text-sidebar-foreground">{identity.name}</p>
         </div>
-        <Button variant="ghost" size="icon-sm" onclick={toggleLocale} class="text-sidebar-foreground" title={t('common.switchLanguage')}>
+        <TooltipButton tooltip={t('common.switchLanguage')} variant="ghost" size="icon-sm" onclick={toggleLocale} class="text-sidebar-foreground">
           <span class="text-xs font-bold">{localeLabel}</span>
-        </Button>
-        <Button variant="ghost" size="icon-sm" onclick={toggleTheme} class="text-sidebar-foreground" title={t('common.toggleTheme')}>
+        </TooltipButton>
+        <TooltipButton tooltip={t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="text-sidebar-foreground">
           {#if getResolvedTheme() === 'dark'}
             <Sun class="h-4 w-4" />
           {:else}
             <Moon class="h-4 w-4" />
           {/if}
-        </Button>
-        <Button variant="ghost" size="icon-sm" onclick={onLogout} class="text-sidebar-foreground hover:text-destructive" title={t('common.logout')}>
+        </TooltipButton>
+        <TooltipButton tooltip={t('common.logout')} variant="ghost" size="icon-sm" onclick={onLogout} class="text-sidebar-foreground hover:text-destructive">
           <LogOut class="h-4 w-4" />
-        </Button>
+        </TooltipButton>
       </div>
     {:else if collapsed}
       <Tooltip.Root>
         <Tooltip.Trigger>
           {#snippet child({ props })}
-            <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground" title={t('common.switchLanguage')}>
+            <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground">
               <span class="text-xs font-bold">{localeLabel}</span>
             </Button>
           {/snippet}
@@ -297,7 +298,7 @@
       <Tooltip.Root>
         <Tooltip.Trigger>
           {#snippet child({ props })}
-            <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground" title={t('common.toggleTheme')}>
+            <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground">
               {#if getResolvedTheme() === 'dark'}
                 <Sun class="h-5 w-5" />
               {:else}
@@ -311,7 +312,7 @@
       <Tooltip.Root>
         <Tooltip.Trigger>
           {#snippet child({ props })}
-            <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground hover:text-destructive" title={t('common.logout')}>
+            <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground hover:text-destructive">
               <LogOut class="h-5 w-5" />
             </Button>
           {/snippet}
@@ -320,16 +321,16 @@
       </Tooltip.Root>
     {:else}
       <div class="flex gap-1">
-        <Button variant="ghost" size="icon" onclick={toggleLocale} class="flex-1 text-sidebar-foreground" title={t('common.switchLanguage')}>
+        <TooltipButton tooltip={t('common.switchLanguage')} variant="ghost" size="icon" onclick={toggleLocale} class="flex-1 text-sidebar-foreground">
           <span class="text-xs font-bold">{localeLabel}</span>
-        </Button>
-        <Button variant="ghost" size="icon" onclick={toggleTheme} class="flex-1 text-sidebar-foreground" title={t('common.toggleTheme')}>
+        </TooltipButton>
+        <TooltipButton tooltip={t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="flex-1 text-sidebar-foreground">
           {#if getResolvedTheme() === 'dark'}
             <Sun class="h-5 w-5" />
           {:else}
             <Moon class="h-5 w-5" />
           {/if}
-        </Button>
+        </TooltipButton>
       </div>
     {/if}
   </div>

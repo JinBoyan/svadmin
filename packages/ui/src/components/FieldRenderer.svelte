@@ -13,6 +13,7 @@
   import { Select } from './ui/select/index.js';
   import { Checkbox } from './ui/checkbox/index.js';
   import { Button } from './ui/button/index.js';
+  import TooltipButton from './TooltipButton.svelte';
   import ComboboxField from './ComboboxField.svelte';
   import { Plus, X } from 'lucide-svelte';
   import type { Snippet } from 'svelte';
@@ -283,9 +284,9 @@
           {#if url}
             <img src={url} alt="preview" class="h-9 w-9 rounded object-cover border" />
           {/if}
-          <Button variant="ghost" size="icon" class="h-8 w-8 shrink-0" onclick={() => removeImage(i)}>
+          <TooltipButton tooltip={t('common.removeImage')} variant="ghost" size="icon" class="h-8 w-8 shrink-0" onclick={() => removeImage(i)}>
             <X class="h-3.5 w-3.5" />
-          </Button>
+          </TooltipButton>
         </div>
       {/each}
       <Button variant="outline" size="sm" type="button" onclick={addImage}>

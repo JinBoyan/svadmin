@@ -8,7 +8,27 @@
       "bump-patch-for-minor-pre-major": true,
       "extra-files": [
         "packages/core/package.json",
-        "packages/ui/package.json"
+        "packages/ui/package.json",
+        "packages/sveltekit/package.json",
+        "packages/drizzle/package.json",
+        "packages/simple-rest/package.json",
+        "packages/sso/package.json",
+        "packages/pocketbase/package.json",
+        "packages/supabase/package.json",
+        "packages/elysia/package.json",
+        "packages/create-svadmin/package.json",
+        "packages/airtable/package.json",
+        "packages/appwrite/package.json",
+        "packages/auth-utils/package.json",
+        "packages/directus/package.json",
+        "packages/firebase/package.json",
+        "packages/graphql/package.json",
+        "packages/hasura/package.json",
+        "packages/medusa/package.json",
+        "packages/nestjs-query/package.json",
+        "packages/nestjsx-crud/package.json",
+        "packages/sanity/package.json",
+        "packages/strapi/package.json"
       ]
     }
   },
