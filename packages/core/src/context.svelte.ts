@@ -112,12 +112,12 @@ export function getRouterProvider(): RouterProvider | undefined {
 
 // ─── Live Provider ──────────────────────────────────────────────
 
-let liveProviderState: import('./live').LiveProvider | undefined = undefined;
+let liveProviderState: import('./live.svelte').LiveProvider | undefined = undefined;
 
-export function setLiveProvider(provider: import('./live').LiveProvider): void {
+export function setLiveProvider(provider: import('./live.svelte').LiveProvider): void {
   liveProviderState = provider;
 }
 
-export function getLiveProvider(): import('./live').LiveProvider | undefined {
+export function getLiveProvider(): import('./live.svelte').LiveProvider | undefined {
   return liveProviderState;
 }
