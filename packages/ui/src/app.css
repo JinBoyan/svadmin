@@ -11,11 +11,10 @@
  *   - More polished dark mode
  */
 
-/* Auto-register svadmin source files for Tailwind 4 content scanning.
- * This ensures all utility classes used in @svadmin/ui and @svadmin/core
- * components are generated without manual @source in consumer projects. */
-@source "@svadmin/ui/src/**/*.{svelte,ts,js}";
-@source "@svadmin/core/src/**/*.{svelte,ts,js}";
+/* Note: @source directives for Tailwind 4 content scanning are intentionally
+ * omitted here. Tailwind 4 auto-detects classes from imported modules.
+ * Adding @source for node_modules paths can cause the Vite plugin to crash
+ * when scanning third-party .svelte files (e.g. svelte-sonner). */
 
 @layer base {
   :root {
