@@ -1,3 +1,6 @@
+/* Typography — Inter font via Bunny Fonts (global CDN, works in China) */
+@import url('https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap');
+
 /* @svadmin/ui — Design Tokens (Shadcn New York style)
  * Auto-imported by AdminApp. Can be overridden by consumer's CSS.
  *
@@ -12,8 +15,8 @@
 /* Auto-register svadmin source files for Tailwind 4 content scanning.
  * This ensures all utility classes used in @svadmin/ui and @svadmin/core
  * components are generated without manual @source in consumer projects. */
-@source "./**/*.{svelte,ts,js}";
-@source "../../core/src/**/*.{svelte,ts,js}";
+@source "@svadmin/ui/src/**/*.{svelte,ts,js}";
+@source "@svadmin/core/src/**/*.{svelte,ts,js}";
 
 @layer base {
   :root {
@@ -87,9 +90,6 @@
     --sidebar-ring: oklch(0.556 0 0);
   }
 }
-
-/* Typography — Inter font via Bunny Fonts (global CDN, works in China) */
-@import url('https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap');
 
 body {
   font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
