@@ -24,4 +24,21 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-
+  # When release-please creates a release (merges its PR), trigger the publish
+  # by dispatching the CI workflow which handles npm publish on tags/dispatch.
+  trigger-publish:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger CI publish via workflow_dispatch
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'ci.yml',
+              ref: 'main',
+            });
+            console.log('✅ Triggered CI publish workflow');
