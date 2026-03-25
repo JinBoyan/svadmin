@@ -1,7 +1,7 @@
 // TableState — Svelte 5 Class State Pattern for table data management
 // Reactive class that encapsulates all table state with fine-grained $state/$derived
 
-import { useParsed } from './useParsed';
+import { useParsed } from './useParsed.svelte';
 import { useList } from './query-hooks.svelte';
 import { readURLState, writeURLState } from './url-sync';
 import type { Pagination, Sort, Filter, BaseRecord, HttpError, KnownResources, GetListResult } from './types';

@@ -29,7 +29,7 @@ export {
 export { matchRoute, navigate, currentPath, setActiveRouterProvider } from './router';
 export { readURLState, writeURLState } from './url-sync';
 export { setAccessControl, setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccess, canAccessAsync } from './permissions';
-export { useLive, useSubscription, usePublish } from './live';
+export { useLive, useSubscription, usePublish } from './live.svelte';
 export { toast } from './toast.svelte';
 export { notify, closeNotification, setNotificationProvider, getNotificationProvider } from './notification.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation } from './i18n.svelte';
@@ -63,7 +63,7 @@ export type {
   BaseRecord,
 } from './types';
 export type { InvalidateScope } from './options';
-export type { LiveProvider, LiveEvent, LiveMode } from './live';
+export type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
 export type { Action, CanParams, CanResult, AccessControlProvider, AccessControlResult, AccessControlFn } from './permissions';
 export type { AuditEntry, AuditHandler } from './audit';
 export { useCan } from './useCan';
@@ -71,15 +71,15 @@ export type { UseCanOptions, UseCanResult } from './useCan';
 export { createCaslAccessControl } from './adapters/casl';
 export { createCasbinAccessControl } from './adapters/casbin';
 export type { CasbinAdapterOptions } from './adapters/casbin';
-export { useExport, useImport } from './data-transfer';
-export type { UseExportOptions, UseImportOptions } from './data-transfer';
+export { useExport, useImport } from './data-transfer.svelte';
+export type { UseExportOptions, UseImportOptions } from './data-transfer.svelte';
 export {
   useLogin, useLogout,
   useRegister, useForgotPassword, useUpdatePassword,
   useGetIdentity, useIsAuthenticated,
   useOnError, usePermissions,
 } from './auth-hooks.svelte';
-export { useParsed } from './useParsed';
+export { useParsed } from './useParsed.svelte';
 export * from './useStepsForm.svelte';
 export { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
 export type { RouterProvider } from './router-provider';

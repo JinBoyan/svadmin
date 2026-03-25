@@ -1,7 +1,7 @@
 import { createQuery, createInfiniteQuery } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options';
 import { getDataProviderForResource, getDataProvider, getLiveProvider } from './context.svelte';
-import { useParsed } from './useParsed';
+import { useParsed } from './useParsed.svelte';
 import {
   createOvertimeTracker,
   createLiveSubscription,
@@ -14,7 +14,7 @@ import type {
   GetOneParams, GetOneResult, GetManyParams, GetManyResult, CustomParams, CustomResult,
   KnownResources,
 } from './types';
-import type { LiveMode, LiveEvent } from './live';
+import type { LiveMode, LiveEvent } from './live.svelte';
 
 // ─── useList ───────────────────────────────────────────────────
 

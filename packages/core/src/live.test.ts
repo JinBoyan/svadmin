@@ -3,7 +3,7 @@
  * Tests the subscription management logic without requiring actual WebSocket/SSE connections.
  */
 import { describe, test, expect, mock } from 'bun:test';
-import type { LiveProvider, LiveEvent } from './live';
+import type { LiveProvider, LiveEvent } from './live.svelte';
 
 // Helper: create a minimal in-memory LiveProvider for testing subscription logic
 function createMockLiveProvider(): LiveProvider & { emit: (event: LiveEvent) => void } {

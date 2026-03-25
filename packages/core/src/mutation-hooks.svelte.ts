@@ -1,7 +1,7 @@
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options';
 import { getDataProviderForResource } from './context.svelte';
-import { useParsed } from './useParsed';
+import { useParsed } from './useParsed.svelte';
 import { audit } from './audit';
 import { UndoError } from './types';
 import type { BaseRecord, HttpError, CreateParams, UpdateParams, DeleteParams, KnownResources } from './types';

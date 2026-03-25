@@ -2,7 +2,7 @@
 // Uses Svelte 5 runes ($state, $effect) for automatic lifecycle management
 
 import { useQueryClient } from '@tanstack/svelte-query';
-import type { LiveProvider, LiveEvent, LiveMode } from './live';
+import type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
 import { toast } from './toast.svelte';
 
 // ─── Overtime Tracker ───────────────────────────────────────────

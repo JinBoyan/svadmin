@@ -5,7 +5,7 @@
  * The server is expected to send JSON messages matching the LiveEvent shape:
  *   { type: 'INSERT' | 'UPDATE' | 'DELETE', resource: string, payload: {...} }
  */
-import type { LiveProvider, LiveEvent } from './live';
+import type { LiveProvider, LiveEvent } from './live.svelte';
 
 export interface WebSocketLiveProviderOptions {
   /** WebSocket server URL, e.g. "wss://api.example.com/ws" */

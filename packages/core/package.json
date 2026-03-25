@@ -35,8 +35,8 @@
       "default": "./src/audit.ts"
     },
     "./live": {
-      "types": "./src/live.ts",
-      "default": "./src/live.ts"
+      "types": "./src/live.svelte.ts",
+      "default": "./src/live.svelte.ts"
     },
     "./theme": {
       "types": "./src/theme.svelte.ts",

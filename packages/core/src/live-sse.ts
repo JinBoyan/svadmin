@@ -9,7 +9,7 @@
  *   event: posts
  *   data: { "type": "INSERT", "payload": {...} }
  */
-import type { LiveProvider, LiveEvent } from './live';
+import type { LiveProvider, LiveEvent } from './live.svelte';
 
 export interface SSELiveProviderOptions {
   /** SSE endpoint URL, e.g. "https://api.example.com/events" */

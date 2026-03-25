@@ -1,4 +1,4 @@
-import { useParsed } from './useParsed';
+import { useParsed } from './useParsed.svelte';
 import { useList } from './query-hooks.svelte';
 import { readURLState, writeURLState } from './url-sync';
 import type { Pagination, Sort, Filter, BaseRecord, HttpError, KnownResources, GetListResult } from './types';

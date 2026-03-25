@@ -1,6 +1,6 @@
 import { useForm, type UseFormOptions } from './form-hooks.svelte';
 import { useQueryClient } from '@tanstack/svelte-query';
-import { useParsed } from './useParsed';
+import { useParsed } from './useParsed.svelte';
 import { getResource, getResources } from './context.svelte';
 import { getAdminOptions } from './options';
 import { navigate } from './router';

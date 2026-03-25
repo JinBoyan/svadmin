@@ -24,11 +24,11 @@ export type { OvertimeResult, OvertimeOptions, NotificationConfig } from './hook
 import { createQuery, createInfiniteQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options';
 import { getDataProviderForResource, getDataProvider } from './context.svelte';
-import { useParsed } from './useParsed';
+import { useParsed } from './useParsed.svelte';
 import { createOvertimeTracker, fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';
 import type { NotificationConfig, OvertimeOptions } from './hook-utils.svelte';
 import type { BaseRecord, HttpError, Pagination, Sort, Filter, DataProvider, KnownResources } from './types';
-import type { LiveMode, LiveEvent } from './live';
+import type { LiveMode, LiveEvent } from './live.svelte';
 import { useList } from './query-hooks.svelte';
 import type { UseListOptions } from './query-hooks.svelte';
 import { audit } from './audit';
