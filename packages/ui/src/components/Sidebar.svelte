@@ -208,7 +208,7 @@
           {#if collapsed}
             <Tooltip.Root>
               <Tooltip.Trigger>
-                {#snippet child({ props })}
+                {#snippet child({ props }: { props: Record<string, unknown> })}
                   <a
                     {...props}
                     href={`#${item.path}`}
@@ -294,7 +294,7 @@
           />
           <div class="flex-1 min-w-0">
             <p class="truncate text-sm font-medium text-sidebar-foreground">{identity.name}</p>
-            <p class="truncate text-[10px] text-sidebar-foreground/50">Administrator</p>
+            <p class="truncate text-[10px] text-sidebar-foreground/50">{((identity as Record<string, unknown>).role || (identity as Record<string, unknown>).roleName) ?? 'User'}</p>
           </div>
         </div>
         <div class="flex items-center justify-between px-1 mt-1">
@@ -317,7 +317,7 @@
       <div class="px-1 py-3 space-y-1">
         <Tooltip.Root>
           <Tooltip.Trigger>
-            {#snippet child({ props })}
+            {#snippet child({ props }: { props: Record<string, unknown> })}
               <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground/60 hover:text-sidebar-foreground">
                 <span class="text-xs font-bold">{localeLabel}</span>
               </Button>
@@ -327,7 +327,7 @@
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
-            {#snippet child({ props })}
+            {#snippet child({ props }: { props: Record<string, unknown> })}
               <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground/60 hover:text-sidebar-foreground">
                 {#if getResolvedTheme() === 'dark'}
                   <Sun class="h-4 w-4" />
@@ -341,7 +341,7 @@
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
-            {#snippet child({ props })}
+            {#snippet child({ props }: { props: Record<string, unknown> })}
               <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground/60 hover:text-destructive">
                 <LogOut class="h-4 w-4" />
               </Button>
