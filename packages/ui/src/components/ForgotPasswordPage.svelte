@@ -19,7 +19,7 @@
   let error = $state('');
   let sent = $state(false);
 
-  async function handleSubmit(e: SubmitEvent) {
+  async function handleSubmit(e: Event) {
     e.preventDefault();
     error = '';
 

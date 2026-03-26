@@ -45,7 +45,7 @@
   let password = $state('');
   let error = $state('');
 
-  async function handleSubmit(e: SubmitEvent) {
+  async function handleSubmit(e: Event) {
     e.preventDefault();
     error = '';
 
