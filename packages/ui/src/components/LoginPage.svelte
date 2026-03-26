@@ -9,7 +9,7 @@
   import * as Alert from './ui/alert/index.js';
   import PasswordInput from './PasswordInput.svelte';
   import { Separator } from './ui/separator/index.js';
-  import { LogIn, Mail, Loader2, AlertCircle } from 'lucide-svelte';
+  import { LogIn, User, Loader2, AlertCircle } from 'lucide-svelte';
 
   /**
    * Social provider config for the login page.
@@ -41,7 +41,7 @@
   const login = useLogin();
   const authProvider = getAuthProvider();
 
-  let email = $state('');
+  let identifier = $state('');
   let password = $state('');
   let error = $state('');
 
@@ -49,10 +49,10 @@
     e.preventDefault();
     error = '';
 
-    if (!email) { error = t('auth.emailRequired'); return; }
+    if (!identifier) { error = t('auth.usernameOrEmailRequired'); return; }
     if (!password) { error = t('auth.passwordRequired'); return; }
 
-    const result = await login.mutate({ email, password });
+    const result = await login.mutate({ email: identifier, username: identifier, password });
     if (result.success) {
       onSuccess?.();
     } else {
@@ -81,16 +81,16 @@
           {/if}
 
           <div class="space-y-2">
-            <Label for="login-email">{t('auth.email')}</Label>
+            <Label for="login-identifier">{t('auth.usernameOrEmail')}</Label>
             <div class="relative">
-              <Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
+              <User class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
               <Input
-                id="login-email"
-                type="email"
-                placeholder="name@example.com"
-                bind:value={email}
+                id="login-identifier"
+                type="text"
+                placeholder={t('auth.identifierPlaceholder')}
+                bind:value={identifier}
                 class="pl-9"
-                autocomplete="email"
+                autocomplete="username"
               />
             </div>
           </div>
