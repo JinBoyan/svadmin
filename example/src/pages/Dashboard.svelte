@@ -24,7 +24,7 @@
   <!-- Stats -->
   <div class="grid gap-4 sm:grid-cols-3">
     {#each stats as stat}
-      <div class="flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div class="flex items-center gap-4 rounded-xl bg-white p-5 shadow-sm">
         <div class="flex h-12 w-12 items-center justify-center rounded-xl {stat.color}">
           <stat.Icon class="h-6 w-6" />
         </div>
@@ -42,8 +42,8 @@
 
   <!-- Recent Data -->
   <div class="grid gap-6 lg:grid-cols-2">
-    <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+    <div class="rounded-xl bg-white shadow-sm">
+      <div class="flex items-center justify-between px-5 py-4">
         <h2 class="font-semibold text-gray-900">Recent Posts</h2>
         <a href="#/posts" class="text-sm text-primary hover:underline">View all</a>
       </div>
@@ -59,8 +59,8 @@
       </div>
     </div>
 
-    <div class="rounded-xl border border-gray-200 bg-white shadow-sm">
-      <div class="flex items-center justify-between border-b border-gray-100 px-5 py-4">
+    <div class="rounded-xl bg-white shadow-sm">
+      <div class="flex items-center justify-between px-5 py-4">
         <h2 class="font-semibold text-gray-900">Users</h2>
         <a href="#/users" class="text-sm text-primary hover:underline">View all</a>
       </div>
