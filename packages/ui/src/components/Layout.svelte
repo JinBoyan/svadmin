@@ -64,7 +64,7 @@
 <div role="application" onkeydown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); commandOpen = true; } }}>
 {#if loading}
   <div class="flex h-screen" in:fade={{ duration: 150 }}>
-    <div class="hidden md:block w-64 border-r bg-sidebar/80 p-4 space-y-4">
+    <div class="hidden md:block w-64 bg-sidebar/80 p-4 space-y-4">
       <Skeleton class="h-8 w-32" />
       <div class="space-y-2 mt-6">
         {#each Array(5) as _}

@@ -15,7 +15,7 @@
 </script>
 
 <div
-  class="flex flex-col items-center justify-center p-8 text-center min-h-[300px] bg-card rounded-lg border border-dashed border-border/50 shadow-sm"
+  class="flex flex-col items-center justify-center p-8 text-center min-h-[300px] bg-card/50 rounded-lg shadow-sm"
   in:scale={{ start: 0.95, duration: 250, opacity: 0 }}
 >
   <div class="h-20 w-20 rounded-full bg-muted flex items-center justify-center mb-4">

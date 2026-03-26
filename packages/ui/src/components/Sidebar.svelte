@@ -142,13 +142,13 @@
 
 <aside
   aria-label="Sidebar navigation"
-  class="fixed inset-y-0 left-0 z-30 flex flex-col backdrop-blur-xl border-r border-sidebar-border transition-all duration-300"
+  class="fixed inset-y-0 left-0 z-30 flex flex-col backdrop-blur-xl transition-all duration-300"
   style="background-color: var(--sidebar);"
   class:w-64={!collapsed}
   class:w-16={collapsed}
 >
   <!-- Logo -->
-  <div class="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
+  <div class="flex h-16 items-center justify-between px-4">
     {#if !collapsed}
       <div class="flex items-center gap-3">
         <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
@@ -245,7 +245,7 @@
   </ScrollArea>
 
   <!-- Footer -->
-  <div class="border-t border-sidebar-border">
+  <div>
     <!-- Color theme picker -->
     {#if !collapsed}
       <div class="px-3 pt-3 pb-1">

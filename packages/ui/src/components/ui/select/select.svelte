@@ -2,7 +2,7 @@
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLSelectAttributes } from "svelte/elements";
 
-	type Props = WithElementRef<HTMLSelectAttributes> & {
+	type Props = WithElementRef<HTMLSelectAttributes, HTMLSelectElement> & {
 		placeholder?: string;
 	};
 

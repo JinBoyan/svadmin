@@ -414,7 +414,7 @@
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
+  <div class="rounded-lg bg-card shadow-sm overflow-hidden">
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">

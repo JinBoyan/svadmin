@@ -14,7 +14,7 @@
   };
 
   const variantMap: Record<StyleVariant, string> = {
-    default: 'border border-border bg-card shadow-sm',
+    default: 'bg-card shadow-sm hover:shadow-md transition-shadow duration-300',
     outline: 'border-2 border-border bg-transparent',
     filled: 'border-0 bg-muted/50 shadow-sm',
   };
