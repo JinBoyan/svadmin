@@ -7,7 +7,7 @@
   import { Label } from './ui/label/index.js';
   import * as Card from './ui/card/index.js';
   import * as Alert from './ui/alert/index.js';
-  import { KeyRound, Mail, ArrowLeft, CheckCircle, Loader2, AlertCircle } from 'lucide-svelte';
+  import { KeyRound, User, ArrowLeft, CheckCircle, Loader2, AlertCircle } from 'lucide-svelte';
 
   let { title = 'Admin' } = $props<{
     title?: string;
@@ -15,7 +15,7 @@
 
   const forgot = useForgotPassword();
 
-  let email = $state('');
+  let identifier = $state('');
   let error = $state('');
   let sent = $state(false);
 
@@ -23,9 +23,9 @@
     e.preventDefault();
     error = '';
 
-    if (!email) { error = t('auth.emailRequired'); return; }
+    if (!identifier) { error = t('auth.usernameOrEmailRequired'); return; }
 
-    const result = await forgot.mutate({ email });
+    const result = await forgot.mutate({ email: identifier, username: identifier });
     if (result.success) {
       sent = true;
     } else {
@@ -73,16 +73,16 @@
             {/if}
 
             <div class="space-y-2">
-              <Label for="forgot-email">{t('auth.email')}</Label>
+              <Label for="forgot-identifier">{t('auth.usernameOrEmail')}</Label>
               <div class="relative">
-                <Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
+                <User class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
                 <Input
-                  id="forgot-email"
-                  type="email"
-                  placeholder="name@example.com"
-                  bind:value={email}
+                  id="forgot-identifier"
+                  type="text"
+                  placeholder={t('auth.identifierPlaceholder')}
+                  bind:value={identifier}
                   class="pl-9"
-                  autocomplete="email"
+                  autocomplete="username"
                 />
               </div>
             </div>

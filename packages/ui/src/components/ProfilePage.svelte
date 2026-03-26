@@ -88,10 +88,14 @@
               <p class="text-lg font-semibold truncate">{identity.data.name ?? '—'}</p>
             </div>
 
-            {#if identity.data.email}
+            {#if identity.data.email || identity.data.username}
               <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail class="h-4 w-4 shrink-0" />
-                <span class="truncate">{identity.data.email}</span>
+                {#if identity.data.email}
+                  <Mail class="h-4 w-4 shrink-0" />
+                {:else}
+                  <User class="h-4 w-4 shrink-0" />
+                {/if}
+                <span class="truncate">{identity.data.email || identity.data.username}</span>
               </div>
             {/if}
 

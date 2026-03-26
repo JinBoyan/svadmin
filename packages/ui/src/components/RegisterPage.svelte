@@ -8,7 +8,7 @@
   import * as Card from './ui/card/index.js';
   import * as Alert from './ui/alert/index.js';
   import PasswordInput from './PasswordInput.svelte';
-  import { UserPlus, Mail, Loader2, AlertCircle } from 'lucide-svelte';
+  import { UserPlus, User, Loader2, AlertCircle } from 'lucide-svelte';
 
   let { title = 'Admin', onSuccess } = $props<{
     title?: string;
@@ -17,7 +17,7 @@
 
   const register = useRegister();
 
-  let email = $state('');
+  let identifier = $state('');
   let password = $state('');
   let confirmPassword = $state('');
   let error = $state('');
@@ -26,11 +26,11 @@
     e.preventDefault();
     error = '';
 
-    if (!email) { error = t('auth.emailRequired'); return; }
+    if (!identifier) { error = t('auth.usernameOrEmailRequired'); return; }
     if (!password) { error = t('auth.passwordRequired'); return; }
     if (password !== confirmPassword) { error = t('auth.passwordMismatch'); return; }
 
-    const result = await register.mutate({ email, password });
+    const result = await register.mutate({ email: identifier, username: identifier, password });
     if (result.success) {
       onSuccess?.();
     } else {
@@ -59,16 +59,16 @@
           {/if}
 
           <div class="space-y-2">
-            <Label for="register-email">{t('auth.email')}</Label>
+            <Label for="register-identifier">{t('auth.usernameOrEmail')}</Label>
             <div class="relative">
-              <Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
+              <User class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none z-[1]" />
               <Input
-                id="register-email"
-                type="email"
-                placeholder="name@example.com"
-                bind:value={email}
+                id="register-identifier"
+                type="text"
+                placeholder={t('auth.identifierPlaceholder')}
+                bind:value={identifier}
                 class="pl-9"
-                autocomplete="email"
+                autocomplete="username"
               />
             </div>
           </div>
