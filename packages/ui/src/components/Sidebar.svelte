@@ -1,20 +1,19 @@
 <script lang="ts">
   import { getResources } from '@svadmin/core';
   import type { Identity } from '@svadmin/core';
-  import { currentPath, navigate } from '@svadmin/core/router';
+  import { currentPath } from '@svadmin/core/router';
   import { t, getLocale, setLocale, getAvailableLocales } from '@svadmin/core/i18n';
   import { toggleTheme, getResolvedTheme, colorThemes, getColorTheme, setColorTheme, canAccessAsync } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import * as Tooltip from './ui/tooltip/index.js';
-  import * as DropdownMenu from './ui/dropdown-menu/index.js';
-  import { Separator } from './ui/separator/index.js';
+
   import { ScrollArea } from './ui/scroll-area/index.js';
   import * as Collapsible from './ui/collapsible/index.js';
   import { Avatar } from './ui/avatar/index.js';
   import {
     LayoutDashboard, FileText, Users, Settings, Home,
-    ChevronLeft, ChevronRight, ChevronDown, LogOut, Sun, Moon, Languages, Palette
+    ChevronLeft, ChevronDown, LogOut, Sun, Moon, Palette
   } from 'lucide-svelte';
 
   let { collapsed, identity, title, onToggle, onLogout } = $props<{
@@ -118,34 +117,57 @@
 
   // Track which groups are open
   let openGroups = $state<Set<string>>(new Set());
+  let colorPickerOpen = $state(false);
+  let colorPickerRef = $state<HTMLDivElement | null>(null);
+  let colorPickerOpenedAt = 0;
+
+  // Click-outside to close color picker
+  $effect(() => {
+    if (!colorPickerOpen) return;
+    function handleMouseDown(e: MouseEvent) {
+      // Ignore if opened within last 200ms (same interaction)
+      if (Date.now() - colorPickerOpenedAt < 200) return;
+      if (colorPickerRef && !colorPickerRef.contains(e.target as Node)) {
+        colorPickerOpen = false;
+      }
+    }
+    document.addEventListener('mousedown', handleMouseDown, true);
+    return () => {
+      document.removeEventListener('mousedown', handleMouseDown, true);
+    };
+  });
 </script>
 
 <svelte:window onhashchange={onHashChange} />
 
 <aside
   aria-label="Sidebar navigation"
-  class="fixed inset-y-0 left-0 z-30 flex flex-col bg-sidebar/80 backdrop-blur-xl border-r border-sidebar-border/50 shadow-xl transition-all duration-300"
+  class="fixed inset-y-0 left-0 z-30 flex flex-col backdrop-blur-xl border-r border-sidebar-border transition-all duration-300"
+  style="background-color: var(--sidebar);"
   class:w-64={!collapsed}
   class:w-16={collapsed}
 >
   <!-- Logo -->
   <div class="flex h-16 items-center justify-between border-b border-sidebar-border px-4">
     {#if !collapsed}
-      <span class="text-lg font-bold text-sidebar-primary">{title}</span>
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
+        <span class="font-semibold text-lg tracking-tight text-sidebar-foreground">{title}</span>
+      </div>
     {:else}
-      <span class="text-lg font-bold text-sidebar-primary">{title.charAt(0)}</span>
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-purple-500 shrink-0 mx-auto" style="box-shadow: 0 4px 12px oklch(0.488 0.243 264.376 / 20%);"></div>
     {/if}
-    <TooltipButton tooltip={t('common.toggleSidebar')} variant="ghost" size="icon-sm" onclick={onToggle}>
-      {#if collapsed}
-        <ChevronRight class="h-4 w-4" />
-      {:else}
+    {#if !collapsed}
+      <TooltipButton tooltip={t('common.toggleSidebar')} variant="ghost" size="icon-sm" onclick={onToggle}>
         <ChevronLeft class="h-4 w-4" />
-      {/if}
-    </TooltipButton>
+      </TooltipButton>
+    {:else}
+      <div></div>
+    {/if}
   </div>
 
   <ScrollArea class="flex-1">
-  <nav aria-label="Main menu" class="py-4 px-2 space-y-1">
+  <nav aria-label="Main menu" class="py-4 px-3 space-y-4">
     {#each navGroups as group}
       {#if group.name && !collapsed}
         <!-- Grouped section with Collapsible -->
@@ -155,24 +177,24 @@
           openGroups = next;
         }}>
           <Collapsible.Trigger
-            class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/60 hover:bg-sidebar-accent/50 transition-colors"
+            class="flex w-full items-center justify-between px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-sidebar-foreground/40 hover:text-sidebar-foreground/60 transition-colors"
           >
             <span>{group.name}</span>
             <ChevronDown class="h-3 w-3 transition-transform {openGroups.has(group.name) ? 'rotate-180' : ''}" />
           </Collapsible.Trigger>
           <Collapsible.Content>
-            <div class="mt-1 space-y-0.5 pl-1">
+            <div class="mt-1 space-y-1">
               {#each group.items as item}
                 {@const active = isActive(item.path)}
                 <a
                   href={`#${item.path}`}
-                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
-                  class:bg-sidebar-accent={active}
-                  class:text-sidebar-accent-foreground={active}
-                  class:text-sidebar-foreground={!active}
-                  class:hover:bg-sidebar-accent={!active}
+                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200
+                  {active
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
+                  style={active ? 'box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);' : ''}
                 >
-                  <item.Icon class="h-5 w-5 flex-shrink-0" />
+                  <item.Icon class="h-4 w-4 flex-shrink-0" />
                   <span>{item.label}</span>
                 </a>
               {/each}
@@ -190,13 +212,12 @@
                   <a
                     {...props}
                     href={`#${item.path}`}
-                    class="flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-                    class:bg-sidebar-accent={active}
-                    class:text-sidebar-accent-foreground={active}
-                    class:text-sidebar-foreground={!active}
-                    class:hover:bg-sidebar-accent={!active}
+                    class="flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
+                    {active
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
                   >
-                    <item.Icon class="h-5 w-5 flex-shrink-0" />
+                    <item.Icon class="h-4 w-4 flex-shrink-0" />
                   </a>
                 {/snippet}
               </Tooltip.Trigger>
@@ -207,13 +228,13 @@
           {:else}
             <a
               href={`#${item.path}`}
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors"
-              class:bg-sidebar-accent={active}
-              class:text-sidebar-accent-foreground={active}
-              class:text-sidebar-foreground={!active}
-              class:hover:bg-sidebar-accent={!active}
+              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
+              {active
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
+              style={active ? 'box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);' : ''}
             >
-              <item.Icon class="h-5 w-5 flex-shrink-0" />
+              <item.Icon class="h-4 w-4 flex-shrink-0" />
               <span>{item.label}</span>
             </a>
           {/if}
@@ -224,111 +245,121 @@
   </ScrollArea>
 
   <!-- Footer -->
-  <Separator class="bg-sidebar-border" />
-  <div class="p-3 space-y-2">
-    <!-- Color theme picker via DropdownMenu -->
+  <div class="border-t border-sidebar-border">
+    <!-- Color theme picker -->
     {#if !collapsed}
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          {#snippet child({ props })}
-            <Button
-              {...props}
-              variant="ghost"
-              class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent transition-colors h-auto justify-start"
-            >
-              <Palette class="h-4 w-4" />
-              <span class="flex-1 text-left text-xs">{t('common.toggleTheme')}</span>
-              <span
-                class="h-4 w-4 rounded-full ring-1 ring-offset-1 ring-offset-sidebar"
-                style="background-color: {colorThemes.find(c => c.id === getColorTheme())?.color ?? '#3b82f6'}; --tw-ring-color: {colorThemes.find(c => c.id === getColorTheme())?.color ?? '#3b82f6'}"
-              ></span>
-            </Button>
-          {/snippet}
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content align="end" class="w-40">
-          {#each colorThemes as ct}
-            <DropdownMenu.Item onclick={() => setColorTheme(ct.id)} class="gap-2">
-              <span
-                class="h-4 w-4 rounded-full {getColorTheme() === ct.id ? 'ring-2 ring-offset-2 scale-110' : 'opacity-70'}"
-                style="background-color: {ct.color}; {getColorTheme() === ct.id ? `--tw-ring-color: ${ct.color}` : ''}"
-              ></span>
-              {ct.label}
-            </DropdownMenu.Item>
-          {/each}
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+      <div class="px-3 pt-3 pb-1">
+        <div class="relative" bind:this={colorPickerRef}>
+          <Button
+            variant="ghost"
+            class="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground transition-colors h-auto justify-start"
+            onclick={() => { if (!colorPickerOpen) colorPickerOpenedAt = Date.now(); colorPickerOpen = !colorPickerOpen; }}
+          >
+            <Palette class="h-4 w-4" />
+            <span class="flex-1 text-left text-xs">{t('common.toggleTheme')}</span>
+            <span
+              class="h-3.5 w-3.5 rounded-full ring-1 ring-offset-1 ring-offset-sidebar"
+              style="background-color: {colorThemes.find(c => c.id === getColorTheme())?.color ?? '#6366f1'}; --tw-ring-color: {colorThemes.find(c => c.id === getColorTheme())?.color ?? '#6366f1'}"
+            ></span>
+          </Button>
+          {#if colorPickerOpen}
+            <div class="absolute bottom-full left-0 mb-1 z-50 w-40 rounded-lg border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-0 zoom-in-95">
+              {#each colorThemes as ct}
+                <button
+                  class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                  onclick={() => { setColorTheme(ct.id); colorPickerOpen = false; }}
+                >
+                  <span
+                    class="h-3.5 w-3.5 rounded-full {getColorTheme() === ct.id ? 'ring-2 ring-offset-1 scale-110' : 'opacity-70'}"
+                    style="background-color: {ct.color}; {getColorTheme() === ct.id ? `--tw-ring-color: ${ct.color}` : ''}"
+                  ></span>
+                  <span class="text-xs">{ct.label}</span>
+                </button>
+              {/each}
+            </div>
+          {/if}
+        </div>
+      </div>
     {/if}
 
+    <!-- User info -->
     {#if !collapsed && identity}
-      <div class="flex items-center gap-3 rounded-lg px-2 py-2">
-        <Avatar
-          src={(identity as Record<string, unknown>).avatar as string | undefined}
-          alt={identity.name ?? 'User'}
-          fallback={identity.name?.charAt(0).toUpperCase() ?? 'U'}
-          size="sm"
-        />
-        <div class="flex-1 min-w-0">
-          <p class="truncate text-sm font-medium text-sidebar-foreground">{identity.name}</p>
+      <div class="px-3 pb-3 pt-1">
+        <div class="flex items-center gap-3 rounded-lg p-2 hover:bg-sidebar-accent/50 transition-colors">
+          <Avatar
+            src={(identity as Record<string, unknown>).avatar as string | undefined}
+            alt={identity.name ?? 'User'}
+            fallback={identity.name?.charAt(0).toUpperCase() ?? 'U'}
+            size="sm"
+          />
+          <div class="flex-1 min-w-0">
+            <p class="truncate text-sm font-medium text-sidebar-foreground">{identity.name}</p>
+            <p class="truncate text-[10px] text-sidebar-foreground/50">Administrator</p>
+          </div>
         </div>
-        <TooltipButton tooltip={t('common.switchLanguage')} variant="ghost" size="icon-sm" onclick={toggleLocale} class="text-sidebar-foreground">
+        <div class="flex items-center justify-between px-1 mt-1">
+          <TooltipButton tooltip={t('common.switchLanguage')} variant="ghost" size="icon-sm" onclick={toggleLocale} class="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+            <span class="text-xs font-bold">{localeLabel}</span>
+          </TooltipButton>
+          <TooltipButton tooltip={t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="text-sidebar-foreground/60 hover:text-sidebar-foreground">
+            {#if getResolvedTheme() === 'dark'}
+              <Sun class="h-4 w-4" />
+            {:else}
+              <Moon class="h-4 w-4" />
+            {/if}
+          </TooltipButton>
+          <TooltipButton tooltip={t('common.logout')} variant="ghost" size="icon-sm" onclick={onLogout} class="text-sidebar-foreground/60 hover:text-destructive">
+            <LogOut class="h-4 w-4" />
+          </TooltipButton>
+        </div>
+      </div>
+    {:else if collapsed}
+      <div class="px-1 py-3 space-y-1">
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            {#snippet child({ props })}
+              <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground/60 hover:text-sidebar-foreground">
+                <span class="text-xs font-bold">{localeLabel}</span>
+              </Button>
+            {/snippet}
+          </Tooltip.Trigger>
+          <Tooltip.Content side="right">{t('common.switchLanguage')}</Tooltip.Content>
+        </Tooltip.Root>
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            {#snippet child({ props })}
+              <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground/60 hover:text-sidebar-foreground">
+                {#if getResolvedTheme() === 'dark'}
+                  <Sun class="h-4 w-4" />
+                {:else}
+                  <Moon class="h-4 w-4" />
+                {/if}
+              </Button>
+            {/snippet}
+          </Tooltip.Trigger>
+          <Tooltip.Content side="right">{t('common.toggleTheme')}</Tooltip.Content>
+        </Tooltip.Root>
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            {#snippet child({ props })}
+              <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground/60 hover:text-destructive">
+                <LogOut class="h-4 w-4" />
+              </Button>
+            {/snippet}
+          </Tooltip.Trigger>
+          <Tooltip.Content side="right">{t('common.logout')}</Tooltip.Content>
+        </Tooltip.Root>
+      </div>
+    {:else}
+      <div class="flex gap-1 p-3">
+        <TooltipButton tooltip={t('common.switchLanguage')} variant="ghost" size="icon" onclick={toggleLocale} class="flex-1 text-sidebar-foreground/60 hover:text-sidebar-foreground">
           <span class="text-xs font-bold">{localeLabel}</span>
         </TooltipButton>
-        <TooltipButton tooltip={t('common.toggleTheme')} variant="ghost" size="icon-sm" onclick={toggleTheme} class="text-sidebar-foreground">
+        <TooltipButton tooltip={t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="flex-1 text-sidebar-foreground/60 hover:text-sidebar-foreground">
           {#if getResolvedTheme() === 'dark'}
             <Sun class="h-4 w-4" />
           {:else}
             <Moon class="h-4 w-4" />
-          {/if}
-        </TooltipButton>
-        <TooltipButton tooltip={t('common.logout')} variant="ghost" size="icon-sm" onclick={onLogout} class="text-sidebar-foreground hover:text-destructive">
-          <LogOut class="h-4 w-4" />
-        </TooltipButton>
-      </div>
-    {:else if collapsed}
-      <Tooltip.Root>
-        <Tooltip.Trigger>
-          {#snippet child({ props })}
-            <Button {...props} variant="ghost" size="icon" onclick={toggleLocale} class="w-full text-sidebar-foreground">
-              <span class="text-xs font-bold">{localeLabel}</span>
-            </Button>
-          {/snippet}
-        </Tooltip.Trigger>
-        <Tooltip.Content side="right">{t('common.switchLanguage')}</Tooltip.Content>
-      </Tooltip.Root>
-      <Tooltip.Root>
-        <Tooltip.Trigger>
-          {#snippet child({ props })}
-            <Button {...props} variant="ghost" size="icon" onclick={toggleTheme} class="w-full text-sidebar-foreground">
-              {#if getResolvedTheme() === 'dark'}
-                <Sun class="h-5 w-5" />
-              {:else}
-                <Moon class="h-5 w-5" />
-              {/if}
-            </Button>
-          {/snippet}
-        </Tooltip.Trigger>
-        <Tooltip.Content side="right">{t('common.toggleTheme')}</Tooltip.Content>
-      </Tooltip.Root>
-      <Tooltip.Root>
-        <Tooltip.Trigger>
-          {#snippet child({ props })}
-            <Button {...props} variant="ghost" size="icon" onclick={onLogout} class="w-full text-sidebar-foreground hover:text-destructive">
-              <LogOut class="h-5 w-5" />
-            </Button>
-          {/snippet}
-        </Tooltip.Trigger>
-        <Tooltip.Content side="right">{t('common.logout')}</Tooltip.Content>
-      </Tooltip.Root>
-    {:else}
-      <div class="flex gap-1">
-        <TooltipButton tooltip={t('common.switchLanguage')} variant="ghost" size="icon" onclick={toggleLocale} class="flex-1 text-sidebar-foreground">
-          <span class="text-xs font-bold">{localeLabel}</span>
-        </TooltipButton>
-        <TooltipButton tooltip={t('common.toggleTheme')} variant="ghost" size="icon" onclick={toggleTheme} class="flex-1 text-sidebar-foreground">
-          {#if getResolvedTheme() === 'dark'}
-            <Sun class="h-5 w-5" />
-          {:else}
-            <Moon class="h-5 w-5" />
           {/if}
         </TooltipButton>
       </div>

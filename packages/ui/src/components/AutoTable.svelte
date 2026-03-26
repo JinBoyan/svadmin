@@ -311,7 +311,7 @@
 <div class="space-y-4">
   <!-- Header -->
   <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-bold text-foreground">{resource.label}</h1>
+    <h1 class="text-xl font-semibold text-foreground">{resource.label}</h1>
     <div class="flex items-center gap-2">
       {#if canExport}
         <Button variant="outline" size="sm" onclick={exportCSV}>
@@ -414,7 +414,7 @@
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-xl border border-border/60 bg-card shadow-md overflow-hidden">
+  <div class="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">

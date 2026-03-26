@@ -61,14 +61,14 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/[0.08] via-background to-primary/[0.04] p-4">
-  <div class="w-full max-w-[420px]">
-    <Card.Card class="backdrop-blur-xl border-border/50 shadow-[0_8px_32px_hsl(var(--primary)/0.08),0_2px_8px_hsl(0_0%_0%/0.06)]">
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50/30 to-indigo-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/20 p-4">
+  <div class="w-full max-w-[380px]">
+    <Card.Card>
       <Card.CardHeader class="text-center pb-2">
-        <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 text-primary mx-auto mb-3">
-          <LogIn class="h-6 w-6" />
+        <div class="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary mx-auto mb-3">
+          <LogIn class="h-5 w-5" />
         </div>
-        <Card.CardTitle class="text-2xl font-bold">{t('auth.welcomeBack')}</Card.CardTitle>
+        <Card.CardTitle class="text-xl">{t('auth.welcomeBack')}</Card.CardTitle>
         <p class="text-sm text-muted-foreground">{t('auth.welcomeMessage')}</p>
       </Card.CardHeader>
       <Card.CardContent>
@@ -155,8 +155,9 @@
       </Card.CardContent>
     </Card.Card>
 
-    <p class="text-xs text-muted-foreground mt-4 text-center opacity-60">
+    <p class="text-xs text-muted-foreground mt-4 text-center">
       Powered by {title}
     </p>
   </div>
 </div>
+

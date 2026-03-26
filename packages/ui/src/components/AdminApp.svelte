@@ -119,7 +119,7 @@
           {@render dashboard()}
         {:else}
           <div class="space-y-4">
-            <h1 class="text-2xl font-bold text-foreground">{t('common.welcome', { title })}</h1>
+            <h1 class="text-xl font-semibold text-foreground">{t('common.welcome', { title })}</h1>
             <p class="text-muted-foreground">{t('common.dashboardHint')}</p>
           </div>
         {/if}

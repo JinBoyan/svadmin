@@ -25,7 +25,7 @@
   {/if}
   <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
     <div>
-      <h1 class="text-2xl font-bold tracking-tight text-foreground">{title}</h1>
+      <h1 class="text-xl font-semibold tracking-tight text-foreground">{title}</h1>
       {#if description}
         <p class="text-sm text-muted-foreground">{description}</p>
       {/if}

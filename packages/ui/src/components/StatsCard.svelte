@@ -45,9 +45,9 @@
   }: Props = $props();
 </script>
 
-<div class="flex items-center gap-4 rounded-xl p-5 {variantMap[variant]} {className}">
+<div class="flex items-center gap-4 rounded-lg p-5 {variantMap[variant]} {className}">
   {#if Icon}
-    <div class="flex h-12 w-12 items-center justify-center rounded-xl {colorMap[color]}">
+    <div class="flex h-12 w-12 items-center justify-center rounded-lg {colorMap[color]}">
       <Icon class="h-6 w-6" />
     </div>
   {/if}
@@ -57,7 +57,7 @@
       <Skeleton class="mt-1 h-7 w-20" />
     {:else}
       <div class="flex items-baseline gap-2">
-        <p class="text-2xl font-bold text-foreground">{value}</p>
+        <p class="text-xl font-semibold text-foreground">{value}</p>
         {#if trend}
           <span
             class="text-xs font-medium {trend.value >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}"

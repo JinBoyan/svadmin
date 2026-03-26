@@ -48,14 +48,14 @@
   }
 </script>
 
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-destructive/[0.05] via-background to-destructive/[0.03] p-4">
+<div class="min-h-screen flex items-center justify-center bg-background p-4">
   <div class="w-full max-w-[480px]">
-    <Card.Card class="backdrop-blur-xl border-border/50 shadow-[0_8px_32px_hsl(var(--destructive)/0.08),0_2px_8px_hsl(0_0%_0%/0.06)]">
+    <Card.Card>
       <Card.CardHeader class="text-center pb-2">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-[14px] bg-destructive/10 text-destructive mx-auto mb-3">
-          <AlertTriangle class="h-7 w-7" />
+        <div class="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-destructive/10 text-destructive mx-auto mb-3">
+          <AlertTriangle class="h-6 w-6" />
         </div>
-        <Card.CardTitle class="text-xl font-bold">{displayTitle}</Card.CardTitle>
+        <Card.CardTitle class="text-xl">{displayTitle}</Card.CardTitle>
         <p class="text-sm text-muted-foreground">
           {t('config.missingEnvDescription')}
         </p>

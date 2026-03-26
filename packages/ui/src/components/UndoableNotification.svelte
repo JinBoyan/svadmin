@@ -49,7 +49,7 @@
 
 {#if !dismissed}
   <div
-    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] min-w-80 max-w-lg rounded-xl border bg-card shadow-2xl overflow-hidden"
+    class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] min-w-80 max-w-lg rounded-lg border bg-card shadow-lg overflow-hidden"
     transition:slide={{ duration: 250 }}
   >
     <div class="flex items-center justify-between px-4 py-3 gap-3">

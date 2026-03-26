@@ -72,10 +72,10 @@
               <img
                 src={identity.data.avatar}
                 alt={identity.data.name ?? ''}
-                class="h-20 w-20 rounded-xl object-cover ring-2 ring-primary/20"
+                class="h-20 w-20 rounded-lg object-cover ring-2 ring-primary/20"
               />
             {:else}
-              <div class="h-20 w-20 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
+              <div class="h-20 w-20 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-2xl font-bold">
                 {initials}
               </div>
             {/if}

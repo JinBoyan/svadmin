@@ -222,7 +222,7 @@
     >
       <ArrowLeft class="h-5 w-5" />
     </TooltipButton>
-    <h1 class="text-2xl font-bold text-foreground">{pageTitle}</h1>
+    <h1 class="text-xl font-semibold text-foreground">{pageTitle}</h1>
     {#if isDirty}
       <Badge variant="outline" class="border-amber-200 bg-amber-50 text-amber-700">{t('common.unsaved')}</Badge>
     {/if}
@@ -230,7 +230,7 @@
 
   {#if isLoading}
     <div class="max-w-3xl space-y-6">
-      <div class="rounded-xl border p-6 space-y-5">
+      <div class="rounded-lg border p-6 space-y-5">
         {#each Array(4) as _}
           <div class="space-y-2">
             <Skeleton class="h-4 w-24" />
