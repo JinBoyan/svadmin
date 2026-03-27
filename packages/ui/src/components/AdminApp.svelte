@@ -100,6 +100,9 @@
   let authChecked = $state(false);
 
   $effect(() => {
+    // Explicitly track route so auth is re-checked on navigation
+    const _route = route;
+
     if (!authProvider) {
       isAuthenticated = true;
       authChecked = true;
@@ -108,7 +111,7 @@
     authProvider.check().then(result => {
       isAuthenticated = result.authenticated;
       authChecked = true;
-      if (!result.authenticated && route !== '/login' && route !== '/register' && route !== '/forgot-password' && route !== '/update-password') {
+      if (!result.authenticated && _route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
         navigate(result.redirectTo ?? '/login');
       }
     });
