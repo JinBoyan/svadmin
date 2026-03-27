@@ -17,6 +17,76 @@ AdminApp `defaultTheme` prop sets the initial mode. Persisted to `localStorage`.
 
 AdminApp 的 `defaultTheme` 属性设定初始模式，自动持久化到 `localStorage`。
 
+## Theme Strategy / 主题策略
+
+By default, svadmin uses **standard** strategy: light-first with a `.dark` CSS class for dark mode. For apps that default to dark mode (e.g. dashboards, creative tools), use **dark-first** strategy:
+
+默认使用 **standard** 策略：默认亮色，通过 `.dark` CSS 类切换暗色。对于默认暗色的应用（如仪表盘、创意工具），使用 **dark-first** 策略：
+
+```typescript
+import { configureTheme } from '@svadmin/core';
+import type { ThemeConfig } from '@svadmin/core';
+
+// Standard (default): adds .dark class for dark mode
+configureTheme({ strategy: 'standard' });
+
+// Dark-first: adds .light class for light mode (dark is default)
+configureTheme({ strategy: 'dark-first' });
+```
+
+Or via `AdminApp` prop:
+
+```svelte
+<AdminApp
+  {dataProvider}
+  {resources}
+  themeConfig={{ strategy: 'dark-first' }}
+  defaultTheme="dark"
+/>
+```
+
+| Strategy | Default Mode | CSS Class | Use Case / 使用场景 |
+|----------|-------------|-----------|--------------------|
+| `standard` | Light | `.dark` added for dark | General admin panels / 通用管理面板 |
+| `dark-first` | Dark | `.light` added for light | Dark dashboards, creative tools / 暗色仪表盘、创意工具 |
+
+## CSS Variable Overrides / CSS 变量覆盖
+
+Override design tokens programmatically via `configureTheme`:
+
+通过 `configureTheme` 编程式覆盖 design tokens：
+
+```typescript
+import { configureTheme, clearCssOverrides } from '@svadmin/core';
+
+configureTheme({
+  strategy: 'dark-first',
+  cssOverrides: {
+    '--primary': 'rgb(108, 124, 255)',
+    '--background': 'rgb(5, 8, 17)',
+    '--radius': '0.8rem',
+  },
+});
+
+// Remove all overrides later
+clearCssOverrides();
+
+// Remove specific overrides
+clearCssOverrides(['--primary']);
+```
+
+This injects CSS variables directly onto `<html>`, taking highest priority over `app.css` defaults.
+
+这会将 CSS 变量直接注入 `<html>`，优先级高于 `app.css` 的默认值。
+
+### ThemeConfig Reference / 配置参考
+
+| Property | Type | Default | Description / 描述 |
+|----------|------|---------|-------------------|
+| `strategy` | `'standard' \| 'dark-first'` | `'standard'` | Class toggle strategy / 类名切换策略 |
+| `cssOverrides` | `Record<string, string>` | — | CSS variables to inject on `<html>` / 注入到 `<html>` 的 CSS 变量 |
+| `disableColorScheme` | `boolean` | `false` | Skip setting `color-scheme` attribute / 跳过 `color-scheme` 属性 |
+
 ## Color Themes / 多色主题
 
 6 built-in color palettes, switchable via sidebar picker or API:
@@ -78,13 +148,23 @@ The built-in sidebar provides:
 | `--info` | `bg-info` | `217 91% 60%` | `217 91% 60%` | Informational / 信息状态 |
 | `--info-foreground` | `text-info-foreground` | `0 0% 100%` | `0 0% 100%` | Text on info / 信息文本 |
 
-Override in your `app.css`:
+Override in your `app.css` or via `configureTheme({ cssOverrides })` API:
 
-在你的 `app.css` 中覆盖：
+在你的 `app.css` 中覆盖或通过 `configureTheme({ cssOverrides })` API：
 
 ```css
 :root {
   --success: 160 84% 39%;          /* Teal instead of green */
   --warning: 25 95% 53%;           /* Orange instead of amber */
 }
+```
+
+```typescript
+// Or programmatically / 或编程式覆盖
+configureTheme({
+  cssOverrides: {
+    '--success': 'oklch(0.65 0.2 160)',
+    '--warning': 'oklch(0.8 0.15 55)',
+  },
+});
 ```
