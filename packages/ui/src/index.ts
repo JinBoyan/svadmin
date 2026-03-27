@@ -46,7 +46,7 @@ export { default as StepsForm } from './components/StepsForm.svelte';
 export { default as InfiniteList } from './components/InfiniteList.svelte';
 export { default as ComboboxField } from './components/ComboboxField.svelte';
 export { default as PasswordInput } from './components/PasswordInput.svelte';
-
+export { default as ChatDialog } from './components/ChatDialog.svelte';
 // Field display components
 export { default as NumberField } from './components/fields/NumberField.svelte';
 export { default as DateField } from './components/fields/DateField.svelte';

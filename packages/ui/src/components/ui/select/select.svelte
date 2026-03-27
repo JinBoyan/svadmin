@@ -2,7 +2,9 @@
 	import { cn, type WithElementRef } from "../../../utils.js";
 	import type { HTMLSelectAttributes } from "svelte/elements";
 
-	type Props = WithElementRef<HTMLSelectAttributes, HTMLSelectElement> & {
+	// Use HTMLElement instead of HTMLSelectElement to avoid TS error:
+	// HTMLSelectElement.remove() returns void, incompatible with HTMLElement's Element return
+	type Props = WithElementRef<HTMLSelectAttributes, HTMLElement> & {
 		placeholder?: string;
 	};
 

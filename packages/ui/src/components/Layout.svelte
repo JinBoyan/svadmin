@@ -5,6 +5,7 @@
   import Toast from './Toast.svelte';
   import Header from './Header.svelte';
   import CommandPalette from './CommandPalette.svelte';
+  import ChatDialog from './ChatDialog.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import { t } from '@svadmin/core/i18n';
   import { getAuthProvider } from '@svadmin/core';
@@ -124,6 +125,7 @@
     </div>
   </div>
   <CommandPalette bind:open={commandOpen} />
+  <ChatDialog />
   <Toast />
 {/if}
 </div>

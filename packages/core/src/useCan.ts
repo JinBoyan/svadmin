@@ -39,16 +39,18 @@ export function useCan(resourceOrOptions: string | UseCanOptions, action?: Actio
     ? { resource: resourceOrOptions, action: action ?? 'list', params }
     : resourceOrOptions;
 
-  const query = createQuery<CanResult>(() => ({
-    queryKey: ['useCan', options.resource, options.action, options.params],
+  // @tanstack/svelte-query v6 requires Accessor pattern: () => options
+  const query = createQuery(() => ({
+    queryKey: ['useCan', options.resource, options.action, options.params] as const,
     queryFn: () => canAccessAsync(options.resource, options.action, options.params),
     enabled: options.queryOptions?.enabled ?? true,
     staleTime: options.queryOptions?.staleTime ?? 5 * 60 * 1000, // 5 min default cache
   }));
 
   return {
-    get allowed() { return query.data?.can ?? true; },
-    get reason() { return query.data?.reason; },
-    get isLoading() { return query.isLoading; },
+    get allowed() { return (query as any).data?.can ?? true; },
+    get reason() { return (query as any).data?.reason; },
+    get isLoading() { return (query as any).isLoading ?? false; },
   };
 }
+
