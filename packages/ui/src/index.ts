@@ -56,6 +56,10 @@ export { default as AnomalyBadge } from "./components/AnomalyBadge.svelte";
 export { default as VoiceInput } from "./components/VoiceInput.svelte";
 export { default as AnimatedCounter } from "./components/AnimatedCounter.svelte";
 export { default as KeyboardShortcuts } from "./components/KeyboardShortcuts.svelte";
+export { default as InlineEdit } from "./components/InlineEdit.svelte";
+
+// Dashboard Charts (zero-dependency SVG)
+export { BarChart, LineChart, PieChart } from './components/charts/index.js';
 // Field display components
 export { default as NumberField } from './components/fields/NumberField.svelte';
 export { default as DateField } from './components/fields/DateField.svelte';

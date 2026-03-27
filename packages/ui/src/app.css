@@ -349,6 +349,29 @@ main {
   scroll-behavior: smooth;
 }
 
+/* ⑯ RTL (Right-to-Left) Language Support */
+[dir="rtl"] {
+  direction: rtl;
+}
+[dir="rtl"] aside {
+  left: auto;
+  right: 0;
+}
+[dir="rtl"] .sidebar-nav-active::before {
+  left: auto;
+  right: 0;
+  border-radius: 3px 0 0 3px;
+}
+/* Mirror sidebar margins for RTL */
+[dir="rtl"] .md\:ml-64 {
+  margin-left: 0;
+  margin-right: 16rem;
+}
+[dir="rtl"] .md\:ml-16 {
+  margin-left: 0;
+  margin-right: 4rem;
+}
+
 /* Tailwind CSS v4 — Map design tokens to utility classes */
 @theme {
   --color-background: var(--background);
