@@ -57,6 +57,8 @@ export { default as VoiceInput } from "./components/VoiceInput.svelte";
 export { default as AnimatedCounter } from "./components/AnimatedCounter.svelte";
 export { default as KeyboardShortcuts } from "./components/KeyboardShortcuts.svelte";
 export { default as InlineEdit } from "./components/InlineEdit.svelte";
+export { default as VirtualTable } from "./components/VirtualTable.svelte";
+export { default as DraggableHeader } from "./components/DraggableHeader.svelte";
 
 // Dashboard Charts (zero-dependency SVG)
 export { BarChart, LineChart, PieChart } from './components/charts/index.js';
