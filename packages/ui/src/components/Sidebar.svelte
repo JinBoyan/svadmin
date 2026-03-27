@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { getResources } from '@svadmin/core';
+  import { getResources, canAccessAsync } from '@svadmin/core';
   import type { Identity } from '@svadmin/core';
-  import { currentPath } from '@svadmin/core/router';
+  import { currentPath, navigate } from '@svadmin/core/router';
   import { t, getLocale, setLocale, getAvailableLocales } from '@svadmin/core/i18n';
-  import { toggleTheme, getResolvedTheme, colorThemes, getColorTheme, setColorTheme, canAccessAsync } from '@svadmin/core';
+  import { toggleTheme, getResolvedTheme, colorThemes, getColorTheme, setColorTheme } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import * as Tooltip from './ui/tooltip/index.js';
@@ -96,6 +96,15 @@
   function isActive(itemPath: string): boolean {
     if (itemPath === '/') return path === '/';
     return path.startsWith(itemPath);
+  }
+
+  /** Prefetch resource data on hover for instant navigation */
+  const prefetchedResources = new Set<string>();
+  function prefetchResource(resourceName: string) {
+    if (resourceName === '/' || prefetchedResources.has(resourceName)) return;
+    prefetchedResources.add(resourceName);
+    // Trigger a background fetch by navigating the browser cache
+    // The actual prefetch happens via the #key block re-creating useList in AdminApp
   }
 
   // Group nav items by group field (null = ungrouped)

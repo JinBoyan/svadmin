@@ -232,6 +232,95 @@ button:active:not(:disabled) {
   transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
+/* ⑦ Gradient Top Border on Cards — Vercel dashboard style */
+[data-slot="card"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, color-mix(in oklch, var(--primary) 20%, transparent), transparent);
+  border-radius: inherit;
+  pointer-events: none;
+}
+[data-slot="card"] {
+  position: relative;
+  overflow: hidden;
+}
+
+/* ⑧ Dark Mode Primary Glow — Linear-style neon accents */
+.dark [data-slot="button"][data-variant="default"],
+.dark [data-slot="badge"][data-variant="default"] {
+  box-shadow: 0 0 12px -3px color-mix(in oklch, var(--primary) 40%, transparent);
+}
+
+/* ⑨ Form Validation Shake Animation */
+@keyframes svadmin-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(2px); }
+}
+.svadmin-shake {
+  animation: svadmin-shake 0.4s ease-out;
+}
+
+/* ⑩ Table Row Staggered Entrance */
+@keyframes svadmin-row-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+[data-slot="table-body"] [data-slot="table-row"] {
+  animation: svadmin-row-enter 0.3s ease-out both;
+}
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(1) { animation-delay: 0s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(2) { animation-delay: 0.03s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(3) { animation-delay: 0.06s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(4) { animation-delay: 0.09s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(5) { animation-delay: 0.12s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(6) { animation-delay: 0.15s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(7) { animation-delay: 0.18s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(8) { animation-delay: 0.21s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(9) { animation-delay: 0.24s; }
+[data-slot="table-body"] [data-slot="table-row"]:nth-child(10) { animation-delay: 0.27s; }
+
+/* ⑪ Accessibility: Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ⑫ Optimistic Delete — row fade-out visual feedback */
+@keyframes svadmin-row-delete {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+.svadmin-deleting {
+  animation: svadmin-row-delete 0.3s ease-out forwards;
+  pointer-events: none;
+}
+
 /* Tailwind CSS v4 — Map design tokens to utility classes */
 @theme {
   --color-background: var(--background);

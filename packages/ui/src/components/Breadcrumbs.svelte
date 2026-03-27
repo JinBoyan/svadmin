@@ -39,16 +39,18 @@
 {#if crumbs.length > 1}
   <Breadcrumb.Root class="mb-4">
     <Breadcrumb.List>
-      {#each crumbs as crumb, i}
+      {#each crumbs as crumb, i (crumb.href)}
         {#if i > 0}
           <Breadcrumb.Separator />
         {/if}
         <Breadcrumb.Item>
+          <span class="inline-flex svadmin-page-enter" style="animation-duration: 0.2s;">
           {#if i === crumbs.length - 1}
             <Breadcrumb.Page>{crumb.label}</Breadcrumb.Page>
           {:else}
             <Breadcrumb.Link href={crumb.href}>{crumb.label}</Breadcrumb.Link>
           {/if}
+          </span>
         </Breadcrumb.Item>
       {/each}
     </Breadcrumb.List>

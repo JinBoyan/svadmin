@@ -5,6 +5,7 @@
   import Toast from './Toast.svelte';
   import Header from './Header.svelte';
   import CommandPalette from './CommandPalette.svelte';
+  import KeyboardShortcuts from './KeyboardShortcuts.svelte';
   import ChatDialog from './ChatDialog.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import { t } from '@svadmin/core/i18n';
@@ -18,6 +19,7 @@
   import { Menu } from 'lucide-svelte';
 
   let commandOpen = $state(false);
+  let shortcutsOpen = $state(false);
   let mobileMenuOpen = $state(false);
 
   let { children, title = 'Admin' }: { children: Snippet; title?: string } = $props();
@@ -62,7 +64,10 @@
   let collapsed = $state(false);
 </script>
 
-<svelte:window onkeydown={(e) => { if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); commandOpen = true; } }} />
+<svelte:window onkeydown={(e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); commandOpen = true; }
+  if (e.key === '?' && !['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) { e.preventDefault(); shortcutsOpen = true; }
+}} />
 {#if loading}
   <div class="flex h-screen" in:fade={{ duration: 150 }}>
     <div class="hidden md:block w-64 bg-sidebar/80 p-4 space-y-4">
@@ -125,6 +130,7 @@
     </div>
   </div>
   <CommandPalette bind:open={commandOpen} />
+  <KeyboardShortcuts bind:open={shortcutsOpen} />
   <ChatDialog />
   <Toast />
 {/if}
