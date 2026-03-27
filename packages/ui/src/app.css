@@ -127,6 +127,33 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Premium Typography Refinements */
+h1, h2, h3 {
+  letter-spacing: -0.025em;
+  font-weight: 600;
+}
+h4, h5, h6 {
+  letter-spacing: -0.01em;
+}
+
+/* Micro-interactions: Linear/Apple ecosystem click scales */
+[data-slot="button"],
+button {
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease, box-shadow 0.15s ease;
+}
+[data-slot="button"]:active:not(:disabled),
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Subtle glowing focus ring for inputs */
+[data-slot="input"]:focus-visible,
+[data-slot="textarea"]:focus-visible,
+[data-slot="select-trigger"]:focus-visible {
+  box-shadow: 0 0 0 1px var(--color-background), 0 0 0 3px color-mix(in oklch, var(--color-primary) 30%, transparent) !important;
+  border-color: var(--color-primary);
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
