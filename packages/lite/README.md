@@ -25,6 +25,7 @@ However, some enterprise/government environments require IE11 compatibility.
 | **Auth Guard** | Server hook redirects unauthenticated users |
 | **UA Detection** | Auto-redirect IE11 users to `/lite/` routes |
 | **i18n** | Uses `@svadmin/core` `t()` translations |
+| **Multi-level Menu** | Config-driven 2/3 level menus via `MenuItem[]` |
 | **Print** | `@media print` optimized styles |
 
 ## Quick Start
@@ -81,6 +82,45 @@ export const actions = createCrudActions(dataProvider, postsResource);
 </LiteLayout>
 ```
 
+### 2b. Multi-level menu (optional)
+
+Pass a `menu` prop to `LiteLayout` to replace the auto-generated flat resource list with a multi-level sidebar:
+
+```svelte
+<script lang="ts">
+  import type { MenuItem } from '@svadmin/core';
+
+  const menu: MenuItem[] = [
+    { name: 'home', label: 'Dashboard', href: '/lite' },
+    {
+      name: 'content', label: 'Content',
+      children: [
+        { name: 'posts', label: 'Posts', href: '/lite/posts' },
+        { name: 'categories', label: 'Categories', href: '/lite/categories' },
+      ],
+    },
+    {
+      name: 'system', label: 'System',
+      children: [
+        { name: 'users', label: 'Users', href: '/lite/users' },
+        {
+          name: 'settings', label: 'Settings',
+          children: [
+            { name: 'general', label: 'General', href: '/lite/settings/general' },
+            { name: 'security', label: 'Security', href: '/lite/settings/security' },
+          ],
+        },
+      ],
+    },
+    { name: 'docs', label: 'Documentation', href: 'https://docs.example.com', target: '_blank' },
+  ];
+</script>
+
+<LiteLayout {resources} {menu} currentResource="posts" brandName="My Admin">
+  <!-- ... -->
+</LiteLayout>
+```
+
 ### 3. Auto-redirect legacy browsers
 
 ```typescript
@@ -105,7 +145,7 @@ export const handle = createLegacyRedirectHook('/lite');
 
 | Component | Description |
 |-----------|-------------|
-| `LiteLayout` | Sidebar + main area layout |
+| `LiteLayout` | Sidebar + main area layout (supports `menu` prop for multi-level menus) |
 | `LiteTable` | HTML table with sort links and delete confirmation |
 | `LiteSearch` | GET-based search form |
 | `LitePagination` | Page number links |
@@ -133,7 +173,8 @@ Import `@svadmin/lite/src/lite.css` in your layout. It's fully self-contained:
 - No modern CSS features
 - Vendor-prefixed flexbox for IE11
 - Print-optimized styles
-- 350 lines, ~10KB unminified
+- Includes multi-level `<details>/<summary>` menu styles
+- ~500 lines, ~12KB unminified
 
 ## Optional: Progressive Enhancement
 
