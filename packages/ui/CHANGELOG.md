@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.10.0...ui-v0.11.0) (2026-03-27)
+
+
+### Features
+
+* **ui:** add component injection via Svelte Context DI ([0f2b765](https://github.com/zuohuadong/svadmin/commit/0f2b76539be91004150729d9690e94648f3fd1f6))
+
 ## [0.10.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.9.0...ui-v0.10.0) (2026-03-27)
 
 

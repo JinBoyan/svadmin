@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.6.0...create-svadmin-v0.7.0) (2026-03-27)
+
+
+### Features
+
+* **ui:** add component injection via Svelte Context DI ([0f2b765](https://github.com/zuohuadong/svadmin/commit/0f2b76539be91004150729d9690e94648f3fd1f6))
+
 ## [0.6.0](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.5.14...create-svadmin-v0.6.0) (2026-03-26)
 
 
