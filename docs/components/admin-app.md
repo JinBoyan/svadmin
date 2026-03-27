@@ -48,6 +48,7 @@ import { AdminApp } from '@svadmin/ui';
 | `resources` | `ResourceDefinition[]` | ✅ | — | Resource definitions / 资源定义 |
 | `title` | `string` | — | `'Admin'` | App title (shown in sidebar) / 应用标题 |
 | `defaultTheme` | `'light' \| 'dark' \| 'system'` | — | `'system'` | Initial theme / 初始主题 |
+| `themeConfig` | `ThemeConfig` | — | — | Theme config (strategy, CSS overrides) / 主题配置 |
 | `locale` | `string` | — | auto-detect | Override locale / 覆盖语言 |
 | `dashboard` | `Snippet` | — | — | Custom dashboard page / 自定义仪表盘 |
 | `loginPage` | `Snippet` | — | — | Custom login page / 自定义登录页 |

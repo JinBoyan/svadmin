@@ -2,8 +2,8 @@
   // Auto-inject design tokens so consumers don't need to manually import
   import '../app.css';
   import type { Snippet } from 'svelte';
-  import type { DataProvider, AuthProvider, ResourceDefinition, ThemeMode, RouterProvider } from '@svadmin/core';
-  import { setDataProvider, setAuthProvider, setResources, setLocale, setTheme, setRouterProvider, getAuthProvider, createHashRouterProvider } from '@svadmin/core';
+  import type { DataProvider, AuthProvider, ResourceDefinition, ThemeMode, RouterProvider, ThemeConfig } from '@svadmin/core';
+  import { setDataProvider, setAuthProvider, setResources, setLocale, setTheme, setRouterProvider, getAuthProvider, createHashRouterProvider, configureTheme } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
@@ -35,6 +35,8 @@
     locale?: string;
     title?: string;
     defaultTheme?: ThemeMode;
+    /** Theme configuration for dark-first mode, CSS overrides, etc. */
+    themeConfig?: ThemeConfig;
     dashboard?: Snippet;
     loginPage?: Snippet;
     /** Override default components via DI */
@@ -49,6 +51,7 @@
     locale,
     title = 'Admin',
     defaultTheme,
+    themeConfig: userThemeConfig,
     dashboard,
     loginPage,
     components: userComponents,
@@ -77,6 +80,7 @@
     setResources(resources);
     setRouterProvider(resolvedRouter);
     if (locale) setLocale(locale);
+    if (userThemeConfig) configureTheme(userThemeConfig);
     if (defaultTheme) setTheme(defaultTheme);
   });
 
