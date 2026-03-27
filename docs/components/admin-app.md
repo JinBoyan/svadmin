@@ -77,6 +77,48 @@ Available slots: `Layout`, `Sidebar`, `Header`, `LoginPage`, `AutoTable`, `AutoF
 
 可覆盖的组件插槽：`Layout`、`Sidebar`、`Header`、`LoginPage`、`AutoTable`、`AutoForm`、`ShowPage`、`Button`、`Input`、`Badge`、`Skeleton`。
 
+### Extended Slots (Optional) / 扩展插槽（可选）
+
+These optional slots allow fine-grained customization of specific UI areas without replacing the entire Layout or Header:
+
+这些可选插槽允许精细自定义特定 UI 区域，无需替换整个 Layout 或 Header：
+
+| Slot | Description / 描述 |
+|------|-------------------|
+| `DashboardPage` | Custom dashboard page component / 自定义仪表盘页面 |
+| `Breadcrumbs` | Custom breadcrumbs (replaces built-in) / 自定义面包屑 |
+| `ThemeToggle` | Custom theme toggle button / 自定义主题切换按钮 |
+| `UserMenu` | Custom user menu / avatar dropdown / 自定义用户菜单/头像下拉 |
+| `NotificationPanel` | Custom notification panel / 自定义通知面板 |
+
+```svelte
+<AdminApp
+  {dataProvider}
+  {resources}
+  components={{
+    UserMenu: MyUserMenu,
+    NotificationPanel: MyNotifications,
+    ThemeToggle: MyThemeToggle,
+    DashboardPage: MyDashboard,
+  }}
+/>
+```
+
+### Header rightActions Snippet
+
+The Header component accepts a `rightActions` snippet for injecting custom actions (e.g. credits display, language switcher):
+
+Header 组件接受 `rightActions` snippet，用于注入自定义操作（如积分显示、语言切换器）：
+
+```svelte
+<Header showSearch onSearchClick={...}>
+  {#snippet rightActions()}
+    <CreditsBadge />
+    <LanguageSwitcher />
+  {/snippet}
+</Header>
+```
+
 Use `create-svadmin eject` to extract component source for customization. See [@svadmin/create README](../packages/create-svadmin/README.md).
 
 使用 `create-svadmin eject` 提取组件源码进行深度定制。

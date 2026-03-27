@@ -24,6 +24,20 @@ export interface ComponentRegistry {
   Input: Component<any>;
   Badge: Component<any>;
   Skeleton: Component<any>;
+
+  // ─── Extended slots (optional) ──────────────────────────────
+  // These allow deeper customization without replacing entire Layout/Header.
+
+  /** Custom dashboard page component (replaces default welcome message) */
+  DashboardPage?: Component<any>;
+  /** Custom breadcrumbs component (replaces built-in Breadcrumbs) */
+  Breadcrumbs?: Component<any>;
+  /** Custom theme toggle button (replaces built-in Sun/Moon toggle) */
+  ThemeToggle?: Component<any>;
+  /** Custom user menu / avatar dropdown in the header */
+  UserMenu?: Component<any>;
+  /** Custom notification panel / bell icon in the header */
+  NotificationPanel?: Component<any>;
 }
 
 const REGISTRY_KEY = 'svadmin:components';
