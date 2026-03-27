@@ -99,22 +99,25 @@
     --sidebar-ring: oklch(0.55 0.18 264);
   }
 
-  /* Elygate-style shadows — subtle depth without heaviness */
+  /* Stripe-inspired Soft Shadows — premium, multi-layered depth */
   [data-slot="button"],
   [data-slot="input"],
   [data-slot="select-trigger"],
   [data-slot="select"],
   [data-slot="textarea"] {
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    /* Subtle interaction shadow */
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 0 0 1px rgb(0 0 0 / 0.02);
   }
   
   [data-slot="card"] {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+    /* Classic Stripe soft shadow: faint ambient + directional drop */
+    box-shadow: 0 2px 8px -2px rgb(0 0 0 / 0.05), 0 4px 16px -4px rgb(0 0 0 / 0.02);
   }
 
   [data-slot="dialog-content"],
   [data-slot="sheet-content"] {
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    /* Deep floating layer for modals */
+    box-shadow: 0 10px 30px -5px rgb(0 0 0 / 0.08), 0 20px 40px -10px rgb(0 0 0 / 0.04);
   }
 }
 
