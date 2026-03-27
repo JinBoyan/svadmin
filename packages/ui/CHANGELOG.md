@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.11.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.11.1...ui-v0.11.2) (2026-03-27)
+
+
+### Bug Fixes
+
+* **ui:** add global border-color reset to app.css ([263f821](https://github.com/zuohuadong/svadmin/commit/263f821ea2afb51a7d6e79d32f2392011874693b))
+* **ui:** add global border-color reset to app.css ([00776d5](https://github.com/zuohuadong/svadmin/commit/00776d50e875c334ccf6f9fbfd6d4c16bcd2fe98))
+* **ui:** remove style tags from Svelte components to fix Vite/Tailwind v4 parsing crashes ([0178f5a](https://github.com/zuohuadong/svadmin/commit/0178f5a0ba5ae7589c111cedb4951155e6d8fcce))
+
 ## [0.11.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.11.0...ui-v0.11.1) (2026-03-27)
 
 
