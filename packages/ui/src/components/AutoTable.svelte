@@ -144,6 +144,15 @@
     sorters.map(s => ({ id: s.field, desc: s.order === 'desc' }))
   ));
   let columnVisibility = $state<VisibilityState>((() => {
+    // Try to restore from localStorage first
+    const storageKey = `svadmin-columns-${resourceName}`;
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(storageKey);
+        if (stored) return JSON.parse(stored);
+      } catch { /* ignore */ }
+    }
+    // Fall back to resource field definitions
     const vis: VisibilityState = {};
     for (const f of resource.fields) {
       if (f.showInList === false) vis[f.key] = false;
@@ -152,6 +161,16 @@
   })());
   let rowSelection = $state<RowSelectionState>({});
   let expanded = $state.raw<ExpandedState>({});
+
+  // Persist column visibility to localStorage
+  $effect(() => {
+    const storageKey = `svadmin-columns-${resourceName}`;
+    if (typeof localStorage !== 'undefined') {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(columnVisibility));
+      } catch { /* ignore quota errors */ }
+    }
+  });
 
   // Sync TanStack sorting → server sorters
   $effect(() => {
@@ -414,7 +433,7 @@
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-lg bg-card shadow-sm overflow-hidden">
+  <div class="rounded-lg bg-card shadow-sm overflow-hidden" role="region" aria-label="{resource.label} {t('common.list')}">
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">

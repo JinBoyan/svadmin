@@ -321,6 +321,34 @@ button:active:not(:disabled) {
   pointer-events: none;
 }
 
+/* ⑬ Popover & Dropdown — frosted glass backdrop + spring entrance */
+[data-slot="popover-content"],
+[data-slot="dropdown-menu-content"],
+[data-slot="context-menu-content"] {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* ⑭ Tooltip spring entrance */
+[data-slot="tooltip-content"] {
+  animation: svadmin-tooltip-enter 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes svadmin-tooltip-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ⑮ Smooth scrolling for content areas */
+main {
+  scroll-behavior: smooth;
+}
+
 /* Tailwind CSS v4 — Map design tokens to utility classes */
 @theme {
   --color-background: var(--background);
