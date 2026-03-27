@@ -144,6 +144,8 @@
     <ConfigErrorScreen title="{title} — {t('common.configRequired')}" />
   {:else if isAuthenticated || !authProvider}
     <Layout {title}>
+      {#key route + (params.resource ?? '') + (params.id ?? '')}
+      <div class="svadmin-page-enter">
       {#if route === '/'}
         {#if dashboard}
           {@render dashboard()}
@@ -170,6 +172,8 @@
           <ShowPage resourceName={params.resource} id={params.id} />
         {/key}
       {/if}
+      </div>
+      {/key}
     </Layout>
   {:else}
     <div class="flex h-screen items-center justify-center">

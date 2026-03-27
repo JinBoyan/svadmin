@@ -162,6 +162,76 @@ button:active:not(:disabled) {
 .dark ::-webkit-scrollbar-thumb { background: oklch(0.35 0 0); }
 .dark ::-webkit-scrollbar-thumb:hover { background: oklch(0.45 0 0); }
 
+/* ① Card Hover Elevation Lift — Stripe-style float on hover */
+[data-slot="card"] {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+[data-slot="card"]:hover {
+  box-shadow: 0 4px 12px -2px rgb(0 0 0 / 0.08), 0 8px 24px -6px rgb(0 0 0 / 0.04);
+  transform: translateY(-1px);
+}
+
+/* ② Table Row Hover — primary color tint instead of plain gray */
+[data-slot="table-row"]:hover {
+  background-color: color-mix(in oklch, var(--primary) 4%, var(--background)) !important;
+}
+[data-slot="table-row"] {
+  transition: background-color 0.15s ease;
+}
+
+/* ③ Sidebar Active Indicator — Linear-style left accent bar */
+.sidebar-nav-active {
+  position: relative;
+}
+.sidebar-nav-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+/* ④ Skeleton Shimmer — metallic light sweep instead of static pulse */
+@keyframes svadmin-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+[data-slot="skeleton"] {
+  animation: svadmin-shimmer 1.5s ease-in-out infinite !important;
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklch, var(--muted) 60%, white) 50%, var(--muted) 75%) !important;
+  background-size: 200% 100% !important;
+}
+.dark [data-slot="skeleton"] {
+  background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklch, var(--muted) 60%, var(--foreground)) 50%, var(--muted) 75%) !important;
+}
+
+/* ⑤ Route Page Transition — fade + subtle slide-up */
+@keyframes svadmin-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.svadmin-page-enter {
+  animation: svadmin-page-enter 0.25s ease-out;
+}
+
+/* ⑥ Toast slide-in refinement (svelte-sonner) — tighter timing */
+[data-sonner-toaster] [data-sonner-toast] {
+  transition-duration: 200ms !important;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
 /* Tailwind CSS v4 — Map design tokens to utility classes */
 @theme {
   --color-background: var(--background);

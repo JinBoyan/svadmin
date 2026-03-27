@@ -573,11 +573,23 @@
               {/if}
             {:else}
               <Table.Row>
-                <Table.Cell colspan={columns.length} class="h-24 text-center text-muted-foreground">
+                <Table.Cell colspan={columns.length} class="h-48 text-center">
                   {#if emptyState}
                     {@render emptyState()}
                   {:else}
-                    {t('common.noData')}
+                    <div class="flex flex-col items-center justify-center py-8">
+                      <svg class="h-16 w-16 text-muted-foreground/30 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      <p class="text-sm font-medium text-muted-foreground mb-1">{t('common.noData')}</p>
+                      <p class="text-xs text-muted-foreground/60 mb-4">{t('common.noDataHint') || 'Get started by creating your first record.'}</p>
+                      {#if canCreate}
+                        <Button variant="outline" size="sm" class="gap-2" onclick={() => navigate(`/${resourceName}/create`)}>
+                          <Plus class="h-3.5 w-3.5" />
+                          {t('common.create')}
+                        </Button>
+                      {/if}
+                    </div>
                   {/if}
                 </Table.Cell>
               </Table.Row>

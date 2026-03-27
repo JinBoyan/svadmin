@@ -190,9 +190,8 @@
                   href={`#${item.path}`}
                   class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200
                   {active
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
-                  style={active ? 'box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);' : ''}
                 >
                   <item.Icon class="h-4 w-4 flex-shrink-0" />
                   <span>{item.label}</span>
@@ -230,9 +229,8 @@
               href={`#${item.path}`}
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
               {active
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
                 : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
-              style={active ? 'box-shadow: 0 1px 3px rgb(0 0 0 / 0.06);' : ''}
             >
               <item.Icon class="h-4 w-4 flex-shrink-0" />
               <span>{item.label}</span>
