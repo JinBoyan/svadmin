@@ -35,6 +35,7 @@ export interface ElysiaDataProviderOptions {
   /**
    * Custom response parser for list endpoints.
    * When provided, this function extracts `{ data, total }` from the raw JSON response.
+   * Use the `resource` parameter to apply different parsers per resource.
    * Useful when the backend response format differs from `{ items, total }`.
    *
    * @default Handles `{ items, total }` and raw arrays automatically
@@ -79,10 +80,10 @@ function defaultParseListResponse<T>(json: unknown): { data: T[]; total: number 
   }
   const obj = json as Record<string, unknown>;
   if (Array.isArray(obj.items)) {
-    return { data: obj.items as T[], total: (obj.total as number) ?? obj.items.length };
+    return { data: obj.items as T[], total: obj.total !== undefined ? Number(obj.total) : obj.items.length };
   }
   if (Array.isArray(obj.data)) {
-    return { data: obj.data as T[], total: (obj.total as number) ?? obj.data.length };
+    return { data: obj.data as T[], total: obj.total !== undefined ? Number(obj.total) : obj.data.length };
   }
   throw new Error('Unrecognized list response format. Expected { items, total }, { data, total }, or an array.');
 }
@@ -177,46 +178,46 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
 
     async getMany<TData extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<TData>> {
       const baseUrl = resolveResourceUrl(opts, resource);
-      const params = ids.map(id => `id=${id}`).join('&');
+      const params = ids.map(id => `id=${encodeURIComponent(String(id))}`).join('&');
       const data = await request<TData[]>(`${baseUrl}?${params}`, resolveHeaders(opts), undefined, withCredentials);
       return { data };
     },
 
     async createMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, variables }: CreateManyParams<TVariables>): Promise<CreateManyResult<TData>> {
       const baseUrl = resolveResourceUrl(opts, resource);
-      const results: TData[] = [];
-      for (const vars of variables) {
-        const data = await request<TData>(baseUrl, resolveHeaders(opts), {
-          method: 'POST',
-          body: JSON.stringify(vars),
-        }, withCredentials);
-        results.push(data);
-      }
+      const results = await Promise.all(
+        variables.map(vars =>
+          request<TData>(baseUrl, resolveHeaders(opts), {
+            method: 'POST',
+            body: JSON.stringify(vars),
+          }, withCredentials)
+        )
+      );
       return { data: results };
     },
 
     async updateMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids, variables }: UpdateManyParams<TVariables>): Promise<UpdateManyResult<TData>> {
       const baseUrl = resolveResourceUrl(opts, resource);
-      const results: TData[] = [];
-      for (const id of ids) {
-        const data = await request<TData>(`${baseUrl}/${id}`, resolveHeaders(opts), {
-          method: updateMethod,
-          body: JSON.stringify(variables),
-        }, withCredentials);
-        results.push(data);
-      }
+      const results = await Promise.all(
+        ids.map(id =>
+          request<TData>(`${baseUrl}/${id}`, resolveHeaders(opts), {
+            method: updateMethod,
+            body: JSON.stringify(variables),
+          }, withCredentials)
+        )
+      );
       return { data: results };
     },
 
     async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>({ resource, ids }: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
       const baseUrl = resolveResourceUrl(opts, resource);
-      const results: TData[] = [];
-      for (const id of ids) {
-        const data = await request<TData>(`${baseUrl}/${id}`, resolveHeaders(opts), {
-          method: 'DELETE',
-        }, withCredentials);
-        results.push(data);
-      }
+      const results = await Promise.all(
+        ids.map(id =>
+          request<TData>(`${baseUrl}/${id}`, resolveHeaders(opts), {
+            method: 'DELETE',
+          }, withCredentials)
+        )
+      );
       return { data: results };
     },
 
