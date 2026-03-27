@@ -62,3 +62,29 @@ The built-in sidebar provides:
 - 🎨 **Color picker** — Colored dots at sidebar footer to switch themes / 选色器圆点
 - 🌓 **Dark mode toggle** — Sun/Moon icon button / 日月图标按钮
 - 🌐 **Locale toggle** — Click to cycle through available locales / 点击切换语言
+
+## Semantic Status Tokens / 语义状态变量
+
+`@svadmin/ui` provides semantic CSS variables for status colors. All components use these tokens instead of hardcoded Tailwind colors, making them fully customizable:
+
+`@svadmin/ui` 提供语义化 CSS 变量用于状态颜色。所有组件均使用这些 token，不再硬编码 Tailwind 颜色，完全可自定义：
+
+| Token | Tailwind Class | Default (Light) | Default (Dark) | Usage / 用途 |
+|-------|---------------|-----------------|----------------|-------------|
+| `--success` | `bg-success` | `142 71% 45%` | `142 71% 45%` | Positive status / 成功状态 |
+| `--success-foreground` | `text-success-foreground` | `0 0% 100%` | `0 0% 100%` | Text on success / 成功文本 |
+| `--warning` | `bg-warning` | `38 92% 50%` | `38 92% 50%` | Caution / 警告状态 |
+| `--warning-foreground` | `text-warning-foreground` | `0 0% 100%` | `0 0% 100%` | Text on warning / 警告文本 |
+| `--info` | `bg-info` | `217 91% 60%` | `217 91% 60%` | Informational / 信息状态 |
+| `--info-foreground` | `text-info-foreground` | `0 0% 100%` | `0 0% 100%` | Text on info / 信息文本 |
+
+Override in your `app.css`:
+
+在你的 `app.css` 中覆盖：
+
+```css
+:root {
+  --success: 160 84% 39%;          /* Teal instead of green */
+  --warning: 25 95% 53%;           /* Orange instead of amber */
+}
+```

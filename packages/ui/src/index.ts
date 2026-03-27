@@ -109,6 +109,12 @@ export { Command } from './components/ui/command/index.js';
 // Utils
 export { cn } from './utils';
 
+// Component Registry (DI)
+export {
+  setComponentRegistry, getComponentRegistry, useComponent,
+  type ComponentRegistry,
+} from './component-registry.svelte';
+
 // Field component registry
 export {
   builtinDisplayComponents, registerDisplayComponent,

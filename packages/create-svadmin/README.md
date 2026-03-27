@@ -15,6 +15,7 @@ bunx @svadmin/create@latest my-admin-app
 Follow the interactive prompts to:
 1. Name your project.
 2. Choose a default Data Provider (Simple REST, Supabase, GraphQL, or Custom).
+3. Choose an Auth Provider (Mock, JWT, Supabase, or None).
 
 ## What's Included
 
@@ -33,4 +34,44 @@ Once scaffolded, `cd` into your directory, install dependencies, and start the d
 cd my-admin-app
 bun install
 bun run dev
+```
+
+## Eject Components / 组件弹出
+
+Extract internal `@svadmin/ui` components into your project for deep customization:
+
+将 `@svadmin/ui` 内部组件提取到你的项目中，实现深度定制：
+
+```bash
+# Eject all components / 弹出全部组件
+npx @svadmin/create eject
+
+# Eject specific components / 弹出指定组件
+npx @svadmin/create eject Layout Header Sidebar
+```
+
+Ejected files are placed in `src/components/svadmin/`. Then pass them via the `components` prop:
+
+弹出的文件会放到 `src/components/svadmin/` 目录，然后通过 `components` prop 传入：
+
+```svelte
+<script lang="ts">
+  import CustomLayout from './components/svadmin/Layout.svelte';
+</script>
+
+<AdminApp components={{ Layout: CustomLayout }} {dataProvider} {resources} />
+```
+
+### Available Components / 可弹出的组件
+
+`Layout` · `Sidebar` · `Header` · `LoginPage` · `AutoTable` · `AutoForm` · `ShowPage` · `ProfilePage` · `StatsCard` · `AuditLogDrawer` · `LiveIndicator` · `CommandPalette` · `AICommandBar` · `ChatDialog` · `PasswordInput` · `BooleanField` · `FieldRenderer` · `MarkdownRenderer` · `AnomalyBadge` · `Toast` · `ConfirmDialog` · `TooltipButton` · `Breadcrumbs` · `ConfigErrorScreen` · `DevTools`
+
+## Development
+
+```bash
+# Sync template from /example
+bun src/sync-template.ts
+
+# Build CLI (for npm publishing)
+bun run build
 ```

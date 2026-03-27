@@ -4,10 +4,16 @@
   "description": "Scaffolding tool for svadmin projects",
   "type": "module",
   "bin": {
-    "create-svadmin": "./index.js"
+    "create-svadmin": "./dist/index.js"
   },
+  "files": [
+    "dist",
+    "template"
+  ],
   "scripts": {
-    "start": "node index.js"
+    "build": "bun build src/index.ts --outdir dist --target node --format esm",
+    "sync-template": "bun src/sync-template.ts",
+    "prepublishOnly": "bun run build"
   },
   "dependencies": {
     "prompts": "^2.4.2",
@@ -15,7 +21,8 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "@types/prompts": "^2.4.9"
+    "@types/prompts": "^2.4.9",
+    "typescript": "^5.7.0"
   },
   "keywords": [
     "svadmin",

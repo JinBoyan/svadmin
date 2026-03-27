@@ -1,15 +1,35 @@
 #!/usr/bin/env node
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import prompts from 'prompts';
 import pc from 'picocolors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-async function init() {
+// ─── Types ─────────────────────────────────────────────────────
+interface InitResponse {
+  projectName: string;
+  dataProvider: 'simple-rest' | 'supabase' | 'graphql' | 'none';
+  authProvider: 'mock' | 'jwt' | 'supabase' | 'none';
+  installDeps: boolean;
+}
+
+interface PackageJson {
+  name: string;
+  version: string;
+  private: boolean;
+  type: string;
+  scripts: Record<string, string>;
+  dependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+}
+
+// ─── Scaffold (init) ───────────────────────────────────────────
+async function init(): Promise<void> {
   console.log();
   console.log(pc.cyan('  ╔═══════════════════════════════════╗'));
   console.log(pc.cyan('  ║  ') + pc.bold('create-svadmin') + pc.cyan('                    ║'));
@@ -23,7 +43,7 @@ async function init() {
       name: 'projectName',
       message: 'Project name:',
       initial: 'svadmin-app',
-      validate: (value) => {
+      validate: (value: string) => {
         if (!value.trim()) return 'Project name is required';
         if (fs.existsSync(value.trim()) && fs.readdirSync(value.trim()).length > 0) {
           return 'Directory already exists and is not empty';
@@ -61,7 +81,7 @@ async function init() {
       message: 'Install dependencies now?',
       initial: true
     }
-  ]);
+  ]) as InitResponse;
 
   if (!response.projectName) {
     console.log(pc.red('\nOperation cancelled.\n'));
@@ -77,9 +97,9 @@ async function init() {
   console.log(`\n${pc.bold('Scaffolding')} project in ${pc.green(projectDir)}...\n`);
 
   // 1. Copy template files
-  const templateDir = path.join(__dirname, 'template');
+  const templateDir = path.join(__dirname, '..', 'template');
 
-  function copyDir(src, dest) {
+  function copyDir(src: string, dest: string): void {
     fs.mkdirSync(dest, { recursive: true });
     const entries = fs.readdirSync(src, { withFileTypes: true });
     for (const entry of entries) {
@@ -99,7 +119,7 @@ async function init() {
   }
 
   // 2. Generate package.json
-  const packageJson = {
+  const packageJson: PackageJson = {
     name: response.projectName,
     version: '0.1.0',
     private: true,
@@ -127,7 +147,7 @@ async function init() {
   };
 
   // Add data provider dependency
-  const dpMap = {
+  const dpMap: Record<string, Record<string, string>> = {
     'simple-rest': { '@svadmin/simple-rest': '^0.0.6' },
     'supabase': { '@svadmin/supabase': '^0.0.6', '@supabase/supabase-js': '^2.0.0' },
     'graphql': { '@svadmin/graphql': '^0.0.6', 'graphql-request': '^7.1.0', 'graphql': '^16.8.0' },
@@ -159,6 +179,13 @@ dist
   console.log(pc.green('  ✔') + ' .gitignore generated');
 
   // 4. Generate README
+  const dpLabel = response.dataProvider === 'simple-rest' ? 'Simple REST'
+    : response.dataProvider === 'supabase' ? 'Supabase'
+    : response.dataProvider === 'graphql' ? 'GraphQL' : 'Custom';
+  const authLabel = response.authProvider === 'mock' ? 'Mock (demo)'
+    : response.authProvider === 'jwt' ? 'JWT'
+    : response.authProvider === 'supabase' ? 'Supabase Auth' : 'None';
+
   fs.writeFileSync(path.join(projectDir, 'README.md'), `# ${response.projectName}
 
 Built with [svadmin](https://github.com/zuohuadong/svadmin) — Headless Admin Framework for Svelte 5.
@@ -173,8 +200,8 @@ bun run dev
 ## Stack
 
 - **UI**: Svelte 5 + Shadcn Svelte + TailwindCSS
-- **Data**: ${response.dataProvider === 'simple-rest' ? 'Simple REST' : response.dataProvider === 'supabase' ? 'Supabase' : response.dataProvider === 'graphql' ? 'GraphQL' : 'Custom'} DataProvider
-- **Auth**: ${response.authProvider === 'mock' ? 'Mock (demo)' : response.authProvider === 'jwt' ? 'JWT' : response.authProvider === 'supabase' ? 'Supabase Auth' : 'None'}
+- **Data**: ${dpLabel} DataProvider
+- **Auth**: ${authLabel}
 - **State**: TanStack Query v6
 `);
   console.log(pc.green('  ✔') + ' README.md generated');
@@ -209,4 +236,109 @@ bun run dev
   console.log();
 }
 
-init().catch(console.error);
+// ─── Eject subcommand ──────────────────────────────────────────
+const EJECT_COMPONENTS = [
+  'Layout', 'Sidebar', 'Header', 'LoginPage',
+  'AutoTable', 'AutoForm', 'ShowPage', 'ProfilePage',
+  'StatsCard', 'AuditLogDrawer', 'LiveIndicator',
+  'CommandPalette', 'AICommandBar', 'ChatDialog',
+  'PasswordInput', 'BooleanField', 'FieldRenderer',
+  'MarkdownRenderer', 'AnomalyBadge', 'Toast',
+  'ConfirmDialog', 'TooltipButton', 'Breadcrumbs',
+  'ConfigErrorScreen', 'DevTools',
+] as const;
+
+async function eject(args: string[]): Promise<void> {
+  console.log();
+  console.log(pc.cyan('  svadmin eject') + pc.dim(' — copy internal components for deep customization'));
+  console.log();
+
+  // Resolve which components to eject
+  const requested = args.filter(a => !a.startsWith('-'));
+  const toEject = requested.length > 0
+    ? requested.filter(name => {
+        if (!(EJECT_COMPONENTS as readonly string[]).includes(name)) {
+          console.log(pc.yellow(`  ⚠ Unknown component: ${name} (skipped)`));
+          return false;
+        }
+        return true;
+      })
+    : [...EJECT_COMPONENTS];
+
+  if (toEject.length === 0) {
+    console.log(pc.red('  No valid components to eject.'));
+    console.log(`  Available: ${EJECT_COMPONENTS.join(', ')}`);
+    return;
+  }
+
+  // Find @svadmin/ui source
+  let uiSrcDir: string | undefined;
+  try {
+    const require = createRequire(import.meta.url);
+    const uiPkg = path.dirname(require.resolve('@svadmin/ui/package.json'));
+    uiSrcDir = path.join(uiPkg, 'src', 'components');
+  } catch {
+    // Fallback: look in node_modules
+    const nm = path.join(process.cwd(), 'node_modules', '@svadmin', 'ui', 'src', 'components');
+    if (fs.existsSync(nm)) {
+      uiSrcDir = nm;
+    } else {
+      console.log(pc.red('  ✗ Cannot find @svadmin/ui. Run `bun install` first.'));
+      return;
+    }
+  }
+
+  const destDir = path.join(process.cwd(), 'src', 'components', 'svadmin');
+  fs.mkdirSync(destDir, { recursive: true });
+
+  let copied = 0;
+  for (const name of toEject) {
+    const srcFile = path.join(uiSrcDir, `${name}.svelte`);
+    // Also try fields/ subdirectory
+    const srcFileAlt = path.join(uiSrcDir, 'fields', `${name}.svelte`);
+    const src = fs.existsSync(srcFile) ? srcFile : fs.existsSync(srcFileAlt) ? srcFileAlt : null;
+
+    if (!src) {
+      console.log(pc.yellow(`  ⚠ ${name}.svelte not found in @svadmin/ui (skipped)`));
+      continue;
+    }
+
+    let content = fs.readFileSync(src, 'utf-8');
+    // Rewrite relative ./ui/ imports to use @svadmin/ui path (shadcn primitives stay in node_modules)
+    content = content.replace(
+      /from\s+['"]\.\/ui\//g,
+      "from '@svadmin/ui/components/ui/"
+    );
+    // Rewrite relative ./ sibling imports to local directory
+    content = content.replace(
+      /from\s+['"]\.\/((?!ui\/)[^'"]+)['"]/g,
+      "from './$1'"
+    );
+
+    const destFile = path.join(destDir, `${name}.svelte`);
+    fs.writeFileSync(destFile, content);
+    console.log(pc.green('  ✔') + ` ${name}.svelte → src/components/svadmin/`);
+    copied++;
+  }
+
+  console.log();
+  if (copied > 0) {
+    console.log(pc.green(pc.bold(`  ✔ Ejected ${copied} component(s)`)));
+    console.log();
+    console.log('  Usage: import overrides in your AdminApp and pass via `components` prop:');
+    console.log();
+    console.log(pc.dim('    import CustomLayout from "./components/svadmin/Layout.svelte";'));
+    console.log(pc.dim('    <AdminApp components={{ Layout: CustomLayout }} ... />'));
+  } else {
+    console.log(pc.yellow('  No components were ejected.'));
+  }
+  console.log();
+}
+
+// ─── CLI dispatch ──────────────────────────────────────────────
+const [,, subcommand, ...rest] = process.argv;
+if (subcommand === 'eject') {
+  eject(rest).catch(console.error);
+} else {
+  init().catch(console.error);
+}

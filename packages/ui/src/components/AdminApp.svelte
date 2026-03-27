@@ -7,6 +7,7 @@
   import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
   import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
+  import { setComponentRegistry, type ComponentRegistry } from '../component-registry.svelte.js';
   import Layout from './Layout.svelte';
   import AutoTable from './AutoTable.svelte';
   import AutoForm from './AutoForm.svelte';
@@ -18,6 +19,12 @@
   import UpdatePasswordPage from './UpdatePasswordPage.svelte';
   import ConfigErrorScreen from './ConfigErrorScreen.svelte';
   import DevTools from './DevTools.svelte';
+  import Sidebar from './Sidebar.svelte';
+  import Header from './Header.svelte';
+  import { Button } from './ui/button/index.js';
+  import { Input } from './ui/input/index.js';
+  import { Badge } from './ui/badge/index.js';
+  import { Skeleton } from './ui/skeleton/index.js';
   import { initRouter, getRoute, getParams } from '../router-state.svelte.js';
 
   interface Props {
@@ -30,6 +37,8 @@
     defaultTheme?: ThemeMode;
     dashboard?: Snippet;
     loginPage?: Snippet;
+    /** Override default components via DI */
+    components?: Partial<ComponentRegistry>;
   }
 
   let {
@@ -42,7 +51,21 @@
     defaultTheme,
     dashboard,
     loginPage,
+    components: userComponents,
   }: Props = $props();
+
+  // Default component registry
+  const defaultComponents: ComponentRegistry = {
+    Layout, Sidebar, Header,
+    LoginPage, AutoTable, AutoForm, ShowPage,
+    Button: Button as unknown as ComponentRegistry['Button'],
+    Input: Input as unknown as ComponentRegistry['Input'],
+    Badge: Badge as unknown as ComponentRegistry['Badge'],
+    Skeleton: Skeleton as unknown as ComponentRegistry['Skeleton'],
+  };
+
+  // Merge user overrides and set context
+  setComponentRegistry({ ...defaultComponents, ...userComponents });
 
   // Resolve router provider (default to hash)
   const resolvedRouter = $derived(routerProvider ?? createHashRouterProvider());
