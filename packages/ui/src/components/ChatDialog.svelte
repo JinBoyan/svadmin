@@ -1,11 +1,30 @@
 <script lang="ts">
-  import { getChatProvider } from '@svadmin/core';
-  import type { ChatMessage } from '@svadmin/core';
+  import { getChatProvider, getChatContext, setChatContext } from '@svadmin/core';
+  import type { ChatMessage, ChatAction } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
+  import { useParsed } from '@svadmin/core';
   import { fly, fade, scale } from 'svelte/transition';
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import { MessageCircle, X, Minus, Send, Loader2, Bot, Trash2 } from 'lucide-svelte';
+
+  interface Props {
+    /** localStorage key for chat history persistence. Set to '' to disable. */
+    persistKey?: string;
+    /** Custom persistence callback — called when messages change */
+    onPersist?: (messages: ChatMessage[]) => void;
+    /** Custom restore callback — called on mount to load history */
+    onRestore?: () => ChatMessage[];
+    /** Callback when user clicks an action button in an assistant message */
+    onAction?: (action: ChatAction, message: ChatMessage) => void;
+  }
+
+  const {
+    persistKey = 'svadmin-chat',
+    onPersist,
+    onRestore,
+    onAction,
+  }: Props = $props();
 
   let open = $state(false);
   let minimized = $state(false);
@@ -15,8 +34,63 @@
   let messagesContainer: HTMLDivElement | undefined = $state();
   let abortController: AbortController | null = null;
   let messageIdCounter = $state(0);
+  let initialized = $state(false);
 
   const provider = $derived(getChatProvider());
+  const parsed = useParsed();
+
+  // ─── Auto-update ChatContext from current route ─────────────
+  $effect(() => {
+    setChatContext({
+      currentResource: parsed.resource,
+      selectedRecordId: parsed.id,
+      currentView: parsed.action as 'list' | 'edit' | 'create' | 'show' | undefined,
+      pathname: `/${parsed.resource ?? ''}${parsed.action ? '/' + parsed.action : ''}${parsed.id ? '/' + parsed.id : ''}`,
+    });
+  });
+
+  // ─── Restore persisted history on mount ─────────────────────
+  $effect(() => {
+    if (initialized) return;
+    initialized = true;
+    if (onRestore) {
+      messages = onRestore();
+    } else if (persistKey) {
+      try {
+        const stored = localStorage.getItem(persistKey);
+        if (stored) {
+          const parsed = JSON.parse(stored) as ChatMessage[];
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            messages = parsed;
+          }
+        }
+      } catch {
+        // ignore corrupt data
+      }
+    }
+  });
+
+  // ─── Persist on change (debounced) ──────────────────────────
+  let persistTimer: ReturnType<typeof setTimeout> | null = null;
+
+  $effect(() => {
+    // Access `messages` to subscribe to changes
+    const snapshot = messages;
+    if (!initialized) return;
+
+    if (persistTimer) clearTimeout(persistTimer);
+    persistTimer = setTimeout(() => {
+      if (onPersist) {
+        onPersist(snapshot);
+      } else if (persistKey) {
+        try {
+          localStorage.setItem(persistKey, JSON.stringify(snapshot));
+        } catch {
+          // storage full or unavailable
+        }
+      }
+    }, 300);
+  });
 
   function genId(): string {
     messageIdCounter++;
@@ -29,6 +103,25 @@
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
       }
     });
+  }
+
+  /** Build a system message with the current admin context */
+  function buildContextSystemMessage(): ChatMessage | null {
+    const ctx = getChatContext();
+    if (!ctx.currentResource) return null;
+
+    const parts: string[] = [];
+    parts.push(`Resource: ${ctx.currentResource}`);
+    if (ctx.currentView) parts.push(`View: ${ctx.currentView}`);
+    if (ctx.selectedRecordId) parts.push(`Selected Record ID: ${ctx.selectedRecordId}`);
+    if (ctx.pathname) parts.push(`Path: ${ctx.pathname}`);
+
+    return {
+      id: 'ctx-system',
+      role: 'system',
+      content: `[Admin Context] ${parts.join(' | ')}`,
+      timestamp: Date.now(),
+    };
   }
 
   async function sendMessage() {
@@ -59,8 +152,13 @@
     abortController = new AbortController();
 
     try {
+      // Build message list with context system message prepended
+      const contextMsg = buildContextSystemMessage();
+      const allMessages = messages.filter((m) => m.content);
+      const messagesToSend = contextMsg ? [contextMsg, ...allMessages] : allMessages;
+
       const result = provider.sendMessage(
-        messages.filter((m) => m.content), // exclude empty placeholder
+        messagesToSend,
         { signal: abortController.signal },
       );
 
@@ -104,6 +202,10 @@
       abortController.abort();
       abortController = null;
     }
+    // Also clear persisted data
+    if (persistKey) {
+      try { localStorage.removeItem(persistKey); } catch { /* noop */ }
+    }
   }
 
   function handleKeydown(e: KeyboardEvent) {
@@ -122,6 +224,12 @@
         open = true;
         minimized = false;
       }
+    }
+  }
+
+  function handleAction(action: ChatAction, msg: ChatMessage) {
+    if (onAction) {
+      onAction(action, msg);
     }
   }
 
@@ -266,6 +374,21 @@
                   {#if msg.role === 'assistant'}
                     {#if msg.content}
                       <div class="chat-markdown">{@html renderMarkdown(msg.content)}</div>
+                      <!-- Action Buttons -->
+                      {#if msg.actions && msg.actions.length > 0}
+                        <div class="flex flex-wrap gap-1.5 mt-2 pt-2 border-t border-border/50">
+                          {#each msg.actions as action}
+                            <Button
+                              variant={action.variant ?? 'outline'}
+                              size="sm"
+                              class="h-7 text-xs"
+                              onclick={() => handleAction(action, msg)}
+                            >
+                              {action.label}
+                            </Button>
+                          {/each}
+                        </div>
+                      {/if}
                     {:else}
                       <div class="flex items-center gap-1.5 text-muted-foreground">
                         <Loader2 class="h-3.5 w-3.5 animate-spin" />

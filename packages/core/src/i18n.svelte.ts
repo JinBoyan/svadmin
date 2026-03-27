@@ -129,6 +129,12 @@ const locales: Record<string, Locale> = {
     // DevTools
     'devtools.title': '开发者工具 (Ctrl+Shift+D)',
     // Validation
+    // Chat
+    'chat.contextInfo': '当前上下文：{resource}',
+    'chat.actionButton': '执行',
+    'chat.historyRestored': '已恢复聊天记录',
+    'chat.historyClear': '聊天记录已清除',
+    // Validation
     'validation.required': '此字段为必填项',
     'validation.minLength': '最少 {min} 个字符',
     'validation.maxLength': '最多 {max} 个字符',
@@ -260,6 +266,12 @@ const locales: Record<string, Locale> = {
     'empty.noMore': 'No more items',
     // DevTools
     'devtools.title': 'DevTools (Ctrl+Shift+D)',
+    // Validation
+    // Chat
+    'chat.contextInfo': 'Current context: {resource}',
+    'chat.actionButton': 'Execute',
+    'chat.historyRestored': 'Chat history restored',
+    'chat.historyClear': 'Chat history cleared',
     // Validation
     'validation.required': 'This field is required',
     'validation.minLength': 'Minimum {min} characters',
