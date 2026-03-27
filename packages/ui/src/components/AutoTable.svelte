@@ -35,6 +35,7 @@
   } from 'lucide-svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import TooltipButton from './TooltipButton.svelte';
+  import InlineEdit from './InlineEdit.svelte';
   import type { Snippet } from 'svelte';
 
   // ─── Props with Snippet composability ─────────────────────────
@@ -161,6 +162,7 @@
   })());
   let rowSelection = $state<RowSelectionState>({});
   let expanded = $state.raw<ExpandedState>({});
+  let columnOrder = $state<string[]>([]);
 
   // Persist column visibility to localStorage
   $effect(() => {
@@ -235,6 +237,7 @@
       get columnVisibility() { return columnVisibility; },
       get rowSelection() { return rowSelection; },
       get expanded() { return expanded; },
+      get columnOrder() { return columnOrder; },
     },
     onSortingChange: (updater) => {
       sorting = typeof updater === 'function' ? updater(sorting) : updater;
@@ -247,6 +250,9 @@
     },
     onExpandedChange: (updater) => {
       expanded = typeof updater === 'function' ? updater(expanded) : updater;
+    },
+    onColumnOrderChange: (updater) => {
+      columnOrder = typeof updater === 'function' ? updater(columnOrder) : updater;
     },
     get enableRowSelection() { return selectable && canDelete; },
     get enableExpanding() { return !!expandedRowRender; },
@@ -460,9 +466,16 @@
         <Table.Root>
           <Table.Header>
             {#each tbl.getHeaderGroups() as headerGroup}
-              <Table.Row class="bg-muted/50 hover:bg-muted/50">
-                {#each headerGroup.headers as header}
+              <DraggableHeader
+                columns={headerGroup.headers.map(h => ({ id: h.column.id, header: h }))}
+                resourceName={resourceName}
+                onReorder={(newOrder) => { columnOrder = newOrder.map(c => c.id); }}
+              >
+                {#snippet header(col, index, dragProps)}
+                  {@const header = col.header as typeof headerGroup.headers[0]}
                   <Table.Head
+                    {...dragProps}
+                    class={cn("bg-muted/50 hover:bg-muted/50", dragProps.class)}
                     style={header.getSize() !== 150 ? `width:${header.getSize()}px` : undefined}
                   >
                     {#if header.id === '_select'}
@@ -493,8 +506,8 @@
                       {visibleFields.find(f => f.key === header.id)?.label ?? header.id}
                     {/if}
                   </Table.Head>
-                {/each}
-              </Table.Row>
+                {/snippet}
+              </DraggableHeader>
             {/each}
           </Table.Header>
           <Table.Body>
@@ -554,6 +567,14 @@
                             {:else if field?.type === 'select' && field.options}
                               {@const opt = field.options.find(o => o.value === cell.getValue())}
                               <Badge variant="outline">{opt?.label ?? cell.getValue() ?? '—'}</Badge>
+                            {:else if canEdit && field && ['text', 'number', 'email', 'url'].includes(field.type)}
+                              <InlineEdit
+                                {resourceName}
+                                recordId={id}
+                                {field}
+                                value={cell.getValue()}
+                                onSave={() => listResult.query.refetch()}
+                              />
                             {:else}
                               {cell.getValue() ?? '—'}
                             {/if}

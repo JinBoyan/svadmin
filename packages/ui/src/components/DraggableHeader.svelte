@@ -21,7 +21,7 @@
     columns: Column[];
     resourceName: string;
     onReorder: (newOrder: Column[]) => void;
-    header: Snippet<[Column, number]>;
+    header: Snippet<[Column, number, Record<string, any>]>;
   }
 
   let { columns, resourceName, onReorder, header }: Props = $props();
@@ -96,17 +96,17 @@
   }
 </script>
 
-<tr>
+<tr class="hover:bg-muted/50 data-[state=selected]:bg-muted transition-colors bg-muted/50">
   {#each columns as column, index}
-    <th
-      draggable="true"
-      ondragstart={(e) => handleDragStart(e, index)}
-      ondragover={(e) => handleDragOver(e, index)}
-      ondrop={(e) => handleDrop(e, index)}
-      ondragend={handleDragEnd}
-      class="cursor-grab active:cursor-grabbing select-none transition-opacity {dragIndex === index ? 'opacity-50' : ''} {dropIndex === index && dropIndex !== dragIndex ? 'border-l-2 border-primary' : ''}"
-    >
-      {@render header(column, index)}
-    </th>
+    {@render header(column, index, {
+      draggable: true,
+      ondragstart: (e: DragEvent) => handleDragStart(e, index),
+      ondragover: (e: DragEvent) => handleDragOver(e, index),
+      ondrop: (e: DragEvent) => handleDrop(e, index),
+      ondragend: handleDragEnd,
+      'data-dragging': dragIndex === index,
+      'data-drop-target': dropIndex === index && dropIndex !== dragIndex,
+      class: `cursor-grab active:cursor-grabbing select-none transition-opacity ${dragIndex === index ? 'opacity-50' : ''} ${dropIndex === index && dropIndex !== dragIndex ? 'border-l-2 border-primary' : ''}`
+    })}
   {/each}
 </tr>
