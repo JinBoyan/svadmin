@@ -20,7 +20,6 @@ export {
   useNavigation, useGo, useBack,
   useGetToPath, useLink,
   useResource,
-  useLog, useLogList,
   useModalForm, useDrawerForm, useModal,
   useOvertime, useRelation,
   useNotification, useDataProvider,
@@ -28,7 +27,7 @@ export {
 } from './hooks.svelte';
 export { matchRoute, navigate, currentPath, setActiveRouterProvider } from './router';
 export { readURLState, writeURLState } from './url-sync';
-export { setAccessControl, setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccess, canAccessAsync } from './permissions';
+export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccess, canAccessAsync } from './permissions';
 export { useLive, useSubscription, usePublish } from './live.svelte';
 export { toast } from './toast.svelte';
 export { notify, closeNotification, setNotificationProvider, getNotificationProvider } from './notification.svelte';
@@ -40,8 +39,8 @@ export type { ChatProvider, ChatMessage, ChatContext, ChatAction } from './chatP
 export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, colorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets } from './theme.svelte';
 export type { ThemeMode, ColorTheme, ThemeStrategy, ThemeConfig, ColorPreset } from './theme.svelte';
 export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier } from './unsaved-changes.svelte';
-export { setAdminOptions, getAdminOptions, getTextTransformers } from './options';
-export type { AdminOptions, TextTransformers, OvertimeConfig } from './options';
+export { setAdminOptions, getAdminOptions, getTextTransformers } from './options.svelte';
+export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.svelte';
 
 export * from './query-keys';
 export { HttpError } from './types';
@@ -64,9 +63,9 @@ export type {
   ResourceTypeMap, KnownResources, InferData,
   BaseRecord,
 } from './types';
-export type { InvalidateScope } from './options';
+export type { InvalidateScope } from './options.svelte';
 export type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
-export type { Action, CanParams, CanResult, AccessControlProvider, AccessControlResult, AccessControlFn } from './permissions';
+export type { Action, CanParams, CanResult, AccessControlProvider } from './permissions';
 export type { AuditEntry, AuditHandler } from './audit';
 export { useCan } from './useCan';
 export type { UseCanOptions, UseCanResult } from './useCan';
@@ -97,6 +96,7 @@ export {
   getDefaultFilter, getDefaultSortOrder,
   unionFilters, unionSorters,
   file2Base64, generateDefaultDocumentTitle,
+  deriveValidator,
 } from './helpers';
 export { TableState } from './table-state.svelte';
 export type { TableStateOptions } from './table-state.svelte';

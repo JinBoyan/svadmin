@@ -138,13 +138,11 @@ export function useTable<
 
   return {
     query,
-    tableQuery: query,
     get overtime() { return overtime; },
     get pagination() { return pagination; },
     get sorters() { return currentSorters; },
     get filters() { return currentFilters; },
     setSorters, setFilters, setPage, setPageSize,
-    setCurrentPage: setPage,
     createLinkForSyncWithLocation,
     get totalPages() {
       // ts-expect-error reactive access

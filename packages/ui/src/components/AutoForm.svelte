@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { useOne, useCreate, useUpdate, getResource } from '@svadmin/core';
+  import { useForm, getResource, deriveValidator } from '@svadmin/core';
   import type { FieldDefinition } from '@svadmin/core';
-  import { navigate } from '@svadmin/core/router';
-  import { canAccess } from '@svadmin/core/permissions';
   import { t } from '@svadmin/core/i18n';
+  import { navigate } from '@svadmin/core/router';
   import { Button } from './ui/button/index.js';
   import TooltipButton from './TooltipButton.svelte';
   import * as Card from './ui/card/index.js';
@@ -13,30 +12,20 @@
   import * as Alert from './ui/alert/index.js';
   import { Skeleton } from './ui/skeleton/index.js';
   import ConfirmDialog from './ConfirmDialog.svelte';
-
   import type { Snippet } from 'svelte';
 
   interface Props {
     resourceName: string;
     id?: string | number;
     mode?: 'create' | 'edit';
-    /** Custom field renderer — overrides default FieldRenderer */
     fieldRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; onchange: (v: unknown) => void }]>;
-    /** Custom form action buttons */
     formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
-    /** Custom header content (after title) */
     headerContent?: Snippet;
   }
 
-  let {
-    resourceName,
-    id = undefined,
-    mode = 'create',
-    fieldRenderer,
-    formActions,
-    headerContent,
-  }: Props = $props();
+  let { resourceName, id, mode = 'create', fieldRenderer, formActions, headerContent }: Props = $props();
 
+  // ─── Resource metadata ────────────────────────────────────────────
   const resource = $derived(getResource(resourceName));
   const primaryKey = $derived(resource.primaryKey ?? 'id');
 
@@ -61,19 +50,7 @@
     return order.map(g => ({ name: g, fields: map.get(g)! }));
   })());
 
-  // Load existing data for edit mode
-  const existingQuery = $derived.by(() => mode === 'edit' && id != null
-    ? useOne({ get resource() { return resourceName; }, get id() { return id; } })
-    : null);
-
-  // Form state
-  let formData = $state<Record<string, unknown>>({});
-  let fieldErrors = $state<Record<string, string>>({});
-  let submitting = $state(false);
-  let error = $state<string | null>(null);
-  let initialized = $state(false);
-  let isDirty = $state(false);
-
+  // ─── Default values from field metadata ───────────────────────────
   function getDefaultForType(field: FieldDefinition): unknown {
     switch (field.type) {
       case 'text': case 'textarea': case 'richtext': case 'image': return '';
@@ -86,115 +63,47 @@
     }
   }
 
-  // Initialize form data (pre-DOM to avoid flash of empty values)
-  $effect.pre(() => {
-    if (initialized) return;
-    if (mode === 'create') {
-      const defaults: Record<string, unknown> = {};
-      for (const field of formFields) {
-        defaults[field.key] = field.defaultValue ?? getDefaultForType(field);
-      }
-      formData = defaults;
-      initialized = true;
-    } else if (existingQuery && existingQuery.query.data?.data) {
-      formData = { ...existingQuery.query.data.data as Record<string, unknown> };
-      initialized = true;
-    }
+  const defaults = $derived((() => {
+    const d: Record<string, unknown> = {};
+    for (const f of formFields) d[f.key] = f.defaultValue ?? getDefaultForType(f);
+    return d;
+  })());
+
+  // ─── useForm: single source of truth for values, errors, tainted ──
+  const form = useForm({
+    get resource() { return resourceName; },
+    get action() { return mode; },
+    get id() { return id; },
+    defaultValues: defaults,
+    redirect: 'list',
+    warnWhenUnsavedChanges: true,
+    validate: deriveValidator(formFields),
   });
 
-  // Unsaved changes warning
-  $effect(() => {
-    if (!isDirty) return;
-
-    function handleBeforeUnload(e: BeforeUnloadEvent) {
-      e.preventDefault();
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  });
-
-  const createMut = useCreate({ get resource() { return resourceName; } });
-  const updateMut = useUpdate({ get resource() { return resourceName; } });
-
-  function validateFields(): boolean {
-    const errors: Record<string, string> = {};
-    for (const field of formFields) {
-      const value = formData[field.key];
-      // Required check
-      if (field.required) {
-        if (value === undefined || value === null || value === '') {
-          errors[field.key] = t('validation.required');
-          continue;
-        }
-      }
-      // Custom per-field validator
-      if (field.validate) {
-        const msg = field.validate(value);
-        if (msg) { errors[field.key] = msg; }
-      }
-    }
-    fieldErrors = errors;
-    return Object.keys(errors).length === 0;
-  }
+  // ─── Submission error (non-field, e.g. network error) ─────────────
+  let submitError = $state<string | null>(null);
 
   async function handleSubmit() {
-    submitting = true;
-    error = null;
-
-    if (!validateFields()) {
-      submitting = false;
-      return;
-    }
-
+    submitError = null;
     try {
-      const cleanData: Record<string, unknown> = {};
-      for (const field of formFields) {
-        const value = formData[field.key];
-        if (value !== undefined) {
-          cleanData[field.key] = value;
-        }
-      }
-
-      if (mode === 'create') {
-        await createMut.mutation.mutateAsync({ variables: cleanData });
-      } else if (id != null) {
-        await updateMut.mutation.mutateAsync({ id, variables: cleanData });
-      }
-
-      isDirty = false;
-      navigate(`/${resourceName}`);
+      await form.submit();
     } catch (e) {
-      error = e instanceof Error ? e.message : t('common.operationFailed');
-    } finally {
-      submitting = false;
+      submitError = e instanceof Error ? e.message : t('common.operationFailed');
     }
   }
-
-  function handleFieldChange(key: string, val: unknown) {
-    formData[key] = val;
-    isDirty = true;
-    // Clear field error when user starts typing
-    if (fieldErrors[key]) {
-      delete fieldErrors[key];
-    }
-  }
-
-  const isLoading = $derived(mode === 'edit' && existingQuery ? existingQuery.query.isLoading : false);
 
   const pageTitle = $derived(
     mode === 'create'
       ? `${t('common.create')}${resource.label}`
       : `${t('common.edit')}${resource.label}`
   );
-  // Unsaved changes dialog state
+
+  // ─── Unsaved changes guard ────────────────────────────────────────
   let confirmOpen = $state(false);
   let pendingNavigation: (() => void) | null = null;
 
   function guardNavigate(fn: () => void) {
-    if (isDirty) {
+    if (form.isTainted()) {
       pendingNavigation = fn;
       confirmOpen = true;
     } else {
@@ -223,12 +132,12 @@
       <ArrowLeft class="h-5 w-5" />
     </TooltipButton>
     <h1 class="text-xl font-semibold text-foreground">{pageTitle}</h1>
-    {#if isDirty}
+    {#if form.isTainted()}
       <Badge variant="outline" class="border-warning/30 bg-warning/10 text-warning-foreground">{t('common.unsaved')}</Badge>
     {/if}
   </div>
 
-  {#if isLoading}
+  {#if form.loading}
     <div class="max-w-3xl space-y-6">
       <div class="rounded-lg border p-6 space-y-5">
         {#each Array(4) as _}
@@ -241,10 +150,10 @@
     </div>
   {:else}
     <form onsubmit={(e: Event) => { e.preventDefault(); handleSubmit(); }} class="max-w-3xl space-y-6">
-      {#if error}
+      {#if submitError}
         <Alert.Root variant="destructive">
           <AlertCircle class="h-4 w-4" />
-          <Alert.Description>{error}</Alert.Description>
+          <Alert.Description>{submitError}</Alert.Description>
         </Alert.Root>
       {/if}
 
@@ -258,18 +167,18 @@
             {/if}
             <Card.Content class="space-y-5 px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
               {#each group.fields as field (field.key)}
-                <div class:border-destructive={!!fieldErrors[field.key]}>
+                <div class:border-destructive={!!form.errors[field.key]}>
                   {#if fieldRenderer}
-                    {@render fieldRenderer({ field, value: formData[field.key], onchange: (val: unknown) => handleFieldChange(field.key, val) })}
+                    {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
                   {:else}
                     <FieldRenderer
                       {field}
-                      value={formData[field.key]}
-                      onchange={(val: unknown) => handleFieldChange(field.key, val)}
+                      value={form.values[field.key]}
+                      onchange={(val: unknown) => form.setFieldValue(field.key, val)}
                     />
                   {/if}
-                  {#if fieldErrors[field.key]}
-                    <p class="text-destructive text-[0.8125rem] mt-1">{fieldErrors[field.key]}</p>
+                  {#if form.errors[field.key]}
+                    <p class="text-destructive text-[0.8125rem] mt-1">{form.errors[field.key]}</p>
                   {/if}
                 </div>
               {/each}
@@ -280,18 +189,18 @@
         <Card.Root>
           <Card.Content class="space-y-5 px-4 sm:px-6 pb-4 sm:pb-6 pt-0">
             {#each formFields as field (field.key)}
-              <div class:border-destructive={!!fieldErrors[field.key]}>
+              <div class:border-destructive={!!form.errors[field.key]}>
                 {#if fieldRenderer}
-                  {@render fieldRenderer({ field, value: formData[field.key], onchange: (val: unknown) => handleFieldChange(field.key, val) })}
+                  {@render fieldRenderer({ field, value: form.values[field.key], onchange: (val: unknown) => form.setFieldValue(field.key, val) })}
                 {:else}
                   <FieldRenderer
                     {field}
-                    value={formData[field.key]}
-                    onchange={(val: unknown) => handleFieldChange(field.key, val)}
+                    value={form.values[field.key]}
+                    onchange={(val: unknown) => form.setFieldValue(field.key, val)}
                   />
                 {/if}
-                {#if fieldErrors[field.key]}
-                  <p class="text-destructive text-[0.8125rem] mt-1">{fieldErrors[field.key]}</p>
+                {#if form.errors[field.key]}
+                  <p class="text-destructive text-[0.8125rem] mt-1">{form.errors[field.key]}</p>
                 {/if}
               </div>
             {/each}
@@ -301,10 +210,10 @@
 
       <div class="flex items-center gap-3">
         {#if formActions}
-          {@render formActions({ isLoading: submitting, onSubmit: handleSubmit })}
+          {@render formActions({ isLoading: form.submitting, onSubmit: handleSubmit })}
         {:else}
-          <Button type="submit" disabled={submitting}>
-            {#if submitting}
+          <Button type="submit" disabled={form.submitting}>
+            {#if form.submitting}
               <Loader2 class="h-4 w-4 animate-spin" data-icon="inline-start" />
             {:else}
               <Save class="h-4 w-4" data-icon="inline-start" />

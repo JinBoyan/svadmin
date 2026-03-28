@@ -1,12 +1,9 @@
-// Global admin options — centralized configuration
+// Global admin options — centralized configuration (module-level $state)
 // Provides defaults that individual hooks can override
 
-import { setContext, getContext } from 'svelte';
 import type { MutationMode } from './types';
 
 export type InvalidateScope = 'all' | 'resourceAll' | 'detail' | 'list' | false | string[];
-
-const OPTIONS_KEY = Symbol('admin-options');
 
 export interface TextTransformers {
   humanize: (text: string) => string;
@@ -27,7 +24,6 @@ export interface AdminOptions {
   liveMode?: 'auto' | 'manual' | 'off';
   disableServerSideValidation?: boolean;
   undoableTimeout?: number;
-  // v0.2.26 additions
   textTransformers?: Partial<TextTransformers>;
   redirect?: {
     afterCreate?: 'list' | 'edit' | 'show' | false;
@@ -36,7 +32,7 @@ export interface AdminOptions {
   };
   reactQuery?: {
     staleTime?: number;
-    cacheTime?: number;
+    gcTime?: number;
     refetchOnWindowFocus?: boolean;
   };
   title?: {
@@ -69,22 +65,18 @@ const defaultOptions: AdminOptions = {
   disableRouteChangeHandler: false,
 };
 
+let adminOptions = $state<AdminOptions>(defaultOptions);
+
 export function setAdminOptions(options: AdminOptions): void {
-  const merged = {
+  adminOptions = {
     ...defaultOptions,
     ...options,
     textTransformers: { ...defaultTextTransformers, ...options.textTransformers },
   };
-  setContext(OPTIONS_KEY, merged);
 }
 
 export function getAdminOptions(): AdminOptions {
-  try {
-    const opts = getContext<AdminOptions>(OPTIONS_KEY);
-    return opts ?? defaultOptions;
-  } catch {
-    return defaultOptions;
-  }
+  return adminOptions;
 }
 
 /** Get the resolved text transformers (always returns full set) */
@@ -92,4 +84,3 @@ export function getTextTransformers(): TextTransformers {
   const opts = getAdminOptions();
   return { ...defaultTextTransformers, ...opts.textTransformers };
 }
-

@@ -25,7 +25,7 @@ export class UndoError extends Error {
 
 // ─── Base Types ───────────────────────────────────────────────
 
-export type BaseRecord = any;
+export type BaseRecord = Record<string, unknown>;
 
 // ─── DataProvider ─────────────────────────────────────────────
 
@@ -288,7 +288,8 @@ export interface FieldDefinition {
   key: string;
   label: string;
   type: 'text' | 'number' | 'boolean' | 'date' | 'select' | 'multiselect' | 'tags'
-    | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color' | 'url' | 'email' | 'phone';
+    | 'textarea' | 'richtext' | 'image' | 'images' | 'json' | 'relation' | 'color'
+    | 'url' | 'email' | 'phone' | 'file' | 'markdown' | 'password';
   required?: boolean;
   searchable?: boolean;
   sortable?: boolean;

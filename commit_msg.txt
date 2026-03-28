@@ -1,0 +1,10 @@
+refactor(core): cleanup tech debt and remove deprecated apis
+
+BREAKING CHANGES:
+- Removed deprecated APIs (onFinish, formLoading, tableQuery, setCurrentPage, useLog)
+- Removed legacy setAccessControl, AccessControlFn, and AccessControlResult
+- Changed BaseRecord from any to Record<string, unknown> for better type safety
+- options.ts migrated to options.svelte.ts using module-level $state
+- Renamed cacheTime to gcTime for Tanstack Query v5 compatibility
+- Fixed router hash fallback logic
+- Fixed liveProviderState missing $state decorator

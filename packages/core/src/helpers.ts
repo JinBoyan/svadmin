@@ -2,7 +2,7 @@
 
 import type { Filter, Sort, CrudOperator } from './types';
 import { t } from './i18n.svelte';
-import { getTextTransformers } from './options';
+import { getTextTransformers } from './options.svelte';
 
 // ─── Table Helpers ────────────────────────────────────────────
 
@@ -154,4 +154,98 @@ export function generateDefaultDocumentTitle(options?: {
 
   const prefix = action ? (actionPrefixes[action] ?? '') : '';
   return `${prefix}${resourceLabel}${suffix}`;
+}
+
+// ─── Form Validation Derivation ─────────────────────────────────
+
+/**
+ * Derive a `useForm`-compatible `validate` function from `FieldDefinition[]`.
+ *
+ * Automatically validates:
+ * - `required` fields (non-empty check)
+ * - `type === 'email'` fields (basic email format)
+ * - `type === 'url'` fields (basic URL format)
+ * - `type === 'number'` fields (must be a valid number)
+ * - Custom per-field `field.validate()` callback
+ *
+ * This eliminates the need for hand-written Zod schemas in most CRUD scenarios.
+ *
+ * @example
+ * ```ts
+ * const form = useForm({
+ *   resource: 'users',
+ *   validate: deriveValidator(resource.fields),
+ * });
+ * ```
+ */
+export function deriveValidator(
+  fields: import('./types').FieldDefinition[],
+  options?: {
+    /** Only validate these field keys. Default: all fields. */
+    only?: string[];
+    /** Skip these field keys. */
+    except?: string[];
+  }
+): (values: Record<string, unknown>) => Record<string, string> | null {
+  return (values: Record<string, unknown>) => {
+    const errors: Record<string, string> = {};
+    const only = options?.only ? new Set(options.only) : null;
+    const except = options?.except ? new Set(options.except) : null;
+
+    for (const field of fields) {
+      if (only && !only.has(field.key)) continue;
+      if (except && except.has(field.key)) continue;
+
+      const value = values[field.key];
+
+      // Required check
+      if (field.required) {
+        if (value === undefined || value === null || value === '') {
+          errors[field.key] = t('validation.required');
+          continue;
+        }
+        // Empty array check for multi-value fields
+        if (Array.isArray(value) && value.length === 0 && (field.type === 'multiselect' || field.type === 'tags')) {
+          errors[field.key] = t('validation.required');
+          continue;
+        }
+      }
+
+      // Skip further checks for empty non-required fields
+      if (value === undefined || value === null || value === '') continue;
+
+      // Type-specific validation
+      switch (field.type) {
+        case 'email': {
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (typeof value === 'string' && !emailRegex.test(value)) {
+            errors[field.key] = t('validation.email', { defaultValue: 'Invalid email address' });
+          }
+          break;
+        }
+        case 'url': {
+          try {
+            new URL(value as string);
+          } catch {
+            errors[field.key] = t('validation.url', { defaultValue: 'Invalid URL' });
+          }
+          break;
+        }
+        case 'number': {
+          if (typeof value === 'string' && isNaN(Number(value))) {
+            errors[field.key] = t('validation.number', { defaultValue: 'Must be a number' });
+          }
+          break;
+        }
+      }
+
+      // Custom per-field validator (always runs last, can override type checks)
+      if (field.validate && !errors[field.key]) {
+        const msg = field.validate(value);
+        if (msg) { errors[field.key] = msg; }
+      }
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
+  };
 }

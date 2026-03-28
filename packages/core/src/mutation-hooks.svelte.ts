@@ -1,5 +1,5 @@
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getAdminOptions } from './options';
+import { getAdminOptions } from './options.svelte';
 import { getDataProviderForResource } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
 import { audit } from './audit';
@@ -61,7 +61,7 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
         queryClient.invalidateQueries({ queryKey: [resName] });
       }
       fireSuccessNotification(params.successNotification, 'Created successfully', data.data, params.variables, resName);
-      audit({ action: 'create', resource: resName, recordId: String((data.data as any).id) });
+      audit({ action: 'create', resource: resName, recordId: String((data.data as Record<string, unknown>).id) });
     },
     onError: (error, params) => {
       fireErrorNotification(params.errorNotification, 'Create failed', error);

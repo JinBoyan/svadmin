@@ -10,7 +10,7 @@ export * from './routing-hooks.svelte';
 export * from './utility-hooks.svelte';
 
 // ─── Re-export types from options ─────────────────────────────────
-export type { InvalidateScope, OvertimeConfig } from './options';
+export type { InvalidateScope, OvertimeConfig } from './options.svelte';
 
 // ─── Export shared utilities ────────────────────────────────────────
 
@@ -22,7 +22,7 @@ export type { OvertimeResult, OvertimeOptions, NotificationConfig } from './hook
 // here as thin wrappers or stubs until they get their own modular files.
 
 import { createQuery, createInfiniteQuery, createMutation, useQueryClient } from '@tanstack/svelte-query';
-import { getAdminOptions } from './options';
+import { getAdminOptions } from './options.svelte';
 import { getDataProviderForResource, getDataProvider } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
 import { createOvertimeTracker, fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';
@@ -356,10 +356,3 @@ export function useThemedLayoutContext() {
   };
 }
 
-// ─── Logging hooks (legacy aliases) ─────────────────────────────────
-
-export function useLogList(options?: Partial<UseListOptions>) {
-  return useList({ resource: 'logs', ...options });
-}
-
-export const useLog = useLogList;

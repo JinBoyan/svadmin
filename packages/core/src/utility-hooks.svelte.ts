@@ -1,8 +1,8 @@
-import { useForm, type UseFormOptions } from './form-hooks.svelte';
+import { useForm, type UseFormOptions, type UseFormReturn } from './form-hooks.svelte';
 import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { getResource, getResources } from './context.svelte';
-import { getAdminOptions } from './options';
+import { getAdminOptions } from './options.svelte';
 import { navigate } from './router';
 import { t } from './i18n.svelte';
 import type { BaseRecord, HttpError, Filter, KnownResources, ResourceDefinition } from './types';
@@ -21,21 +21,24 @@ export function useModal(options?: { defaultVisible?: boolean }) {
 
 // ─── useModalForm ─────────────────────────────────────────────
 
-export interface UseModalFormOptions<TQueryFnData extends BaseRecord = BaseRecord, TError = HttpError, TVariables = Record<string, unknown>, TData extends BaseRecord = TQueryFnData> extends UseFormOptions<TQueryFnData, TError, TVariables, TData> {
+export interface UseModalFormOptions<
+  TVariables extends Record<string, unknown> = Record<string, unknown>,
+  TData extends BaseRecord = BaseRecord,
+  TError = HttpError,
+> extends UseFormOptions<TVariables, TData, TError> {
   defaultVisible?: boolean;
-  autoSave?: UseFormOptions<TQueryFnData, TError, TVariables, TData>['autoSave'] & {
+  autoSave?: UseFormOptions<TVariables, TData, TError>['autoSave'] & {
     invalidateOnClose?: boolean;
   };
 }
 
 export function useModalForm<
-  TQueryFnData extends BaseRecord = BaseRecord,
+  TVariables extends Record<string, unknown> = Record<string, unknown>,
+  TData extends BaseRecord = BaseRecord,
   TError = HttpError,
-  TVariables = Record<string, unknown>,
-  TData extends BaseRecord = TQueryFnData
->(options: UseModalFormOptions<TQueryFnData, TError, TVariables, TData> = {}) {
+>(options: UseModalFormOptions<TVariables, TData, TError> = {} as UseModalFormOptions<TVariables, TData, TError>) {
   const queryClient = useQueryClient();
-  const formState = useForm(options);
+  const formState = useForm<TVariables, TData, TError>(options);
   let visible = $state(options.defaultVisible ?? false);
 
   function show(id?: string | number) {
@@ -45,7 +48,7 @@ export function useModalForm<
 
   function close() {
     visible = false;
-    formState.clearErrors();
+    formState.reset();
     if (options.autoSave?.invalidateOnClose) {
       queryClient.invalidateQueries({ queryKey: [formState.resource] });
     }

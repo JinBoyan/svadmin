@@ -112,7 +112,7 @@ export function getRouterProvider(): RouterProvider | undefined {
 
 // ─── Live Provider ──────────────────────────────────────────────
 
-let liveProviderState: import('./live.svelte').LiveProvider | undefined = undefined;
+let liveProviderState = $state<import('./live.svelte').LiveProvider | undefined>(undefined);
 
 export function setLiveProvider(provider: import('./live.svelte').LiveProvider): void {
   liveProviderState = provider;

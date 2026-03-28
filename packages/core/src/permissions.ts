@@ -16,8 +16,7 @@ export interface CanResult {
   reason?: string;
 }
 
-/** @deprecated Use `CanResult` instead */
-export type AccessControlResult = CanResult;
+
 
 /**
  * Formal Access Control Provider interface.
@@ -50,17 +49,9 @@ export interface AccessControlProvider {
   };
 }
 
-/** @deprecated Use `AccessControlProvider['can']` instead */
-export type AccessControlFn = (
-  resource: string,
-  action: Action,
-  params?: Record<string, unknown>,
-) => CanResult | Promise<CanResult>;
-
 // ─── State ────────────────────────────────────────────────────
 
 let provider: AccessControlProvider | null = null;
-let legacyFn: AccessControlFn | null = null;
 
 // ─── API ──────────────────────────────────────────────────────
 
@@ -69,21 +60,6 @@ let legacyFn: AccessControlFn | null = null;
  */
 export function setAccessControlProvider(p: AccessControlProvider): void {
   provider = p;
-  legacyFn = null;
-}
-
-/**
- * @deprecated Use `setAccessControlProvider()` with full `AccessControlProvider` interface.
- * Legacy API preserved for backward compatibility.
- */
-export function setAccessControl(fn: AccessControlFn): void {
-  legacyFn = fn;
-  provider = {
-    can: async ({ resource, action, params }) => {
-      const result = fn(resource, action, params);
-      return result instanceof Promise ? result : Promise.resolve(result);
-    },
-  };
 }
 
 /** Get the current AccessControlProvider (or null) */
@@ -97,23 +73,12 @@ export function getAccessControlOptions() {
 }
 
 /**
- * Synchronous access check. Returns `{ can: true }` if no provider/fn is set.
- * When a legacy sync fn is registered via `setAccessControl()`, this calls it synchronously.
- * When only a provider is registered, this warns if provider.can() returns a Promise.
+ * Synchronous access check. Returns `{ can: true }` if no provider is set.
+ * When a provider is registered, this warns since provider.can() is always async.
  */
 export function canAccess(resource: string, action: Action, params?: Record<string, unknown>): CanResult {
-  // Fast path: use legacy sync fn if available
-  if (legacyFn) {
-    const result = legacyFn(resource, action, params);
-    if (result instanceof Promise) {
-      console.warn('[permissions] canAccess called synchronously but accessControlFn returned a Promise. Defaulting to { can: true }. Use canAccessAsync() instead.');
-      return { can: true };
-    }
-    return result;
-  }
   if (!provider) return { can: true };
-  // Provider path (always async) — warn
-  console.warn('[permissions] canAccess called synchronously but provider.can() returned a Promise. Defaulting to { can: true }. Use canAccessAsync() instead.');
+  console.warn('[permissions] canAccess called synchronously but provider.can() is async. Defaulting to { can: true }. Use canAccessAsync() instead.');
   return { can: true };
 }
 
@@ -121,9 +86,6 @@ export function canAccess(resource: string, action: Action, params?: Record<stri
  * Async access check. Preferred over `canAccess()`.
  */
 export async function canAccessAsync(resource: string, action: Action, params?: Record<string, unknown>): Promise<CanResult> {
-  if (legacyFn) {
-    return legacyFn(resource, action, params);
-  }
   if (!provider) return { can: true };
   return provider.can({ resource, action, params });
 }

@@ -1,5 +1,5 @@
 import { createQuery, createInfiniteQuery } from '@tanstack/svelte-query';
-import { getAdminOptions } from './options';
+import { getAdminOptions } from './options.svelte';
 import { getDataProviderForResource, getDataProvider, getLiveProvider } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
 import {
@@ -25,7 +25,7 @@ export interface UseListOptions<TData extends BaseRecord = BaseRecord, TError = 
   filters?: Filter[];
   meta?: Record<string, unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean; cacheTime?: number; refetchOnWindowFocus?: boolean };
+  queryOptions?: { staleTime?: number; enabled?: boolean; gcTime?: number; refetchOnWindowFocus?: boolean };
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -56,7 +56,7 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     },
     enabled: queryOptions?.enabled ?? true,
     staleTime: queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
-    gcTime: queryOptions?.cacheTime ?? adminOptions.reactQuery?.cacheTime,
+    gcTime: queryOptions?.gcTime ?? adminOptions.reactQuery?.gcTime,
     refetchOnWindowFocus: queryOptions?.refetchOnWindowFocus ?? adminOptions.reactQuery?.refetchOnWindowFocus,
   }));
 
@@ -95,7 +95,7 @@ export interface UseOneOptions<TData extends BaseRecord = BaseRecord, TError = H
   id?: string | number;
   meta?: Record<string, unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean; cacheTime?: number; refetchOnWindowFocus?: boolean };
+  queryOptions?: { staleTime?: number; enabled?: boolean; gcTime?: number; refetchOnWindowFocus?: boolean };
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;
@@ -126,7 +126,7 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
     },
     enabled: (queryOptions?.enabled ?? true) && id != null,
     staleTime: queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
-    gcTime: queryOptions?.cacheTime ?? adminOptions.reactQuery?.cacheTime,
+    gcTime: queryOptions?.gcTime ?? adminOptions.reactQuery?.gcTime,
   }));
 
   const overtime = createOvertimeTracker(() => query.isLoading, options.overtimeOptions ?? adminOptions.overtime);
@@ -170,7 +170,7 @@ export interface UseManyOptions<TData extends BaseRecord = BaseRecord, TError = 
   ids: (string | number)[];
   meta?: Record<string, unknown>;
   dataProviderName?: string;
-  queryOptions?: { staleTime?: number; enabled?: boolean; cacheTime?: number; refetchOnWindowFocus?: boolean };
+  queryOptions?: { staleTime?: number; enabled?: boolean; gcTime?: number; refetchOnWindowFocus?: boolean };
   successNotification?: NotificationConfig;
   errorNotification?: NotificationConfig;
   liveMode?: LiveMode;

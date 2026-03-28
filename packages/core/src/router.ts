@@ -57,7 +57,7 @@ export function navigate(path: string): void {
   if (_routerProvider) {
     _routerProvider.go({ to: path });
   } else {
-    window.location.hash = path.startsWith('#') ? path : path;
+    window.location.hash = '#' + path.replace(/^#/, '');
   }
 }
 
