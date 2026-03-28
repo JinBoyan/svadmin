@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.16.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.15.0...ui-v0.16.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** trigger major release for removed deprecated APIs
+
+### Features
+
+* **ui:** apply developer-native font-mono style to identifiers and shortcuts ([fdecbe3](https://github.com/zuohuadong/svadmin/commit/fdecbe3ae6f2dab25ddbf821a24eac648fbab574))
+
+
+### Code Refactoring
+
+* **core:** trigger major release for removed deprecated APIs ([d84d348](https://github.com/zuohuadong/svadmin/commit/d84d34862d0151ac30b52dd4a9371f5f449a2e68))
+
 ## [0.15.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.14.0...ui-v0.15.0) (2026-03-28)
 
 

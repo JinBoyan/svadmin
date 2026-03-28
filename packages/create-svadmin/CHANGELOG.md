@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.8.0...create-svadmin-v0.9.0) (2026-03-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **core:** trigger major release for removed deprecated APIs
+
+### Code Refactoring
+
+* **core:** trigger major release for removed deprecated APIs ([d84d348](https://github.com/zuohuadong/svadmin/commit/d84d34862d0151ac30b52dd4a9371f5f449a2e68))
+
 ## [0.8.0](https://github.com/zuohuadong/svadmin/compare/create-svadmin-v0.7.0...create-svadmin-v0.8.0) (2026-03-27)
 
 
