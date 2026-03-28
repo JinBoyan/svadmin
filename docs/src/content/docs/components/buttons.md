@@ -17,7 +17,7 @@ svadmin includes 10 action buttons that integrate with data hooks and routing.
 | `RefreshButton` | Invalidate queries | `queryClient.invalidateQueries()` |
 | `ExportButton` | Export data as CSV | `useExport()` |
 | `ImportButton` | Import from CSV | `useImport()` |
-| `SaveButton` | Submit form | Triggers `onFinish()` |
+| `SaveButton` | Submit form | Triggers `submit()` |
 | `CloneButton` | Clone existing record | `navigate('/{resource}/create?clone={id}')` |
 
 ## Usage

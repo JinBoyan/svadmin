@@ -17,7 +17,7 @@ svadmin 包含 10 个与数据 Hook 和路由集成的操作按钮。
 | `RefreshButton` | 刷新查询 | `queryClient.invalidateQueries()` |
 | `ExportButton` | 导出 CSV 数据 | `useExport()` |
 | `ImportButton` | 从 CSV 导入 | `useImport()` |
-| `SaveButton` | 提交表单 | 触发 `onFinish()` |
+| `SaveButton` | 提交表单 | 触发 `submit()` |
 | `CloneButton` | 克隆现有记录 | `navigate('/{resource}/create?clone={id}')` |
 
 ## 用法

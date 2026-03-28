@@ -31,8 +31,8 @@ const form = useForm({
 <input
   value={title}
   oninput={(e) => {
-    title = e.target.value;
-    form.triggerAutoSave({ title });
+    form.setFieldValue('title', e.target.value);
+    form.triggerAutoSave();
   }}
 />
 ```
@@ -40,11 +40,11 @@ const form = useForm({
 ## 状态指示器
 
 ```svelte
-{#if form.autoSaveStatus === 'saving'}
+{#if form.autoSave.status === 'saving'}
   <span>保存中...</span>
-{:else if form.autoSaveStatus === 'saved'}
+{:else if form.autoSave.status === 'saved'}
   <span>✓ 已保存</span>
-{:else if form.autoSaveStatus === 'error'}
+{:else if form.autoSave.status === 'error'}
   <span>保存失败</span>
 {/if}
 ```

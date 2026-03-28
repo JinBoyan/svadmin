@@ -31,8 +31,8 @@ Call `triggerAutoSave` whenever form values change:
 <input
   value={title}
   oninput={(e) => {
-    title = e.target.value;
-    form.triggerAutoSave({ title });
+    form.setFieldValue('title', e.target.value);
+    form.triggerAutoSave();
   }}
 />
 ```
@@ -40,11 +40,11 @@ Call `triggerAutoSave` whenever form values change:
 ## Status Indicator
 
 ```svelte
-{#if form.autoSaveStatus === 'saving'}
+{#if form.autoSave.status === 'saving'}
   <span>Saving...</span>
-{:else if form.autoSaveStatus === 'saved'}
+{:else if form.autoSave.status === 'saved'}
   <span>✓ Saved</span>
-{:else if form.autoSaveStatus === 'error'}
+{:else if form.autoSave.status === 'error'}
   <span>Save failed</span>
 {/if}
 ```

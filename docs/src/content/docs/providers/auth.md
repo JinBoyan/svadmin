@@ -38,7 +38,7 @@ interface AuthProvider {
 ### Usage
 
 ```typescript
-const { mutate: login, isLoading } = useLogin();
+const { mutate: login, isPending } = useLogin();
 await login({ email: 'user@example.com', password: 'secret' });
 ```
 

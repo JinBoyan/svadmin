@@ -39,16 +39,41 @@ const form = useForm();
 
 ```typescript
 const {
-  query,          // TanStack 查询（编辑/克隆模式）
-  formLoading,    // boolean（响应式 getter）
-  mutation,       // TanStack 变更
-  onFinish,       // (values) => void — 验证 + 提交
-  errors,         // Record<string, string>（响应式 getter）
+  // 表单值（唯一数据源）
+  values,         // TVariables（响应式）
+  setFieldValue,  // (field, value, opts?) => void
+  setValues,      // (newValues, opts?) => void
+
+  // 脏状态（Tainted）
+  tainted,        // Record<string, boolean>（响应式）
+  isTainted,      // (field?) => boolean
+
+  // 错误
+  errors,         // Record<string, string>（响应式）
   setFieldError,  // (field, message) => void
-  clearErrors,    // () => void
   clearFieldError, // (field) => void
-  triggerAutoSave, // (values) => void
-  autoSaveStatus,  // 'idle' | 'saving' | 'saved' | 'error'
+  clearErrors,    // () => void
+  validateField,  // (field) => string | null
+
+  // 提交
+  submit,         // (overrides?) => Promise<void> — 验证 + 提交
+  reset,          // () => void — 重置为初始值
+
+  // 状态
+  loading,        // boolean — 查询加载中（编辑/克隆）
+  submitting,     // boolean — 变更进行中
+  resource,       // string
+  action,         // 'create' | 'edit' | 'clone'
+  id,             // string | number | undefined
+  setId,          // (newId) => void
+
+  // 自动保存
+  triggerAutoSave, // () => void
+  autoSave,       // { status, data, error }
+
+  // 原始查询/变更（逃生舱）
+  query,          // TanStack 查询（编辑/克隆模式）
+  mutation,       // TanStack 变更
 } = useForm();
 ```
 
@@ -134,7 +159,7 @@ const { modal, ...formProps } = useModalForm({ resource: 'posts' });
 
 {#if modal.visible}
 <dialog open>
-  <form onsubmit|preventDefault={() => formProps.onFinish(values)}>
+  <form onsubmit|preventDefault={() => formProps.submit()}>
     <!-- 表单字段 -->
     <button type="submit">保存</button>
     <button type="button" onclick={modal.close}>取消</button>

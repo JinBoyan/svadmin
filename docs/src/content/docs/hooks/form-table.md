@@ -39,16 +39,41 @@ const form = useForm();
 
 ```typescript
 const {
-  query,          // TanStack query (edit/clone mode)
-  formLoading,    // boolean (reactive getter)
-  mutation,       // TanStack mutation
-  onFinish,       // (values) => void — validates + submits
-  errors,         // Record<string, string> (reactive getter)
+  // Form values (single source of truth)
+  values,         // TVariables (reactive)
+  setFieldValue,  // (field, value, opts?) => void
+  setValues,      // (newValues, opts?) => void
+
+  // Tainted (dirty) state
+  tainted,        // Record<string, boolean> (reactive)
+  isTainted,      // (field?) => boolean
+
+  // Errors
+  errors,         // Record<string, string> (reactive)
   setFieldError,  // (field, message) => void
-  clearErrors,    // () => void
   clearFieldError, // (field) => void
-  triggerAutoSave, // (values) => void
-  autoSaveStatus,  // 'idle' | 'saving' | 'saved' | 'error'
+  clearErrors,    // () => void
+  validateField,  // (field) => string | null
+
+  // Submission
+  submit,         // (overrides?) => Promise<void> — validates + submits
+  reset,          // () => void — reset to initial values
+
+  // State
+  loading,        // boolean — query loading (edit/clone)
+  submitting,     // boolean — mutation in progress
+  resource,       // string
+  action,         // 'create' | 'edit' | 'clone'
+  id,             // string | number | undefined
+  setId,          // (newId) => void
+
+  // AutoSave
+  triggerAutoSave, // () => void
+  autoSave,       // { status, data, error }
+
+  // Raw escape hatches
+  query,          // TanStack query (edit/clone mode)
+  mutation,       // TanStack mutation
 } = useForm();
 ```
 
@@ -134,7 +159,7 @@ const { modal, ...formProps } = useModalForm({ resource: 'posts' });
 
 {#if modal.visible}
 <dialog open>
-  <form onsubmit|preventDefault={() => formProps.onFinish(values)}>
+  <form onsubmit|preventDefault={() => formProps.submit()}>
     <!-- form fields -->
     <button type="submit">Save</button>
     <button type="button" onclick={modal.close}>Cancel</button>
