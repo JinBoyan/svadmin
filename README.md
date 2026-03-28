@@ -63,31 +63,31 @@
 
 ### Core / 核心
 
-| Package | Description / 描述 |
-|---------|-------------------|
-| `@svadmin/core` | Hooks, providers, types, utilities, Resource Type Registry |
-| `@svadmin/ui` | Pre-built admin components / 预构建管理组件（shadcn-svelte） |
-| `@svadmin/create` | CLI scaffolding tool / CLI 脚手架工具 |
+| Package           | Description / 描述                                           |
+| ----------------- | ------------------------------------------------------------ |
+| `@svadmin/core`   | Hooks, providers, types, utilities, Resource Type Registry   |
+| `@svadmin/ui`     | Pre-built admin components / 预构建管理组件（shadcn-svelte） |
+| `@svadmin/create` | CLI scaffolding tool / CLI 脚手架工具                        |
 
 ### Data Providers / 数据适配器
 
-| Package | Backend |
-|---------|---------|
-| `@svadmin/simple-rest` | REST API (zero deps, JWT/Cookie auth) |
-| `@svadmin/supabase` | Supabase (data + auth + live) |
-| `@svadmin/pocketbase` | PocketBase (data + auth + live) |
-| `@svadmin/appwrite` | Appwrite (data + auth + live) |
-| `@svadmin/graphql` | GraphQL |
-| `@svadmin/elysia` | Elysia (auto type inference via Eden Treaty) |
-| `@svadmin/strapi` | Strapi CMS |
-| `@svadmin/directus` | Directus |
-| `@svadmin/firebase` | Firebase / Firestore |
-| `@svadmin/hasura` | Hasura GraphQL |
-| `@svadmin/sanity` | Sanity.io |
-| `@svadmin/airtable` | Airtable |
-| `@svadmin/medusa` | Medusa Commerce |
-| `@svadmin/nestjs-query` | NestJS GraphQL |
-| `@svadmin/nestjsx-crud` | NestJS CRUD |
+| Package                 | Backend                                      |
+| ----------------------- | -------------------------------------------- |
+| `@svadmin/simple-rest`  | REST API (zero deps, JWT/Cookie auth)        |
+| `@svadmin/supabase`     | Supabase (data + auth + live)                |
+| `@svadmin/pocketbase`   | PocketBase (data + auth + live)              |
+| `@svadmin/appwrite`     | Appwrite (data + auth + live)                |
+| `@svadmin/graphql`      | GraphQL                                      |
+| `@svadmin/elysia`       | Elysia (auto type inference via Eden Treaty) |
+| `@svadmin/strapi`       | Strapi CMS                                   |
+| `@svadmin/directus`     | Directus                                     |
+| `@svadmin/firebase`     | Firebase / Firestore                         |
+| `@svadmin/hasura`       | Hasura GraphQL                               |
+| `@svadmin/sanity`       | Sanity.io                                    |
+| `@svadmin/airtable`     | Airtable                                     |
+| `@svadmin/medusa`       | Medusa Commerce                              |
+| `@svadmin/nestjs-query` | NestJS GraphQL                               |
+| `@svadmin/nestjsx-crud` | NestJS CRUD                                  |
 
 ## 🚀 Quick Start / 快速开始
 
@@ -115,20 +115,31 @@ bun add @svadmin/core @svadmin/ui @svadmin/simple-rest
 ### Define Resources / 定义资源
 
 ```typescript
-import type { ResourceDefinition } from '@svadmin/core';
+import type { ResourceDefinition } from "@svadmin/core";
 
 export const resources: ResourceDefinition[] = [
   {
-    name: 'products',
-    label: 'Products',
+    name: "products",
+    label: "Products",
     fields: [
-      { key: 'id', label: 'ID', type: 'number', showInForm: false },
-      { key: 'name', label: 'Name', type: 'text', required: true, searchable: true },
-      { key: 'price', label: 'Price', type: 'number', required: true },
-      { key: 'status', label: 'Status', type: 'select', options: [
-        { label: 'Active', value: 'active' },
-        { label: 'Draft', value: 'draft' },
-      ]},
+      { key: "id", label: "ID", type: "number", showInForm: false },
+      {
+        key: "name",
+        label: "Name",
+        type: "text",
+        required: true,
+        searchable: true,
+      },
+      { key: "price", label: "Price", type: "number", required: true },
+      {
+        key: "status",
+        label: "Status",
+        type: "select",
+        options: [
+          { label: "Active", value: "active" },
+          { label: "Draft", value: "draft" },
+        ],
+      },
     ],
   },
 ];
@@ -164,38 +175,84 @@ export const resources: ResourceDefinition[] = [
 
 ```typescript
 // Server: export your Elysia app type
-import { Elysia } from 'elysia';
-const app = new Elysia().get('/posts', () => db.posts.findMany());
+import { Elysia } from "elysia";
+const app = new Elysia().get("/posts", () => db.posts.findMany());
 export type App = typeof app;
 
 // Client: auto-infer resource types
-import { createElysiaDataProvider } from '@svadmin/elysia';
-import type { InferResourceMap } from '@svadmin/elysia';
-import type { App } from './server';
+import { createElysiaDataProvider } from "@svadmin/elysia";
+import type { InferResourceMap } from "@svadmin/elysia";
+import type { App } from "./server";
 
 // ResourceTypeMap auto-derived from Elysia routes
-declare module '@svadmin/core' {
+declare module "@svadmin/core" {
   interface ResourceTypeMap extends InferResourceMap<App> {}
 }
 
-const dataProvider = createElysiaDataProvider<App>('http://localhost:3000');
+const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
+```
+
+### Tailwind CSS v4 Integration / Tailwind CSS v4 集成
+
+> **Important / 重要**: Tailwind CSS v4 does not scan `node_modules` by default. You **must** add `@source` directives so that utility classes used by `@svadmin/ui` components are generated.
+>
+> Tailwind CSS v4 默认不扫描 `node_modules`。你**必须**添加 `@source` 指令，否则 `@svadmin/ui` 组件使用的工具类不会被生成，导致布局完全错乱。
+
+**1. Add `@source` to your CSS entry file / 在 CSS 入口文件中添加 `@source`:**
+
+```css
+/* app.css */
+@import "tailwindcss";
+
+/* Required: tell Tailwind v4 to scan svadmin component sources */
+@source "../node_modules/@svadmin/ui/src";
+@source "../node_modules/@svadmin/core/src";
+```
+
+**2. Configure Vite `optimizeDeps` / 配置 Vite `optimizeDeps`:**
+
+Since `@svadmin/ui` ships raw `.svelte` source files (not pre-built), exclude the svadmin packages from pre-bundling and explicitly include their CJS peer dependencies:
+
+由于 `@svadmin/ui` 提供的是原始 `.svelte` 源码文件（非预构建），需要将 svadmin 包排除在预打包之外，并显式包含其 CJS 对等依赖：
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ["@svadmin/core", "@svadmin/ui", "@svadmin/supabase"],
+    include: [
+      "@svadmin/core > @tanstack/svelte-query",
+      "@svadmin/ui > svelte-sonner",
+      "@svadmin/ui > vaul-svelte",
+      "@svadmin/ui > cmdk-sv",
+      "@svadmin/ui > bits-ui",
+      "@svadmin/ui > @tanstack/svelte-table",
+      "@svadmin/ui > lucide-svelte",
+      "@svadmin/ui > @lucide/svelte",
+      "highlight.js",
+      "marked",
+      "marked-highlight",
+      "isomorphic-dompurify",
+    ],
+  },
+});
 ```
 
 ## 🏗️ `<AdminApp>` Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `dataProvider` | `DataProvider` | ✅ | — | Data source adapter / 数据源适配器 |
-| `authProvider` | `AuthProvider` | — | — | Auth adapter / 认证适配器 |
-| `routerProvider` | `RouterProvider` | — | hash | Custom router / 自定义路由提供者 |
-| `resources` | `ResourceDefinition[]` | ✅ | — | Resource definitions / 资源定义 |
-| `title` | `string` | — | `'Admin'` | App title / 应用标题 |
-| `defaultTheme` | `'light' \| 'dark' \| 'system'` | — | `'system'` | Initial theme / 初始主题 |
-| `themeConfig` | `ThemeConfig` | — | — | Theme config (strategy, overrides) / 主题配置 |
-| `locale` | `string` | — | auto | Override locale / 覆盖语言 |
-| `dashboard` | `Snippet` | — | — | Custom dashboard / 自定义仪表盘 |
-| `loginPage` | `Snippet` | — | — | Custom login page / 自定义登录页 |
-| `components` | `Partial<ComponentRegistry>`| — | — | Override default UI components / 覆盖默认组件 |
+| Prop             | Type                            | Required | Default    | Description                                   |
+| ---------------- | ------------------------------- | -------- | ---------- | --------------------------------------------- |
+| `dataProvider`   | `DataProvider`                  | ✅       | —          | Data source adapter / 数据源适配器            |
+| `authProvider`   | `AuthProvider`                  | —        | —          | Auth adapter / 认证适配器                     |
+| `routerProvider` | `RouterProvider`                | —        | hash       | Custom router / 自定义路由提供者              |
+| `resources`      | `ResourceDefinition[]`          | ✅       | —          | Resource definitions / 资源定义               |
+| `title`          | `string`                        | —        | `'Admin'`  | App title / 应用标题                          |
+| `defaultTheme`   | `'light' \| 'dark' \| 'system'` | —        | `'system'` | Initial theme / 初始主题                      |
+| `themeConfig`    | `ThemeConfig`                   | —        | —          | Theme config (strategy, overrides) / 主题配置 |
+| `locale`         | `string`                        | —        | auto       | Override locale / 覆盖语言                    |
+| `dashboard`      | `Snippet`                       | —        | —          | Custom dashboard / 自定义仪表盘               |
+| `loginPage`      | `Snippet`                       | —        | —          | Custom login page / 自定义登录页              |
+| `components`     | `Partial<ComponentRegistry>`    | —        | —          | Override default UI components / 覆盖默认组件 |
 
 ## 🌓 Dark Mode / 暗色模式
 
@@ -217,12 +274,17 @@ Dark mode works out of the box. Use `defaultTheme` prop or the Sidebar toggle:
 Programmatic control / 编程式控制:
 
 ```typescript
-import { setTheme, toggleTheme, getTheme, getResolvedTheme } from '@svadmin/core';
+import {
+  setTheme,
+  toggleTheme,
+  getTheme,
+  getResolvedTheme,
+} from "@svadmin/core";
 
-setTheme('dark');     // 'light' | 'dark' | 'system'
-toggleTheme();        // toggle between light/dark
-getTheme();           // current setting
-getResolvedTheme();   // resolved to 'light' or 'dark'
+setTheme("dark"); // 'light' | 'dark' | 'system'
+toggleTheme(); // toggle between light/dark
+getTheme(); // current setting
+getResolvedTheme(); // resolved to 'light' or 'dark'
 ```
 
 ## 🎨 Color Themes / 多色主题
@@ -232,11 +294,11 @@ Switch between 6 color palettes via sidebar picker or programmatically:
 通过侧边栏选色器或编程式切换 6 种配色：
 
 ```typescript
-import { getColorTheme, setColorTheme, colorThemes } from '@svadmin/core';
-import type { ColorTheme } from '@svadmin/core';
+import { getColorTheme, setColorTheme, colorThemes } from "@svadmin/core";
+import type { ColorTheme } from "@svadmin/core";
 
-setColorTheme('rose');   // 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'zinc'
-getColorTheme();         // current color theme
+setColorTheme("rose"); // 'blue' | 'green' | 'rose' | 'orange' | 'violet' | 'zinc'
+getColorTheme(); // current color theme
 console.log(colorThemes); // [{ id: 'blue', label: 'Blue', color: '#3b82f6' }, ...]
 ```
 
@@ -250,7 +312,7 @@ For end-to-end type safety, register your resource types:
 
 ```typescript
 // Extend the ResourceTypeMap interface (declaration merging)
-declare module '@svadmin/core' {
+declare module "@svadmin/core" {
   interface ResourceTypeMap {
     posts: { id: number; title: string; body: string };
     users: { id: number; name: string; email: string };
@@ -258,8 +320,8 @@ declare module '@svadmin/core' {
 }
 
 // Now all hooks get compile-time checking:
-useList({ resource: 'posts' });  // ✅ OK
-useList({ resource: 'postz' });  // ❌ Compile error — typo caught!
+useList({ resource: "posts" }); // ✅ OK
+useList({ resource: "postz" }); // ❌ Compile error — typo caught!
 ```
 
 ## 🔌 Custom DataProvider / 自定义数据源
@@ -269,15 +331,25 @@ Implement the `DataProvider` interface to connect any backend:
 实现 `DataProvider` 接口即可接入任意后端：
 
 ```typescript
-import type { DataProvider, BaseRecord } from '@svadmin/core';
+import type { DataProvider, BaseRecord } from "@svadmin/core";
 
 const myProvider: DataProvider = {
-  getApiUrl: () => 'https://api.example.com',
-  getList: async ({ resource, pagination, sorters, filters }) => { /* ... */ },
-  getOne: async ({ resource, id }) => { /* ... */ },
-  create: async ({ resource, variables }) => { /* ... */ },
-  update: async ({ resource, id, variables }) => { /* ... */ },
-  deleteOne: async ({ resource, id }) => { /* ... */ },
+  getApiUrl: () => "https://api.example.com",
+  getList: async ({ resource, pagination, sorters, filters }) => {
+    /* ... */
+  },
+  getOne: async ({ resource, id }) => {
+    /* ... */
+  },
+  create: async ({ resource, variables }) => {
+    /* ... */
+  },
+  update: async ({ resource, id, variables }) => {
+    /* ... */
+  },
+  deleteOne: async ({ resource, id }) => {
+    /* ... */
+  },
 };
 ```
 
