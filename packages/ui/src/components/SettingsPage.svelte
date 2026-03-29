@@ -2,10 +2,12 @@
   import { t } from '@svadmin/core/i18n';
   import { navigate } from '@svadmin/core/router';
   import { currentPath } from '@svadmin/core/router';
-  import { User, Palette, Info } from 'lucide-svelte';
+  import { User, Palette, Info, Shield, FileSearch } from 'lucide-svelte';
   import ProfilePage from './ProfilePage.svelte';
   import AppearanceSettings from './AppearanceSettings.svelte';
   import AboutSettings from './AboutSettings.svelte';
+  import RolesSettings from './RolesSettings.svelte';
+  import AuditLogViewer from './AuditLogViewer.svelte';
 
   const sections = [
     {
@@ -18,6 +20,8 @@
     {
       group: 'settings.system',
       items: [
+        { key: 'roles', path: '/settings/roles', icon: Shield, label: 'settings.rolesAndPermissions' },
+        { key: 'audit', path: '/settings/audit', icon: FileSearch, label: 'settings.auditLogs' },
         { key: 'about', path: '/settings/about', icon: Info, label: 'settings.about' },
       ],
     },
@@ -26,6 +30,8 @@
   let activeKey = $derived.by(() => {
     const path = currentPath();
     if (path.includes('/settings/appearance')) return 'appearance';
+    if (path.includes('/settings/roles')) return 'roles';
+    if (path.includes('/settings/audit')) return 'audit';
     if (path.includes('/settings/about')) return 'about';
     return 'profile';
   });
@@ -91,11 +97,15 @@
   </nav>
 
   <!-- Right content area -->
-  <div class="flex-1 p-6 lg:p-8 max-w-3xl">
+  <div class="flex-1 p-6 lg:p-8 {activeKey === 'roles' || activeKey === 'audit' ? 'max-w-6xl' : 'max-w-3xl'}">
     {#if activeKey === 'profile'}
       <ProfilePage />
     {:else if activeKey === 'appearance'}
       <AppearanceSettings />
+    {:else if activeKey === 'roles'}
+      <RolesSettings />
+    {:else if activeKey === 'audit'}
+      <AuditLogViewer />
     {:else if activeKey === 'about'}
       <AboutSettings />
     {/if}

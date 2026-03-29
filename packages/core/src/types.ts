@@ -213,6 +213,13 @@ export interface CheckResult {
   logout?: boolean;
 }
 
+export interface Role {
+  id: string;
+  name: string;
+  description?: string;
+  [key: string]: unknown;
+}
+
 export interface AuthProvider {
   login: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   logout: (params?: Record<string, unknown>) => Promise<AuthActionResult>;
@@ -224,7 +231,26 @@ export interface AuthProvider {
   updatePassword?: (params: Record<string, unknown>) => Promise<AuthActionResult>;
   /** Update user profile (name, avatar, etc.) */
   updateProfile?: (params: { name?: string; avatar?: string | File; [key: string]: unknown }) => Promise<AuthActionResult>;
+  /** Get list of system roles for RBAC mapping */
+  getRoles?: () => Promise<Role[]>;
+  /** Get specific role permissions as a matrix map, e.g. { "users": ["create", "read"] } */
+  getRolePermissions?: (roleId: string) => Promise<Record<string, string[]>>;
+  /** Update permissions for a specific role */
+  updateRolePermissions?: (roleId: string, permissions: Record<string, string[]>) => Promise<AuthActionResult>;
+  /** Get recent audit logs */
+  getAuditLogs?: (params?: { page?: number; pageSize?: number }) => Promise<{ data: AuditLog[]; total: number }>;
   onError?: (error: unknown) => Promise<{ redirectTo?: string; logout?: boolean }>;
+}
+
+export interface AuditLog {
+  id: string | number;
+  userId?: string | number;
+  userName?: string;
+  action: string;
+  resource?: string;
+  createdAt: string | Date;
+  ipAddress?: string;
+  details?: Record<string, unknown> | string;
 }
 
 // ─── NotificationProvider ─────────────────────────────────────

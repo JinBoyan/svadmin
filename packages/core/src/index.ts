@@ -61,7 +61,7 @@ export type {
   ResourceDefinition, FieldDefinition, MenuItem,
   AuthActionResult, CheckResult,
   ResourceTypeMap, KnownResources, InferData,
-  BaseRecord,
+  BaseRecord, Role, AuditLog
 } from './types';
 export type { InvalidateScope } from './options.svelte';
 export type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';

@@ -26,7 +26,17 @@
     "bits-ui": "^2.0.0",
     "tailwind-variants": "^3.0.0",
     "clsx": "^2.0.0",
-    "tailwind-merge": "^3.0.0"
+    "tailwind-merge": "^3.0.0",
+    "marked": "^15.0.0",
+    "marked-highlight": "^2.2.0",
+    "highlight.js": "^11.0.0",
+    "isomorphic-dompurify": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "marked": { "optional": true },
+    "marked-highlight": { "optional": true },
+    "highlight.js": { "optional": true },
+    "isomorphic-dompurify": { "optional": true }
   },
   "dependencies": {
     "@lucide/svelte": "^0.577.0",
