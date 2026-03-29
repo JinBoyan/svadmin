@@ -22,6 +22,7 @@ export { default as LoginPage } from './components/LoginPage.svelte';
 export { default as RegisterPage } from './components/RegisterPage.svelte';
 export { default as ForgotPasswordPage } from './components/ForgotPasswordPage.svelte';
 export { default as CanAccess } from './components/CanAccess.svelte';
+export { default as Can } from './components/CanAccess.svelte';
 export { default as UndoableNotification } from './components/UndoableNotification.svelte';
 export { default as ModalForm } from './components/ModalForm.svelte';
 export { default as DrawerForm } from './components/DrawerForm.svelte';
