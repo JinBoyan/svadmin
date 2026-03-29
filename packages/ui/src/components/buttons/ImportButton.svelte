@@ -47,7 +47,7 @@
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
     class={className}
-    disabled={importHook.isLoading || (can ? !can.allowed : false)}
+    disabled={importHook.isLoading || !can.allowed}
     onclick={triggerImport}
   >
     <Upload class="h-4 w-4" />

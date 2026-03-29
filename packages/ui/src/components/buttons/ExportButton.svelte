@@ -21,7 +21,7 @@
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
     class={className}
-    disabled={isLoading || (can ? !can.allowed : false)}
+    disabled={isLoading || !can.allowed}
     onclick={triggerExport}
   >
     <Download class="h-4 w-4" />

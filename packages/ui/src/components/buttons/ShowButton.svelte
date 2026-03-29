@@ -22,7 +22,7 @@
     variant="ghost"
     size={hideText ? 'icon' : 'sm'}
     class={className}
-    disabled={can ? !can.allowed : false}
+    disabled={!can.allowed}
     onclick={() => nav.show(resource, recordItemId)}
   >
     <Eye class="h-4 w-4" />
