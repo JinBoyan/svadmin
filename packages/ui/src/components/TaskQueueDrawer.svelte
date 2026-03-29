@@ -1,9 +1,4 @@
-<script lang="ts">
-  import type { Snippet } from 'svelte';
-  import { Loader2, CheckCircle2, XCircle, Clock, Download, X, ListTodo } from 'lucide-svelte';
-  import { Button } from './ui/button/index.js';
-  import { Badge } from './ui/badge/index.js';
-
+<script context="module">
   export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
 
   export interface BackgroundTask {
@@ -16,6 +11,13 @@
     downloadUrl?: string;
     [key: string]: unknown;
   }
+</script>
+
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+  import { Loader2, CheckCircle2, XCircle, Clock, Download, X, ListTodo } from 'lucide-svelte';
+  import { Button } from './ui/button/index.js';
+  import { Badge } from './ui/badge/index.js';
 
   let {
     open = $bindable(false),

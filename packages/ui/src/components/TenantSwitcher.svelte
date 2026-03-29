@@ -1,15 +1,17 @@
-<script lang="ts">
-  import type { Snippet } from 'svelte';
-  import { ChevronsUpDown, Building2, Check } from 'lucide-svelte';
-  import { Button } from './ui/button/index.js';
-  import * as DropdownMenu from './ui/dropdown-menu/index.js';
-
+<script context="module">
   export interface Tenant {
     id: string;
     name: string;
     logo?: string;
     [key: string]: unknown;
   }
+</script>
+
+<script lang="ts">
+  import type { Snippet } from 'svelte';
+  import { ChevronsUpDown, Building2, Check } from 'lucide-svelte';
+  import { Button } from './ui/button/index.js';
+  import * as DropdownMenu from './ui/dropdown-menu/index.js';
 
   let {
     tenants = [],
@@ -59,14 +61,14 @@
         </button>
       {/snippet}
     </DropdownMenu.Trigger>
-    <DropdownMenu.Content class="w-56" align="start" side="right" sideOffset={8}>
+    <DropdownMenu.Content class="w-56">
       {#if headerSnippet}
         <div class="px-2 py-1.5">
           {@render headerSnippet()}
         </div>
         <DropdownMenu.Separator />
       {/if}
-      <DropdownMenu.Label class="text-xs text-muted-foreground">Workspaces</DropdownMenu.Label>
+      <div class="px-2 py-1.5 text-xs text-muted-foreground">Workspaces</div>
       {#each tenants as tenant}
         <DropdownMenu.Item
           class="flex items-center gap-3 cursor-pointer"
