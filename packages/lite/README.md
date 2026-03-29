@@ -2,7 +2,7 @@
 
 **Lightweight, SSR-compatible admin UI for [@svadmin](https://github.com/zuohuadong/svadmin).**
 
-Zero client-side JavaScript required. Works in IE11 and legacy browsers.
+Zero client-side JavaScript required. Works in IE11 and all modern browsers.
 
 ## Why?
 
@@ -169,12 +169,14 @@ export const handle = createLegacyRedirectHook('/lite');
 ## CSS
 
 Import `@svadmin/lite/src/lite.css` in your layout. It's fully self-contained:
-- No CSS variables
-- No modern CSS features
-- Vendor-prefixed flexbox for IE11
+- IE11+ baseline (standard flexbox, no CSS variables)
+- Custom-styled checkboxes, radios, and selects (no `appearance: none` needed)
+- Indigo/Slate color system aligned with `@svadmin/ui`
+- Modern focus rings (`box-shadow` based)
+- Smooth transitions on all interactive elements
+- Multi-layer translucent shadows
 - Print-optimized styles
-- Includes multi-level `<details>/<summary>` menu styles
-- ~500 lines, ~12KB unminified
+- ~500 lines, ~14KB unminified
 
 ## Optional: Progressive Enhancement
 

@@ -119,27 +119,29 @@
 <style>
   .lite-role-tabs {
     display: flex;
-    gap: 4px;
+    flex-wrap: wrap;
     margin-bottom: 16px;
     border-bottom: 2px solid #e2e8f0;
     padding-bottom: 0;
   }
   .lite-role-tab {
     padding: 8px 16px;
+    margin-right: 4px;
     text-decoration: none;
     color: #64748b;
     font-size: 14px;
     font-weight: 500;
     border-bottom: 2px solid transparent;
     margin-bottom: -2px;
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s ease, border-color 0.15s ease;
   }
   .lite-role-tab:hover {
-    color: #1e293b;
+    color: #0f172a;
+    text-decoration: none;
   }
   .lite-role-tab.active {
-    color: #3b82f6;
-    border-bottom-color: #3b82f6;
+    color: #4f46e5;
+    border-bottom-color: #4f46e5;
     font-weight: 600;
   }
 </style>
