@@ -47,7 +47,7 @@
 
 <div class="flex flex-col lg:flex-row gap-0 min-h-full">
   <!-- Left sidebar navigation -->
-  <nav class="w-full lg:w-56 shrink-0 border-b lg:border-b-0 lg:border-r border-border bg-muted/30">
+  <nav class="w-full lg:w-56 shrink-0 bg-muted/10 shadow-[inset_0_-1px_0_rgba(0,0,0,0.05)] lg:shadow-[inset_-1px_0_0_rgba(0,0,0,0.05)] dark:shadow-[inset_-1px_0_0_rgba(255,255,255,0.05)]">
     <!-- Mobile: horizontal scroll tabs -->
     <div class="flex lg:hidden overflow-x-auto px-4 py-2 gap-1">
       {#each sections as section}

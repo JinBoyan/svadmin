@@ -103,7 +103,7 @@
     </div>
 
     <!-- Table -->
-    <div class="flex-1 border rounded-lg bg-card overflow-hidden">
+    <div class="flex-1 shadow-sm ring-1 ring-border/10 rounded-lg bg-card overflow-hidden">
       {#if loading}
         <div class="flex items-center justify-center h-48 text-muted-foreground">
           <Loader2 class="h-5 w-5 animate-spin mr-2" />
@@ -124,7 +124,7 @@
             </Table.Header>
             <Table.Body>
               {#each filteredLogs as log}
-                <Table.Row class="hover:bg-muted/50 transition-colors">
+                <Table.Row class="border-0 even:bg-muted/20 hover:bg-muted/40 transition-colors">
                   <Table.Cell class="text-xs text-muted-foreground font-mono">
                     {formatDate(log.createdAt)}
                   </Table.Cell>
@@ -188,7 +188,7 @@
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <div class="bg-card shadow-2xl w-full max-w-2xl h-full flex flex-col animate-in slide-in-from-right duration-300" onclick={(e) => e.stopPropagation()}>
       <!-- Drawer Header -->
-      <div class="p-6 border-b border-border flex items-center justify-between bg-muted/30">
+      <div class="p-6 shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)] flex items-center justify-between bg-muted/30">
         <div>
           <h2 class="text-lg font-bold text-foreground flex items-center gap-2">
             <FileSearch class="h-5 w-5 text-primary" />
@@ -202,7 +202,7 @@
       </div>
 
       <!-- Meta Tags -->
-      <div class="px-6 py-3 border-b border-border flex items-center gap-2 flex-wrap">
+      <div class="px-6 py-3 shadow-[0_1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_1px_0_rgba(255,255,255,0.05)] flex items-center gap-2 flex-wrap">
         <Badge variant="outline">{drawerLog.action}</Badge>
         {#if drawerLog.resource}
           <Badge variant="secondary">{drawerLog.resource}</Badge>
@@ -218,7 +218,7 @@
       </div>
 
       <!-- Footer -->
-      <div class="p-4 border-t border-border bg-muted/20 text-right text-[11px] text-muted-foreground font-medium">
+      <div class="p-4 shadow-[0_-1px_0_rgba(0,0,0,0.05)] dark:shadow-[0_-1px_0_rgba(255,255,255,0.05)] bg-muted/20 text-right text-[11px] text-muted-foreground font-medium">
         System audit snapshot · Read-only
       </div>
     </div>

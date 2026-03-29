@@ -1,5 +1,6 @@
 <script lang="ts">
   import { untrack } from 'svelte';
+  import { cn } from '../utils.js';
   import {
     createTable,
     getCoreRowModel,
@@ -446,7 +447,7 @@
   {/if}
 
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-lg bg-card shadow-sm overflow-hidden" role="region" aria-label="{resource.label} {t('common.list')}">
+  <div class="rounded-lg bg-card shadow-sm ring-1 ring-border/10 overflow-hidden" role="region" aria-label="{resource.label} {t('common.list')}">
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">
@@ -524,7 +525,7 @@
               <ContextMenu.Root>
                 <ContextMenu.Trigger>
                   {#snippet child({ props })}
-                    <Table.Row {...props} class="transition-colors {row.getIsSelected() ? 'bg-accent' : ''}">
+                    <Table.Row {...props} class="transition-colors border-0 even:bg-muted/20 {row.getIsSelected() ? 'bg-accent/50' : 'hover:bg-muted/40'}">
                       {#each row.getVisibleCells() as cell}
                         <Table.Cell>
                           {#if cell.column.id === '_select'}
@@ -653,7 +654,7 @@
             {@const record = row.original}
             {@const id = record[primaryKey] as string | number}
             <div
-              class="rounded-xl border bg-card p-4 shadow-sm transition-colors {row.getIsSelected() ? 'ring-2 ring-primary bg-accent/30' : ''}"
+              class="rounded-xl shadow-sm ring-1 ring-border/10 bg-card p-4 transition-colors {row.getIsSelected() ? 'ring-2 ring-primary bg-accent/30' : ''}"
             >
               <!-- Card header: ID + select + actions -->
               <div class="flex items-center justify-between mb-3">
