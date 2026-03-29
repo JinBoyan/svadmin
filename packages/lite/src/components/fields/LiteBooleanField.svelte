@@ -1,0 +1,41 @@
+<script lang="ts">
+  import type { FieldDefinition } from '@svadmin/core';
+
+  interface Props {
+    field: FieldDefinition;
+    value?: unknown;
+    error?: string[];
+    mode?: 'show' | 'edit' | 'create';
+  }
+
+  let { field, value, error = [], mode = 'show' }: Props = $props();
+  const hasError = error.length > 0;
+</script>
+
+{#if mode === 'show'}
+  <div>
+    <span class="lite-bool {value ? 'lite-bool-true' : ''}"></span>
+    {value ? '✓ Yes' : '✗ No'}
+  </div>
+{:else}
+  <div class="lite-checkbox-group">
+    <input
+      type="checkbox"
+      name={field.key}
+      id={field.key}
+      checked={!!value}
+      value="true"
+    />
+    <!-- Fallback hidden input so unchecked boxes submit "false" -->
+    <input type="hidden" name={field.key} value="false" />
+    
+    <label for={field.key}>
+      {field.placeholder ?? (field.label || 'Yes')}
+    </label>
+    {#if hasError}
+      {#each error as err}
+        <div class="lite-error-text">{err}</div>
+      {/each}
+    {/if}
+  </div>
+{/if}

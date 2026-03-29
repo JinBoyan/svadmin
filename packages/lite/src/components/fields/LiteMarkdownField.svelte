@@ -1,0 +1,33 @@
+<script lang="ts">
+  import type { FieldDefinition } from '@svadmin/core';
+
+  interface Props {
+    field: FieldDefinition;
+    value?: unknown;
+    error?: string[];
+    mode?: 'show' | 'edit' | 'create';
+  }
+
+  let { field, value, error = [], mode = 'show' }: Props = $props();
+  const hasError = error.length > 0;
+</script>
+
+{#if mode === 'show'}
+  <pre style="white-space: pre-wrap; padding: 12px; background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 4px;">{String(value ?? '—')}</pre>
+{:else}
+  <div>
+    <textarea
+      name={field.key}
+      id={field.key}
+      class="lite-input {hasError ? 'lite-input-error' : ''}"
+      style="min-height: 200px; font-family: monospace;"
+      placeholder="Enter markdown..."
+      {...field.required ? { required: true } : {}}
+    >{String(value ?? '')}</textarea>
+    {#if hasError}
+      {#each error as err}
+        <div class="lite-error-text">{err}</div>
+      {/each}
+    {/if}
+  </div>
+{/if}

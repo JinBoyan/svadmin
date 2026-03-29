@@ -1,0 +1,34 @@
+<script lang="ts">
+  import type { FieldDefinition } from '@svadmin/core';
+
+  interface Props {
+    field: FieldDefinition;
+    value?: unknown;
+    error?: string[];
+    mode?: 'show' | 'edit' | 'create';
+  }
+
+  let { field, value, error = [], mode = 'show' }: Props = $props();
+  const hasError = error.length > 0;
+</script>
+
+{#if mode === 'show'}
+  <span>{value == null ? '—' : Number(value).toLocaleString()}</span>
+{:else}
+  <div>
+    <input
+      type="number"
+      name={field.key}
+      id={field.key}
+      value={value == null ? '' : Number(value)}
+      class="lite-input {hasError ? 'lite-input-error' : ''}"
+      placeholder={field.placeholder ?? field.label}
+      {...field.required ? { required: true } : {}}
+    />
+    {#if hasError}
+      {#each error as err}
+        <div class="lite-error-text">{err}</div>
+      {/each}
+    {/if}
+  </div>
+{/if}

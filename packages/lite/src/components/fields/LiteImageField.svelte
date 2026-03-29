@@ -1,0 +1,57 @@
+<script lang="ts">
+  import type { FieldDefinition } from '@svadmin/core';
+
+  interface Props {
+    field: FieldDefinition;
+    value?: unknown;
+    error?: string[];
+    mode?: 'show' | 'edit' | 'create';
+  }
+
+  let { field, value, error = [], mode = 'show' }: Props = $props();
+  const hasError = error.length > 0;
+  
+  function getUrls(v: unknown): string[] {
+    if (!v) return [];
+    if (Array.isArray(v)) return v.map(String);
+    if (typeof v === 'string') return [v];
+    return [];
+  }
+</script>
+
+{#if mode === 'show'}
+  {@const urls = getUrls(value)}
+  <div style="display:flex; gap: 8px; flex-wrap: wrap;">
+    {#each urls as url}
+      <img src={url} alt={field.label} style="max-height: 100px; border-radius: 4px; border: 1px solid #e5e7eb;" />
+    {:else}
+      <span>—</span>
+    {/each}
+  </div>
+{:else}
+  <div>
+    {@const urls = getUrls(value)}
+    {#if urls.length > 0 && mode === 'edit'}
+      <div style="margin-bottom: 8px; display:flex; gap: 8px;">
+        {#each urls as url}
+          <img src={url} alt="Current" style="height: 60px; border-radius: 4px; border: 1px solid #e5e7eb; opacity: 0.6;" />
+        {/each}
+      </div>
+      <p style="font-size: 11px; color:#6b7280; margin: 0 0 4px;">Uploading new ones will overwrite.</p>
+    {/if}
+    <input
+      type="file"
+      name={field.key}
+      id={field.key}
+      accept="image/*"
+      class="lite-input {hasError ? 'lite-input-error' : ''}"
+      {...field.type === 'images' ? { multiple: true } : {}}
+      {...field.required && !urls.length ? { required: true } : {}}
+    />
+    {#if hasError}
+      {#each error as err}
+        <div class="lite-error-text">{err}</div>
+      {/each}
+    {/if}
+  </div>
+{/if}
