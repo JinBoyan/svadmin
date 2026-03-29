@@ -12,8 +12,8 @@
   }>();
 
   const nav = useNavigation();
-  const can = $derived(accessControl?.enabled ? useCan(resource, 'edit') : null);
-  const hidden = $derived(accessControl?.hideIfUnauthorized && can && !can.allowed);
+  const can = useCan(() => ({ resource, action: 'edit', queryOptions: { enabled: accessControl?.enabled ?? true } }));
+  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
 </script>
 
 {#if !hidden}

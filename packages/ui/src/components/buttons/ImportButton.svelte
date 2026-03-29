@@ -31,8 +31,8 @@
     }
   }
 
-  const can = $derived(accessControl?.enabled ? useCan(resource, 'import') : null);
-  const hidden = $derived(accessControl?.hideIfUnauthorized && can && !can.allowed);
+  const can = useCan(() => ({ resource, action: 'import', queryOptions: { enabled: accessControl?.enabled ?? true } }));
+  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
 </script>
 
 {#if !hidden}

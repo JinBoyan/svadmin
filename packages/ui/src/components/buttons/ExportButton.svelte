@@ -11,8 +11,8 @@
   }>();
 
   const { triggerExport, isLoading } = useExport({ get resource() { return resource; } });
-  const can = $derived(accessControl?.enabled ? useCan(resource, 'export') : null);
-  const hidden = $derived(accessControl?.hideIfUnauthorized && can && !can.allowed);
+  const can = useCan(() => ({ resource, action: 'export', queryOptions: { enabled: accessControl?.enabled ?? true } }));
+  const hidden = $derived(accessControl?.hideIfUnauthorized && !can.allowed);
 </script>
 
 {#if !hidden}
