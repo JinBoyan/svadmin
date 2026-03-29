@@ -36,6 +36,7 @@
   import ConfirmDialog from './ConfirmDialog.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import InlineEdit from './InlineEdit.svelte';
+  import DraggableHeader from './DraggableHeader.svelte';
   import type { Snippet } from 'svelte';
 
   // ─── Props with Snippet composability ─────────────────────────
