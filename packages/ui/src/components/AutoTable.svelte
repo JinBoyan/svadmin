@@ -13,7 +13,7 @@
   import { useList, useDelete, getResource } from '@svadmin/core';
   import type { Pagination as PaginationState, Sort, Filter, FieldDefinition } from '@svadmin/core';
   import { navigate } from '@svadmin/core/router';
-  import { useCan } from '@svadmin/core';
+  import { useCan, getAccessControlProvider } from '@svadmin/core';
   import { readURLState, writeURLState } from '@svadmin/core';
   import { t } from '@svadmin/core/i18n';
   import { fade } from 'svelte/transition';
@@ -136,10 +136,11 @@
   const deleteMutation = deleteResult.mutation;
 
   // ─── Permissions ──────────────────────────────────────────────
-  const canCreatePerm = useCan(() => ({ resource: resourceName, action: 'create' }));
-  const canEditPerm = useCan(() => ({ resource: resourceName, action: 'edit' }));
-  const canDeletePerm = useCan(() => ({ resource: resourceName, action: 'delete' }));
-  const canExportPerm = useCan(() => ({ resource: resourceName, action: 'export' }));
+  const acEnabled = $derived(!!getAccessControlProvider());
+  const canCreatePerm = useCan(() => ({ resource: resourceName, action: 'create', queryOptions: { enabled: acEnabled } }));
+  const canEditPerm = useCan(() => ({ resource: resourceName, action: 'edit', queryOptions: { enabled: acEnabled } }));
+  const canDeletePerm = useCan(() => ({ resource: resourceName, action: 'delete', queryOptions: { enabled: acEnabled } }));
+  const canExportPerm = useCan(() => ({ resource: resourceName, action: 'export', queryOptions: { enabled: acEnabled } }));
   const canCreate = $derived(canCreatePerm.allowed && resource.canCreate !== false);
   const canEdit = $derived(canEditPerm.allowed && resource.canEdit !== false);
   const canDelete = $derived(canDeletePerm.allowed && resource.canDelete !== false);

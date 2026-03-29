@@ -20,7 +20,7 @@
     variant="default"
     size={hideText ? 'icon' : 'default'}
     class={className}
-    disabled={can ? !can.allowed : false}
+    disabled={!can.allowed}
     onclick={() => nav.create(resource)}
   >
     <Plus class="h-4 w-4" />

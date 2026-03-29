@@ -21,7 +21,7 @@
     variant="outline"
     size={hideText ? 'icon' : 'sm'}
     class={className}
-    disabled={can ? !can.allowed : false}
+    disabled={!can.allowed}
     onclick={() => nav.clone(resource, recordItemId)}
   >
     <Copy class="h-4 w-4" />

@@ -49,7 +49,7 @@
       variant="ghost"
       size={hideText ? 'icon' : 'sm'}
       class="text-destructive hover:text-destructive {className}"
-      disabled={can ? !can.allowed : false}
+      disabled={!can.allowed}
       onclick={handleDelete}
     >
       <Trash2 class="h-4 w-4" />
