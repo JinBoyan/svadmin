@@ -29,6 +29,10 @@
     "zod": "^3.24.0"
   },
   "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "author": "zuohuadong",
   "repository": {
     "type": "git",
