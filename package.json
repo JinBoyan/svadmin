@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.5.14",
   "description": "Headless admin framework for Svelte 5 — bring your own backend",
+  "packageManager": "bun@1.2.4",
   "workspaces": [
     "packages/*",
     "example",
