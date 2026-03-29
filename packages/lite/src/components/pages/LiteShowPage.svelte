@@ -1,0 +1,61 @@
+<script lang="ts">
+  import type { ResourceDefinition } from '@svadmin/core';
+  import { t } from '@svadmin/core/i18n';
+  import LiteShowField from '../LiteShowField.svelte';
+  import LiteListButton from '../buttons/LiteListButton.svelte';
+  import LiteEditButton from '../buttons/LiteEditButton.svelte';
+  import LiteDeleteButton from '../buttons/LiteDeleteButton.svelte';
+
+  interface Props {
+    resource: ResourceDefinition;
+    record: Record<string, unknown>;
+    basePath?: string;
+    canEdit?: boolean;
+    canDelete?: boolean;
+  }
+
+  let {
+    resource,
+    record,
+    basePath = '/lite',
+    canEdit = true,
+    canDelete = true,
+  }: Props = $props();
+
+  const pk = resource.primaryKey ?? 'id';
+  const idStr = String(record[pk]);
+  
+  const showFields = $derived(
+    resource.fields.filter(f => f.showInShow !== false)
+  );
+</script>
+
+<div class="lite-page">
+  <div class="lite-page-header">
+    <h1 class="lite-page-title">{t('common.show') || 'Show'} {resource.label || resource.name} #{idStr}</h1>
+    <div class="lite-page-actions">
+      {#if canEdit}
+        <LiteEditButton resource={resource.name} recordItemId={idStr} {basePath} />
+      {/if}
+      <LiteListButton resource={resource.name} {basePath} />
+      {#if canDelete}
+        <LiteDeleteButton resource={resource.name} recordItemId={idStr} redirectUrl="{basePath}/{resource.name}" {basePath} />
+      {/if}
+    </div>
+  </div>
+
+  <div class="lite-card" style="padding: 24px;">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px;">
+      {#each showFields as field}
+        <div>
+          <label style="display: block; font-size: 13px; font-weight: 500; color: #64748b; margin-bottom: 8px;">
+            {field.label}
+          </label>
+          <div style="color: #0f172a; font-size: 14px;">
+            <LiteShowField {field} value={record[field.key]} />
+          </div>
+        </div>
+      {/each}
+    </div>
+  </div>
+</div>
