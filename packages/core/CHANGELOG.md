@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.16.0](https://github.com/zuohuadong/svadmin/compare/core-v0.15.0...core-v0.16.0) (2026-03-29)
+
+
+### Features
+
+* **ui:** add ArrayField for nested dynamic form groups ([0407757](https://github.com/zuohuadong/svadmin/commit/04077572b3d6a668df136d6a22375206735d775c))
+* **ui:** add enterprise RBAC, audit logs, tenant switcher, task queue, and draggable grid ([449dfaf](https://github.com/zuohuadong/svadmin/commit/449dfaf73febe25a08073c4ea63f0d76f38a2f51))
+
+
+### Bug Fixes
+
+* **core:** migrate CanAccess and useCan logic to support Svelte 5 closures ([38d4f78](https://github.com/zuohuadong/svadmin/commit/38d4f785e2ca3d7dfc6b62445b29f230e74df284))
+
 ## [0.15.0](https://github.com/zuohuadong/svadmin/compare/core-v0.14.0...core-v0.15.0) (2026-03-29)
 
 
