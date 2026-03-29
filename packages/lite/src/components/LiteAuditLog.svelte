@@ -97,8 +97,8 @@
     font-size: 12px;
     font-weight: 600;
   }
-  .lite-badge-danger { background: #fef2f2; color: #dc2626; }
-  .lite-badge-success { background: #f0fdf4; color: #16a34a; }
-  .lite-badge-warning { background: #fffbeb; color: #d97706; }
-  .lite-badge-default { background: #f1f5f9; color: #475569; }
+  .lite-badge-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .lite-badge-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+  .lite-badge-warning { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .lite-badge-default { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
 </style>
