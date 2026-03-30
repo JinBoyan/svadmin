@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.1](https://github.com/zuohuadong/svadmin/compare/core-v0.17.0...core-v0.17.1) (2026-03-30)
+
+
+### Bug Fixes
+
+* **deps:** replace svelte-sonner with sonner-svelte to resolve Tailwind CSS v4 Vite plugin compile error ([98b330a](https://github.com/zuohuadong/svadmin/commit/98b330a8cea21bd81debd2a85b4923c5f3edf6cb))
+
 ## [0.17.0](https://github.com/zuohuadong/svadmin/compare/core-v0.16.0...core-v0.17.0) (2026-03-29)
 
 
