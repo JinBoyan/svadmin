@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.3](https://github.com/zuohuadong/svadmin/compare/ui-v0.20.2...ui-v0.20.3) (2026-03-30)
+
+
+### Bug Fixes
+
+* **deps:** replace svelte-sonner with sonner-svelte to resolve Tailwind CSS v4 Vite plugin compile error ([98b330a](https://github.com/zuohuadong/svadmin/commit/98b330a8cea21bd81debd2a85b4923c5f3edf6cb))
+
 ## [0.20.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.20.1...ui-v0.20.2) (2026-03-30)
 
 
