@@ -61,6 +61,11 @@ export { default as InlineEdit } from "./components/InlineEdit.svelte";
 export { default as VirtualTable } from "./components/VirtualTable.svelte";
 export { default as DraggableHeader } from "./components/DraggableHeader.svelte";
 export { default as SettingsPage } from "./components/SettingsPage.svelte";
+
+// Editor Registry
+export { setRichTextEditor, getRichTextEditor } from "./editor-config.svelte.js";
+
+// Settings & Preferences
 export { default as AppearanceSettings } from "./components/AppearanceSettings.svelte";
 export { default as AboutSettings } from "./components/AboutSettings.svelte";
 export { default as PermissionMatrix } from "./components/PermissionMatrix.svelte";

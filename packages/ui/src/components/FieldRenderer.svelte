@@ -18,6 +18,7 @@
   import ArrayField from './fields/ArrayField.svelte';
   import { Plus, X } from 'lucide-svelte';
   import type { Snippet } from 'svelte';
+  import { getRichTextEditor } from '../editor-config.svelte.js';
 
   let { field, value, onchange, children } = $props<{
     field: FieldDefinition;
@@ -164,25 +165,16 @@
     />
 
   {:else if field.type === 'richtext'}
-    {#await import('@svadmin/editor')}
-      <Textarea
-        id={field.key}
-        value={strVal}
-        oninput={(e) => onchange((e.target as HTMLTextAreaElement).value)}
-        required={field.required}
-        rows={10}
-        placeholder={t('field.enterValue', { label: field.label })}
-        class="resize-y"
-      />
-    {:then editorMod}
-      <editorMod.Editor
+    {@const EditorComp = getRichTextEditor()}
+    {#if EditorComp}
+      <EditorComp
         id={field.key}
         value={strVal}
         placeholder={t('field.enterValue', { label: field.label })}
         preset="full"
         onchange={(html: string) => onchange(html)}
       />
-    {:catch}
+    {:else}
       <Textarea
         id={field.key}
         value={strVal}
@@ -192,7 +184,7 @@
         placeholder={t('field.enterValue', { label: field.label })}
         class="resize-y"
       />
-    {/await}
+    {/if}
 
   {:else if field.type === 'textarea'}
     <Textarea
