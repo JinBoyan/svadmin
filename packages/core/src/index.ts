@@ -31,7 +31,7 @@ export { setAccessControlProvider, getAccessControlProvider, getAccessControlOpt
 export { useLive, useSubscription, usePublish } from './live.svelte';
 export { toast } from './toast.svelte';
 export { notify, closeNotification, setNotificationProvider, getNotificationProvider } from './notification.svelte';
-export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation, useTranslate } from './i18n.svelte';
+export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation } from './i18n.svelte';
 export { audit, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
 export type { AuditLogProvider } from './audit';
 export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals } from './chatProvider.svelte';

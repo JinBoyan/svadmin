@@ -69,3 +69,21 @@ Available: `blue`, `green`, `purple`, `orange`, `rose`, `teal`, `slate`
 ```typescript
 <AdminApp colorTheme="purple" ... />
 ```
+
+## Internationalization (I18n)
+
+`@svadmin/core` includes a lightweight, native Svelte 5 `$derived` powered internationalization system via the `useTranslation` hook. The returned `t` and properties are fully reactive:
+
+```svelte
+<script>
+  import { useTranslation, addTranslations } from '@svadmin/core';
+
+  const { t, locale, setLocale, getAvailableLocales } = useTranslation();
+
+  addTranslations('ja-JP', { 'common.test': 'テスト' });
+</script>
+
+<h1>{t('common.save')}</h1>
+<p>Current language: {locale}</p>
+<button onclick={() => setLocale('ja-JP')}>Switch to Japanese</button>
+```
