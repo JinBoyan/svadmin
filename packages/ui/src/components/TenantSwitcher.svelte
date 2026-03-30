@@ -1,17 +1,9 @@
-<script context="module">
-  export interface Tenant {
-    id: string;
-    name: string;
-    logo?: string;
-    [key: string]: unknown;
-  }
-</script>
-
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { ChevronsUpDown, Building2, Check } from 'lucide-svelte';
   import { Button } from './ui/button/index.js';
   import * as DropdownMenu from './ui/dropdown-menu/index.js';
+  import type { Tenant } from '../types.js';
 
   let {
     tenants = [],

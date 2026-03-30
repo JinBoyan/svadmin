@@ -1,7 +1,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter
+  GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter, BaseRecord
 } from '@svadmin/core';
 
 // Nestjs-query uses GraphQL with auto-generated queries
@@ -43,7 +43,7 @@ export function createNestjsQueryDataProvider(endpoint: string, headers: Record<
   return {
     getApiUrl: () => endpoint,
 
-    async getList<T>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const fields = (meta?.fields as string[])?.join('\n') || 'id';
       const query = `query($paging: CursorPaging, $filter: ${resource}Filter, $sorting: [${resource}Sort!]) {
@@ -60,49 +60,49 @@ export function createNestjsQueryDataProvider(endpoint: string, headers: Record<
       return { data: data[resource]?.nodes ?? [], total: data[resource]?.totalCount ?? 0 };
     },
 
-    async getOne<T>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
       const fields = (meta?.fields as string[])?.join('\n') || 'id';
       const singular = resource.replace(/s$/, '');
       const query = `query($id: ID!) { ${singular}(id: $id) { ${fields} } }`;
       const data = await gql(endpoint, query, { id }, headers);
-      return { data: data[singular] as T };
+      return { data: data[singular] as unknown as unknown as T };
     },
 
-    async create<T>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
       const fields = (meta?.fields as string[])?.join('\n') || 'id';
       const singular = resource.replace(/s$/, '');
       const query = `mutation($input: CreateOne${singular}Input!) { createOne${singular}(input: $input) { ${fields} } }`;
       const data = await gql(endpoint, query, { input: { [singular.toLowerCase()]: variables } }, headers);
-      return { data: data[`createOne${singular}`] as T };
+      return { data: data[`createOne${singular}`] as unknown as unknown as T };
     },
 
-    async update<T>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
       const fields = (meta?.fields as string[])?.join('\n') || 'id';
       const singular = resource.replace(/s$/, '');
       const query = `mutation($input: UpdateOne${singular}Input!) { updateOne${singular}(input: $input) { ${fields} } }`;
       const data = await gql(endpoint, query, { input: { id, update: variables } }, headers);
-      return { data: data[`updateOne${singular}`] as T };
+      return { data: data[`updateOne${singular}`] as unknown as unknown as T };
     },
 
-    async deleteOne<T>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
       const fields = (meta?.fields as string[])?.join('\n') || 'id';
       const singular = resource.replace(/s$/, '');
       const query = `mutation($input: DeleteOne${singular}Input!) { deleteOne${singular}(input: $input) { ${fields} } }`;
       const data = await gql(endpoint, query, { input: { id } }, headers);
-      return { data: data[`deleteOne${singular}`] as T };
+      return { data: data[`deleteOne${singular}`] as unknown as unknown as T };
     },
 
-    async getMany<T>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
       const fields = (meta?.fields as string[])?.join('\n') || 'id';
       const query = `query($filter: ${resource}Filter) { ${resource}(filter: $filter) { nodes { ${fields} } } }`;
       const data = await gql(endpoint, query, { filter: { id: { in: ids } } }, headers);
       return { data: data[resource]?.nodes ?? [] };
     },
 
-    async custom<T>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
       const res = await fetch(url, { method: method.toUpperCase(), headers: { 'Content-Type': 'application/json', ...headers, ...h }, body: payload ? JSON.stringify(payload) : undefined });
       if (!res.ok) throw new Error(`Custom request failed: ${res.status}`);
-      return { data: (await res.json()) as T };
+      return { data: (await res.json()) as unknown as unknown as T };
     },
   };
 }

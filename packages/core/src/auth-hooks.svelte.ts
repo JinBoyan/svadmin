@@ -266,17 +266,28 @@ export function useOnError() {
 
 /**
  * Fetches permissions from authProvider.getPermissions().
- * Returns a reactive object with data, isLoading, and error.
+ * Returns a reactive integrated object.
+ * 
+ * @example
+ * ```svelte
+ * <script>
+ *   import { usePermissions } from '@svadmin/core';
+ *   const perms = usePermissions();
+ *   const canAdmin = $derived(perms.has('admin'));
+ * </script>
+ * ```
  */
 export function usePermissions<T = unknown>() {
   const provider = getAuthProvider();
-  let data = $state<T | null>(null);
+  let permissions = $state<T | null>(null);
   let isLoading = $state(true);
   let error = $state<Error | null>(null);
+  let version = $state(0); // Force reactive invalidation
 
   if (provider?.getPermissions) {
-    provider.getPermissions().then(permissions => {
-      data = permissions as T;
+    provider.getPermissions().then(p => {
+      permissions = p as T;
+      version++;
       isLoading = false;
     }).catch(err => {
       error = err instanceof Error ? err : new Error(String(err));
@@ -288,66 +299,28 @@ export function usePermissions<T = unknown>() {
   }
 
   return {
-    get data() { return data; },
     get isLoading() { return isLoading; },
     get error() { return error; },
+    get version() { return version; },
+    
+    /** Get the raw permissions data */
+    get raw() { return permissions; },
+
+    /** Convenience: check if a specific permission exists */
+    has(perm: string): boolean {
+      if (!permissions) return false;
+      if (Array.isArray(permissions)) return permissions.includes(perm);
+      if (permissions instanceof Set) return (permissions as Set<string>).has(perm);
+      if (typeof permissions === 'object') return !!(permissions as Record<string, boolean>)[perm];
+      return false;
+    },
+
+    /** Convenience: check resource action (Casbin style representation if applicable) */
+    can(resource: string, action: string): boolean {
+      // Tries to map to a standard permission string format like "resource:action" 
+      // Replace with your own logic if your permissions are structured differently.
+      return this.has(`${resource}:${action}`);
+    }
   };
-}
-
-// ─── useHasPermission ────────────────────────────────────────
-
-/**
- * Reactive permission checker — returns a closure that re-evaluates
- * when the underlying permissions data changes.
- *
- * Works with Casbin-style permission arrays, Sets, or permission objects.
- * The returned function is safe to use inside `$derived()` for reactive UI updates.
- *
- * @example
- * ```svelte
- * <script>
- *   import { useHasPermission } from '@svadmin/core';
- *
- *   const hasPermission = useHasPermission();
- *   // ✅ Reactive — UI updates when permissions finish loading
- *   const canDelete = $derived(hasPermission('admin'));
- *   const canExport = $derived(hasPermission('data:export'));
- * </script>
- *
- * {#if canDelete}
- *   <Button variant="destructive">Delete</Button>
- * {/if}
- * ```
- */
-export function useHasPermission() {
-  const provider = getAuthProvider();
-  let permissions = $state<unknown>(null);
-  let loaded = $state(false);
-
-  if (provider?.getPermissions) {
-    provider.getPermissions().then(p => {
-      permissions = p;
-      loaded = true;
-    }).catch(err => {
-      console.warn('[svadmin] useHasPermission: getPermissions failed', err);
-      loaded = true;
-    });
-  } else {
-    loaded = true;
-  }
-
-  /**
-   * Check if the current user has a specific permission.
-   * Supports: `string[]`, `Set<string>`, `Record<string, boolean>`, or any object with `.includes` / `.has`.
-   */
-  function hasPermission(perm: string): boolean {
-    if (!loaded || permissions == null) return false;
-    if (Array.isArray(permissions)) return permissions.includes(perm);
-    if (permissions instanceof Set) return (permissions as Set<string>).has(perm);
-    if (typeof permissions === 'object') return !!(permissions as Record<string, boolean>)[perm];
-    return false;
-  }
-
-  return hasPermission;
 }
 

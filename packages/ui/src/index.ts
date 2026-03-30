@@ -64,15 +64,15 @@ export { default as SettingsPage } from "./components/SettingsPage.svelte";
 export { default as AppearanceSettings } from "./components/AppearanceSettings.svelte";
 export { default as AboutSettings } from "./components/AboutSettings.svelte";
 export { default as PermissionMatrix } from "./components/PermissionMatrix.svelte";
-export type { RoleInfo, ResourceInfo, ActionInfo } from "./components/PermissionMatrix.svelte";
+export type { RoleInfo, ResourceInfo, ActionInfo } from "./types.js";
 export { default as RolesSettings } from "./components/RolesSettings.svelte";
 export { default as AuditLogViewer } from "./components/AuditLogViewer.svelte";
 export { default as TenantSwitcher } from "./components/TenantSwitcher.svelte";
-export type { Tenant } from "./components/TenantSwitcher.svelte";
+export type { Tenant } from "./types.js";
 export { default as TaskQueueDrawer } from "./components/TaskQueueDrawer.svelte";
-export type { BackgroundTask, TaskStatus } from "./components/TaskQueueDrawer.svelte";
+export type { BackgroundTask, TaskStatus } from "./types.js";
 export { default as DraggableGrid } from "./components/DraggableGrid.svelte";
-export type { GridModule } from "./components/DraggableGrid.svelte";
+export type { GridModule } from "./types.js";
 
 // Dashboard Charts (zero-dependency SVG)
 export { BarChart, LineChart, PieChart } from './components/charts/index.js';

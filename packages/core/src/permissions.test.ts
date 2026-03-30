@@ -27,7 +27,7 @@ describe('permissions', () => {
       can: async () => ({ can: true }),
     });
     const result = await canAccessAsync('posts', 'edit');
-    expect(result.can).toBe(true);
+    expect((result as any).can).toBe(true);
   });
 
   test('canAccessAsync resolves with denied status', async () => {
@@ -35,8 +35,8 @@ describe('permissions', () => {
       can: async () => ({ can: false, reason: 'No permission' }),
     });
     const result = await canAccessAsync('users', 'delete');
-    expect(result.can).toBe(false);
-    expect(result.reason).toBe('No permission');
+    expect((result as any).can).toBe(false);
+    expect((result as any).reason).toBe('No permission');
   });
 
   test('resource-specific rules', async () => {
@@ -89,8 +89,8 @@ describe('AccessControlProvider', () => {
       },
     });
     const result = await canAccessAsync('posts', 'edit', { id: 42 });
-    expect(result.can).toBe(false);
-    expect(result.reason).toBe('Record locked');
+    expect((result as any).can).toBe(false);
+    expect((result as any).reason).toBe('Record locked');
   });
 
   test('extended action types work', async () => {

@@ -79,24 +79,24 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
         filter: buildFilter(params.filters),
       });
       return {
-        data: result.items as TData[],
+        data: result.items as unknown as TData[],
         total: result.totalItems,
       };
     },
 
     async getOne<TData extends BaseRecord = BaseRecord>(params: GetOneParams): Promise<GetOneResult<TData>> {
       const record = await pb.collection(params.resource).getOne(String(params.id));
-      return { data: record as TData };
+      return { data: record as unknown as TData };
     },
 
     async create<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: CreateParams<TVariables>): Promise<CreateResult<TData>> {
       const record = await pb.collection(params.resource).create(params.variables as Record<string, unknown>);
-      return { data: record as TData };
+      return { data: record as unknown as TData };
     },
 
     async update<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: UpdateParams<TVariables>): Promise<UpdateResult<TData>> {
       const record = await pb.collection(params.resource).update(String(params.id), params.variables as Record<string, unknown>);
-      return { data: record as TData };
+      return { data: record as unknown as TData };
     },
 
     async deleteOne<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteParams<TVariables>): Promise<DeleteResult<TData>> {
@@ -107,7 +107,7 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
     async getMany<TData extends BaseRecord = BaseRecord>(params: GetManyParams): Promise<GetManyResult<TData>> {
       const filter = params.ids.map(id => `id = '${id}'`).join(' || ');
       const records = await pb.collection(params.resource).getFullList({ filter });
-      return { data: records as TData[] };
+      return { data: records as unknown as TData[] };
     },
 
     async deleteMany<TData extends BaseRecord = BaseRecord, TVariables = unknown>(params: DeleteManyParams<TVariables>): Promise<DeleteManyResult<TData>> {
@@ -116,7 +116,7 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
         await pb.collection(params.resource).delete(String(id));
         results.push({ id });
       }
-      return { data: results as TData[] };
+      return { data: results as unknown as TData[] };
     },
   };
 }

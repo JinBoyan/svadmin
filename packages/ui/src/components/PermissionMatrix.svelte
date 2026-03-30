@@ -1,12 +1,7 @@
-<script context="module">
-  export type RoleInfo = { code: string; name: string; [key: string]: any };
-  export type ResourceInfo = { code: string; name: string; section?: string; [key: string]: any };
-  export type ActionInfo = { code: string; name: string; [key: string]: any };
-</script>
-
 <script lang="ts">
   import { Shield, AlertCircle, Check } from 'lucide-svelte';
   import type { Snippet } from 'svelte';
+  import type { RoleInfo, ResourceInfo, ActionInfo } from '../types.js';
   
   let {
     // Basic metadata lists

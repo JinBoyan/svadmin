@@ -46,8 +46,10 @@
     selectable?: boolean;
     /** Custom header actions (right side) */
     headerActions?: Snippet;
-    /** Custom cell renderer per field */
-    cellRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; record: Record<string, unknown> }]>;
+    /** Custom cell renderers by field key */
+    columns?: Record<string, Snippet<[{ value: unknown; record: Record<string, unknown> }]>>;
+    /** Global fallback cell renderer */
+    defaultCellRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; record: Record<string, unknown> }]>;
     /** Custom row actions (edit/delete column) */
     rowActions?: Snippet<[{ record: Record<string, unknown>; id: string | number }]>;
     /** Custom empty state */
@@ -64,7 +66,8 @@
     resourceName,
     selectable = true,
     headerActions,
-    cellRenderer,
+    columns: customColumns,
+    defaultCellRenderer,
     rowActions,
     emptyState,
     expandedRowRender,
@@ -560,8 +563,10 @@
                             </div>
                           {:else}
                             {@const field = visibleFields.find(f => f.key === cell.column.id)}
-                            {#if cellRenderer && field}
-                              {@render cellRenderer({ field, value: cell.getValue(), record })}
+                            {#if customColumns && field && customColumns[field.key]}
+                              {@render customColumns[field.key]({ value: cell.getValue(), record })}
+                            {:else if defaultCellRenderer && field}
+                              {@render defaultCellRenderer({ field, value: cell.getValue(), record })}
                             {:else if field?.type === 'boolean'}
                               <span class="inline-block h-2 w-2 rounded-full {cell.getValue() ? 'bg-success' : 'bg-muted-foreground/30'}"></span>
                             {:else if field?.type === 'date' && cell.getValue()}
@@ -694,8 +699,10 @@
                   <div class="flex items-start justify-between gap-4">
                     <span class="text-xs font-medium text-muted-foreground shrink-0">{field.label}</span>
                     <span class="text-sm text-right truncate max-w-[60%]">
-                      {#if cellRenderer}
-                        {@render cellRenderer({ field, value, record })}
+                      {#if customColumns && field && customColumns[field.key]}
+                        {@render customColumns[field.key]({ value, record })}
+                      {:else if defaultCellRenderer && field}
+                        {@render defaultCellRenderer({ field, value, record })}
                       {:else if field.type === 'boolean'}
                         <span class="inline-block h-2 w-2 rounded-full {value ? 'bg-success' : 'bg-muted-foreground/30'}"></span>
                       {:else if field.type === 'date' && value}

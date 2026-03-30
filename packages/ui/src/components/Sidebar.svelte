@@ -17,13 +17,14 @@
     ChevronLeft, ChevronDown, LogOut, Sun, Moon, Palette
   } from 'lucide-svelte';
 
-  let { collapsed, identity, title, onToggle, onLogout, menu }: {
+  let { collapsed, identity, title, onToggle, onLogout, menu, legacyHashRouting = false }: {
     collapsed: boolean;
     identity: Identity | null;
     title: string;
     onToggle: () => void;
     onLogout: () => void;
     menu?: MenuItem[];
+    legacyHashRouting?: boolean;
   } = $props();
 
   const resources = getResources();
@@ -205,7 +206,7 @@
               {#each group.items as item}
                 {@const active = isActive(item.path)}
                 <a
-                  href={`#${item.path}`}
+                  href={legacyHashRouting ? `#${item.path}` : item.path}
                   class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200
                   {active
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
@@ -228,7 +229,7 @@
                 {#snippet child({ props }: { props: Record<string, unknown> })}
                   <a
                     {...props}
-                    href={`#${item.path}`}
+                    href={legacyHashRouting ? `#${item.path}` : item.path}
                     class="flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
                     {active
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground'
@@ -244,7 +245,7 @@
             </Tooltip.Root>
           {:else}
             <a
-              href={`#${item.path}`}
+              href={legacyHashRouting ? `#${item.path}` : item.path}
               class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
               {active
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
@@ -284,7 +285,7 @@
               {#each colorThemes as ct}
                 <button
                   class="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
-                  onclick={() => { setColorTheme(ct.id); colorPickerOpen = false; }}
+                  onclick={() => { setColorTheme(ct.id as typeof ct.id & import('@svadmin/core').ColorTheme); colorPickerOpen = false; }}
                 >
                   <span
                     class="h-3.5 w-3.5 rounded-full {getColorTheme() === ct.id ? 'ring-2 ring-offset-1 scale-110' : 'opacity-70'}"

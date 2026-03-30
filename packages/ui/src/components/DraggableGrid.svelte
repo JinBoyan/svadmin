@@ -1,12 +1,6 @@
-<script context="module">
-  export interface GridModule {
-    id: string;
-    [key: string]: unknown;
-  }
-</script>
-
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import type { GridModule } from '../types.js';
 
   let {
     modules = $bindable<GridModule[]>([]),

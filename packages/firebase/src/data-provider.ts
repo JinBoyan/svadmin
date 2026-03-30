@@ -2,7 +2,7 @@ import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
   GetManyParams, GetManyResult, CustomParams, CustomResult, Filter
-} from '@svadmin/core';
+, BaseRecord } from '@svadmin/core';
 
 interface FirestoreFieldValue {
   stringValue?: string;
@@ -66,57 +66,57 @@ export function createFirebaseDataProvider(projectId: string, apiKey: string): D
   return {
     getApiUrl: () => `https://firestore.googleapis.com/v1/projects/${projectId}`,
 
-    async getList<T>({ resource, pagination }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination }: GetListParams): Promise<GetListResult<T>> {
       const { pageSize = 20 } = pagination ?? {};
       const url = `${buildFirestoreUrl(projectId, resource)}?pageSize=${pageSize}&key=${apiKey}`;
       const res = await fetch(url, { headers: authHeaders });
       if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
       const data = await res.json();
       const docs = (data.documents ?? []).map(parseFirestoreDoc);
-      return { data: docs as T[], total: docs.length };
+      return { data: docs as unknown as T[], total: docs.length };
     },
 
-    async getOne<T>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
       const res = await fetch(`${buildFirestoreUrl(projectId, resource, id)}?key=${apiKey}`, { headers: authHeaders });
       if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
-      return { data: parseFirestoreDoc(await res.json()) as T };
+      return { data: parseFirestoreDoc(await res.json()) as unknown as T };
     },
 
-    async create<T>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
       const res = await fetch(`${buildFirestoreUrl(projectId, resource)}?key=${apiKey}`, {
         method: 'POST', headers: authHeaders, body: JSON.stringify({ fields: toFirestoreFields(variables as Record<string, unknown>) }),
       });
       if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
-      return { data: parseFirestoreDoc(await res.json()) as T };
+      return { data: parseFirestoreDoc(await res.json()) as unknown as T };
     },
 
-    async update<T>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
       const res = await fetch(`${buildFirestoreUrl(projectId, resource, id)}?key=${apiKey}`, {
         method: 'PATCH', headers: authHeaders, body: JSON.stringify({ fields: toFirestoreFields(variables as Record<string, unknown>) }),
       });
       if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
-      return { data: parseFirestoreDoc(await res.json()) as T };
+      return { data: parseFirestoreDoc(await res.json()) as unknown as T };
     },
 
-    async deleteOne<T>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
       const res = await fetch(`${buildFirestoreUrl(projectId, resource, id)}?key=${apiKey}`, { method: 'DELETE', headers: authHeaders });
       if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
-      return { data: { id } as T };
+      return { data: { id } as unknown as T };
     },
 
-    async getMany<T>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
       const results = await Promise.all(ids.map(async (id: string | number) => {
         const res = await fetch(`${buildFirestoreUrl(projectId, resource, id)}?key=${apiKey}`, { headers: authHeaders });
         if (!res.ok) throw new Error(`Firebase error: ${res.status}`);
-        return parseFirestoreDoc(await res.json()) as T;
+        return parseFirestoreDoc(await res.json()) as unknown as T;
       }));
       return { data: results };
     },
 
-    async custom<T>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
       const res = await fetch(url, { method: method.toUpperCase(), headers: { ...authHeaders, ...h }, body: payload ? JSON.stringify(payload) : undefined });
       if (!res.ok) throw new Error(`Custom request failed: ${res.status}`);
-      return { data: (await res.json()) as T };
+      return { data: (await res.json()) as unknown as T };
     },
   };
 }

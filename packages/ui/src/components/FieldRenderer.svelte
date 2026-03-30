@@ -176,10 +176,11 @@
       />
     {:then editorMod}
       <editorMod.Editor
+        id={field.key}
         value={strVal}
         placeholder={t('field.enterValue', { label: field.label })}
         preset="full"
-        onchange={(html) => onchange(html)}
+        onchange={(html: string) => onchange(html)}
       />
     {:catch}
       <Textarea
@@ -206,6 +207,7 @@
 
   {:else if field.type === 'relation' && field.resource}
     <ComboboxField
+      id={field.key}
       resource={field.resource}
       value={value as string | number | null}
       onchange={(v) => onchange(v)}
@@ -218,6 +220,7 @@
     {#if (field.options?.length ?? 0) > 8}
       <!-- Many options → use ComboboxField-style search -->
       <ComboboxField
+        id={field.key}
         resource=""
         value={value as string | number | null}
         onchange={(v) => onchange(v)}
@@ -242,6 +245,7 @@
       {#each field.options ?? [] as opt}
         <label class="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/50 rounded px-1 py-0.5 transition-colors">
           <Checkbox
+            id={`${field.key}-${opt.value}`}
             checked={multiVal.includes(opt.value)}
             onCheckedChange={() => toggleMulti(opt.value)}
           />
@@ -267,6 +271,7 @@
   {:else if field.type === 'boolean'}
     <div class="flex items-center gap-2 pt-1">
       <Switch
+        id={field.key}
         checked={boolVal}
         onCheckedChange={(v) => onchange(v)}
       />
@@ -289,6 +294,7 @@
         {/each}
       </div>
       <Input
+        id={field.key}
         type="text"
         placeholder={t('field.tagsPlaceholder')}
         onkeydown={handleTagKeydown}
@@ -309,6 +315,7 @@
       {#each imagesVal as url, i}
         <div class="flex items-center gap-2">
           <Input
+            id={i === 0 ? field.key : undefined}
             type="text"
             value={url}
             oninput={(e) => updateImage(i, (e.target as HTMLInputElement).value)}

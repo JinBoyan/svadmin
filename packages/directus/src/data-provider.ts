@@ -2,7 +2,7 @@ import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
   GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter
-} from '@svadmin/core';
+, BaseRecord } from '@svadmin/core';
 
 function buildDirectusFilter(filters?: Filter[]): Record<string, unknown> {
   if (!filters?.length) return {};
@@ -27,7 +27,7 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<T>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
       const { current = 1, pageSize = 10 } = pagination ?? {};
       const params = new URLSearchParams();
       params.set('limit', String(pageSize));
@@ -42,28 +42,28 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
       return { data: data.data ?? [], total: data.meta?.total_count ?? 0 };
     },
 
-    async getOne<T>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
       const params = meta?.fields ? `?fields=${(meta.fields as string[]).join(',')}` : '';
       const data = await request<any>(`/items/${resource}/${id}${params}`);
-      return { data: data.data as T };
+      return { data: data.data as unknown as T };
     },
 
-    async create<T>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
       const data = await request<any>(`/items/${resource}`, { method: 'POST', body: JSON.stringify(variables) });
-      return { data: data.data as T };
+      return { data: data.data as unknown as T };
     },
 
-    async update<T>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
       const data = await request<any>(`/items/${resource}/${id}`, { method: 'PATCH', body: JSON.stringify(variables) });
-      return { data: data.data as T };
+      return { data: data.data as unknown as T };
     },
 
-    async deleteOne<T>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
       await request(`/items/${resource}/${id}`, { method: 'DELETE' });
-      return { data: { id } as T };
+      return { data: { id } as unknown as T };
     },
 
-    async getMany<T>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
       const params = new URLSearchParams();
       params.set('filter', JSON.stringify({ id: { _in: ids } }));
       if (meta?.fields) params.set('fields', (meta.fields as string[]).join(','));
@@ -71,10 +71,10 @@ export function createDirectusDataProvider(apiUrl: string, token?: string): Data
       return { data: data.data ?? [] };
     },
 
-    async custom<T>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers: h }: CustomParams): Promise<CustomResult<T>> {
       const res = await fetch(url, { method: method.toUpperCase(), headers: { ...headers, ...h }, body: payload ? JSON.stringify(payload) : undefined });
       if (!res.ok) throw new Error(`Custom request failed: ${res.status}`);
-      return { data: (await res.json()) as T };
+      return { data: (await res.json()) as unknown as T };
     },
   };
 }

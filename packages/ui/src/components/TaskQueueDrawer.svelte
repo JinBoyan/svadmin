@@ -1,23 +1,9 @@
-<script context="module">
-  export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed';
-
-  export interface BackgroundTask {
-    id: string;
-    title: string;
-    status: TaskStatus;
-    progress?: number; // 0-100
-    message?: string;
-    createdAt: string | Date;
-    downloadUrl?: string;
-    [key: string]: unknown;
-  }
-</script>
-
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { Loader2, CheckCircle2, XCircle, Clock, Download, X, ListTodo } from 'lucide-svelte';
   import { Button } from './ui/button/index.js';
   import { Badge } from './ui/badge/index.js';
+  import type { BackgroundTask, TaskStatus } from '../types.js';
 
   let {
     open = $bindable(false),

@@ -40,7 +40,7 @@ describe('@svadmin/drizzle DataProvider', () => {
       )
     `);
     db = drizzle(sqlite, { schema });
-    dataProvider = await createDrizzleDataProvider({ connection: db, schema });
+    dataProvider = await createDrizzleDataProvider({ connection: db as any, schema });
   });
 
   it('returns a valid DataProvider with all required methods', () => {

@@ -2,7 +2,7 @@ import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
   GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter
-} from '@svadmin/core';
+, BaseRecord } from '@svadmin/core';
 
 interface AirtableRecord {
   id: string;
@@ -45,7 +45,7 @@ export function createAirtableDataProvider(apiKey: string, baseId: string): Data
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<T>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
       const url = new URL(`${apiUrl}/${resource}`);
       
       const { pageSize = 100 } = pagination ?? {};
@@ -67,19 +67,19 @@ export function createAirtableDataProvider(apiKey: string, baseId: string): Data
 
       // Airtable doesn't return total count easily without offset matching, we can only return current length or a large number
       return {
-        data: data.records.map((r: AirtableRecord) => ({ ...r.fields, id: r.id })) as T[],
+        data: data.records.map((r: AirtableRecord) => ({ ...r.fields, id: r.id })) as unknown as T[],
         total: data.records.length,
       };
     },
 
-    async getOne<T>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
       const response = await fetch(`${apiUrl}/${resource}/${id}`, { headers });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      return { data: { ...data.fields, id: data.id } as T };
+      return { data: { ...data.fields, id: data.id } as unknown as T };
     },
 
-    async create<T>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
       const response = await fetch(`${apiUrl}/${resource}`, {
         method: 'POST',
         headers,
@@ -87,10 +87,10 @@ export function createAirtableDataProvider(apiKey: string, baseId: string): Data
       });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      return { data: { ...data.records[0].fields, id: data.records[0].id } as T };
+      return { data: { ...data.records[0].fields, id: data.records[0].id } as unknown as T };
     },
 
-    async update<T>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
       const response = await fetch(`${apiUrl}/${resource}`, {
         method: 'PATCH',
         headers,
@@ -98,17 +98,17 @@ export function createAirtableDataProvider(apiKey: string, baseId: string): Data
       });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      return { data: { ...data.records[0].fields, id: data.records[0].id } as T };
+      return { data: { ...data.records[0].fields, id: data.records[0].id } as unknown as T };
     },
 
-    async deleteOne<T>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
       const response = await fetch(`${apiUrl}/${resource}/${id}`, { method: 'DELETE', headers });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      return { data: { id: data.id } as T };
+      return { data: { id: data.id } as unknown as T };
     },
 
-    async getMany<T>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
       const url = new URL(`${apiUrl}/${resource}`);
       const formula = `OR(${ids.map((id: string | number) => `RECORD_ID()='${id}'`).join(',')})`;
       url.searchParams.append('filterByFormula', formula);
@@ -116,10 +116,10 @@ export function createAirtableDataProvider(apiKey: string, baseId: string): Data
       const response = await fetch(url.toString(), { headers });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      return { data: data.records.map((r: AirtableRecord) => ({ ...r.fields, id: r.id })) as T[] };
+      return { data: data.records.map((r: AirtableRecord) => ({ ...r.fields, id: r.id })) as unknown as T[] };
     },
 
-    async custom<T>({ url, method, payload, headers: customHeaders, query }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers: customHeaders, query }: CustomParams): Promise<CustomResult<T>> {
       let requestUrl = url;
       if (query) {
         const params = new URLSearchParams();
@@ -135,7 +135,7 @@ export function createAirtableDataProvider(apiKey: string, baseId: string): Data
 
       if (!response.ok) throw new Error(`Custom request failed: ${response.status}`);
       const data = await response.json();
-      return { data: data as T };
+      return { data: data as unknown as T };
     },
   };
 }

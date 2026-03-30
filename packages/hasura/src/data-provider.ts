@@ -1,7 +1,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter
+  GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter, BaseRecord
 } from '@svadmin/core';
 
 // Maps core filter operators to Hasura GraphQL query operators
@@ -38,7 +38,7 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
   return {
     getApiUrl: () => endpoint,
 
-    async getList<T>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
       const { current = 1, pageSize = 10, mode } = pagination ?? {};
       const offset = mode === 'server' ? (current - 1) * pageSize : 0;
       const limit = mode === 'server' ? pageSize : undefined;
@@ -75,7 +75,7 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
       `;
 
       const data = await executeGraphQL(endpoint, query, variables, defaultHeaders);
-      const resourceData = data[resource] as T[] | undefined;
+      const resourceData = data[resource] as unknown as unknown as T[] | undefined;
       const aggregateData = data[`${resource}_aggregate`] as { aggregate?: { count?: number } } | undefined;
       return {
         data: resourceData || [],
@@ -83,7 +83,7 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
       };
     },
 
-    async getOne<T>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
         query getOne($id: uuid!) {
@@ -93,10 +93,10 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
         }
       `;
       const data = await executeGraphQL(endpoint, query, { id }, defaultHeaders);
-      return { data: data[`${resource}_by_pk`] as T };
+      return { data: data[`${resource}_by_pk`] as unknown as unknown as T };
     },
 
-    async create<T>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
         mutation create($object: ${resource}_insert_input!) {
@@ -106,10 +106,10 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
         }
       `;
       const data = await executeGraphQL(endpoint, query, { object: variables }, defaultHeaders);
-      return { data: data[`insert_${resource}_one`] as T };
+      return { data: data[`insert_${resource}_one`] as unknown as unknown as T };
     },
 
-    async update<T>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
         mutation update($id: uuid!, $set: ${resource}_set_input!) {
@@ -119,10 +119,10 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
         }
       `;
       const data = await executeGraphQL(endpoint, query, { id, set: variables }, defaultHeaders);
-      return { data: data[`update_${resource}_by_pk`] as T };
+      return { data: data[`update_${resource}_by_pk`] as unknown as unknown as T };
     },
 
-    async deleteOne<T>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
         mutation deleteOne($id: uuid!) {
@@ -132,10 +132,10 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
         }
       `;
       const data = await executeGraphQL(endpoint, query, { id }, defaultHeaders);
-      return { data: data[`delete_${resource}_by_pk`] as T };
+      return { data: data[`delete_${resource}_by_pk`] as unknown as unknown as T };
     },
 
-    async getMany<T>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
         query getMany($ids: [uuid!]!) {
@@ -145,10 +145,10 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
         }
       `;
       const data = await executeGraphQL(endpoint, query, { ids }, defaultHeaders);
-      return { data: (data[resource] as T[]) || [] };
+      return { data: (data[resource] as unknown as unknown as T[]) || [] };
     },
 
-    async custom<T>({ url, method, payload, headers }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers }: CustomParams): Promise<CustomResult<T>> {
       // By default Hasura only understands GraphQL via POST, but arbitrary custom calls might be used for REST endpoints mapping.
       const response = await fetch(url, {
         method: method.toUpperCase(),
@@ -157,7 +157,7 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
       });
       if (!response.ok) throw new Error(`Custom request failed: ${response.status}`);
       const data = await response.json();
-      return { data: data as T };
+      return { data: data as unknown as unknown as T };
     },
   };
 }

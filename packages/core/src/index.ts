@@ -78,7 +78,7 @@ export {
   useLogin, useLogout,
   useRegister, useForgotPassword, useUpdatePassword,
   useGetIdentity, useIsAuthenticated,
-  useOnError, usePermissions, useHasPermission,
+  useOnError, usePermissions,
 } from './auth-hooks.svelte';
 export { useParsed } from './useParsed.svelte';
 export * from './useStepsForm.svelte';

@@ -1,7 +1,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter
+  GetManyParams, GetManyResult, CustomParams, CustomResult, Sort, Filter, BaseRecord
 } from '@svadmin/core';
 
 function mapOperator(operator: string): string {
@@ -52,7 +52,7 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<T>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord>({ resource, pagination, sorters, filters, meta }: GetListParams): Promise<GetListResult<T>> {
       const url = new URL(`${apiUrl}/${resource}`);
       url.search = generateQueryParams(pagination, sorters, filters);
       if (meta?.populate) url.searchParams.append('populate', String(meta.populate));
@@ -72,7 +72,7 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
       };
     },
 
-    async getOne<T>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
       const url = new URL(`${apiUrl}/${resource}/${id}`);
       if (meta?.populate) url.searchParams.append('populate', String(meta.populate));
       
@@ -82,7 +82,7 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
       return { data: data.data || data };
     },
 
-    async create<T>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -93,7 +93,7 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
       return { data: result.data || result };
     },
 
-    async update<T>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -104,14 +104,14 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
       return { data: result.data || result };
     },
 
-    async deleteOne<T>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const result = await response.json();
       return { data: result.data || result };
     },
 
-    async getMany<T>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord>({ resource, ids, meta }: GetManyParams): Promise<GetManyResult<T>> {
       const url = new URL(`${apiUrl}/${resource}`);
       ids.forEach((id: string | number, index: number) => url.searchParams.append(`filters[id][$in][${index}]`, String(id)));
       if (meta?.populate) url.searchParams.append('populate', String(meta.populate));
@@ -122,7 +122,7 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
       return { data: result.data || [] };
     },
 
-    async custom<T>({ url, method, payload, headers, query }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers, query }: CustomParams): Promise<CustomResult<T>> {
       let requestUrl = url;
       if (query) {
         const params = new URLSearchParams();
@@ -138,7 +138,7 @@ export function createStrapiDataProvider(apiUrl: string, httpClient: typeof fetc
 
       if (!response.ok) throw new Error(`Custom request failed: ${response.status}`);
       const data = await response.json();
-      return { data: data as T };
+      return { data: data as unknown as T };
     },
   };
 }

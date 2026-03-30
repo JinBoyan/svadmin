@@ -1,7 +1,7 @@
 import type {
   DataProvider, GetListParams, GetListResult, GetOneParams, GetOneResult,
   CreateParams, CreateResult, UpdateParams, UpdateResult, DeleteParams, DeleteResult,
-  CustomParams, CustomResult,
+  CustomParams, CustomResult, BaseRecord
 } from '@svadmin/core';
 import type { GraphQLClient, RequestDocument, Variables } from 'graphql-request';
 
@@ -30,7 +30,7 @@ export function createGraphQLDataProvider(options: GraphQLDataProviderOptions): 
   return {
     getApiUrl: () => 'graphql',
 
-    async getList<T>({ resource, pagination, meta }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, meta }: GetListParams): Promise<GetListResult<T>> {
       const query = getQuery(meta, 'getList', resource);
       const variables: Variables = {
         ...getMetaVars(meta),
@@ -42,40 +42,40 @@ export function createGraphQLDataProvider(options: GraphQLDataProviderOptions): 
 
       const response = await client.request<{ data: T[]; total?: number }>(query, variables);
       return {
-        data: response.data || ([] as T[]),
+        data: response.data || ([] as unknown as T[]),
         total: response.total || 0,
       };
     },
 
-    async getOne<T>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
       const query = getQuery(meta, 'getOne', resource);
       const variables: Variables = { id, ...getMetaVars(meta) };
       const response = await client.request<{ data: T }>(query, variables);
       return { data: response.data };
     },
 
-    async create<T>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables, meta }: CreateParams): Promise<CreateResult<T>> {
       const query = getQuery(meta, 'create', resource);
       const allVars: Variables = { ...(variables as Record<string, unknown>), ...getMetaVars(meta) };
       const response = await client.request<{ data: T }>(query, allVars);
       return { data: response.data };
     },
 
-    async update<T>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
       const query = getQuery(meta, 'update', resource);
       const allVars: Variables = { id, ...(variables as Record<string, unknown>), ...getMetaVars(meta) };
       const response = await client.request<{ data: T }>(query, allVars);
       return { data: response.data };
     },
 
-    async deleteOne<T>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
       const query = getQuery(meta, 'deleteOne', resource);
       const allVars: Variables = { id, ...getMetaVars(meta) };
       const response = await client.request<{ data: T }>(query, allVars);
       return { data: response.data };
     },
 
-    async custom<T>({ meta, payload, headers }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ meta, payload, headers }: CustomParams): Promise<CustomResult<T>> {
       if (!meta?.query) {
         throw new Error(`[svadmin/graphql] custom requires 'meta.query'`);
       }

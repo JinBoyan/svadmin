@@ -15,7 +15,8 @@ import type {
   CustomParams,
   CustomResult,
   Filter,
-  Sort
+  Sort,
+  BaseRecord
 } from '@svadmin/core';
 
 // Simplified nestjsx/crud-request query generation
@@ -68,7 +69,7 @@ export function createNestjsxCrudDataProvider(apiUrl: string, httpClient: typeof
   return {
     getApiUrl: () => apiUrl,
 
-    async getList<T>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
+    async getList<T extends BaseRecord = BaseRecord>({ resource, pagination, sorters, filters }: GetListParams): Promise<GetListResult<T>> {
       const url = new URL(`${apiUrl}/${resource}`);
       url.search = generateQueryParams(pagination, sorters, filters);
 
@@ -87,14 +88,14 @@ export function createNestjsxCrudDataProvider(apiUrl: string, httpClient: typeof
       };
     },
 
-    async getOne<T>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
+    async getOne<T extends BaseRecord = BaseRecord>({ resource, id }: GetOneParams): Promise<GetOneResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}/${id}`);
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
       return { data: data };
     },
 
-    async create<T>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
+    async create<T extends BaseRecord = BaseRecord>({ resource, variables }: CreateParams): Promise<CreateResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,7 +106,7 @@ export function createNestjsxCrudDataProvider(apiUrl: string, httpClient: typeof
       return { data: data };
     },
 
-    async update<T>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
+    async update<T extends BaseRecord = BaseRecord>({ resource, id, variables }: UpdateParams): Promise<UpdateResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -116,14 +117,14 @@ export function createNestjsxCrudDataProvider(apiUrl: string, httpClient: typeof
       return { data: data };
     },
 
-    async deleteOne<T>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
+    async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id }: DeleteParams): Promise<DeleteResult<T>> {
       const response = await httpClient(`${apiUrl}/${resource}/${id}`, { method: 'DELETE' });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
       return { data: data };
     },
 
-    async getMany<T>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
+    async getMany<T extends BaseRecord = BaseRecord>({ resource, ids }: GetManyParams): Promise<GetManyResult<T>> {
       const url = new URL(`${apiUrl}/${resource}`);
       ids.forEach((id) => url.searchParams.append('search', `id||$in||${id}`));
 
@@ -133,7 +134,7 @@ export function createNestjsxCrudDataProvider(apiUrl: string, httpClient: typeof
       return { data: data.data || data };
     },
 
-    async custom<T>({ url, method, payload, headers, query }: CustomParams): Promise<CustomResult<T>> {
+    async custom<T = unknown>({ url, method, payload, headers, query }: CustomParams): Promise<CustomResult<T>> {
       let requestUrl = url;
       if (query) {
         const params = new URLSearchParams();
@@ -149,7 +150,7 @@ export function createNestjsxCrudDataProvider(apiUrl: string, httpClient: typeof
 
       if (!response.ok) throw new Error(`Custom request failed: ${response.status}`);
       const data = await response.json();
-      return { data: data as T };
+      return { data: data as unknown as unknown as T };
     },
   };
 }
