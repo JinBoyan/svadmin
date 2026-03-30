@@ -67,3 +67,22 @@ Home / Posts / Edit #42
 ```
 
 Supports: list, create, edit, and show routes.
+
+## Sidebar
+
+The `Sidebar` component provides navigation automatically generated from your resources. It supports a `routeMode` prop arraying to different routing environments:
+
+```svelte
+<Sidebar 
+  {collapsed} {identity} {title} {onToggle} {onLogout} {menu}
+  routeMode="auto" 
+/>
+```
+
+### Route Modes
+
+| Mode | Description |
+|------|-------------|
+| `auto` | (Default) Dynamically detects the environment. If `window.location.hash.startsWith('#/')` is true, falls back to `hash`, otherwise defaults to `path`. Perfect for seamless SvelteKit and SPA interoperability. |
+| `path` | Uses standard filesystem `/path` routing (SvelteKit default). |
+| `hash` | Uses `#` based hash routing (SPA default). |

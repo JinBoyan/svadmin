@@ -37,8 +37,16 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 ### `usePermissions<T>()`
 
 ```typescript
-const { data } = usePermissions<string[]>();
-// data → ['admin', 'editor']
+const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
+
+// 检查特定权限
+if (has('admin')) { /* ... */ }
+
+// 检查资源:操作权限
+if (can('posts', 'edit')) { /* ... */ }
+
+// 重新获取权限（比如角色升级后）
+await refetch();
 ```
 
 ### `useOnError()`

@@ -67,3 +67,22 @@ CRUD 页面包装器组合了 PageHeader、面包屑、AutoTable/AutoForm 和操
 ```
 
 支持：列表、创建、编辑和详情路由。
+
+## 面板侧边栏 (Sidebar)
+
+`Sidebar` 组件提供基于资源自动生成的导航。它支持一个 `routeMode` 路由模式属性以适应不同的路由环境：
+
+```svelte
+<Sidebar 
+  {collapsed} {identity} {title} {onToggle} {onLogout} {menu}
+  routeMode="auto" 
+/>
+```
+
+### 路由模式
+
+| 模式 | 描述 |
+|------|------|
+| `auto` | (默认) 动态检测当前环境。如果检测到 `window.location.hash.startsWith('#/')` 则降级为 `hash` 模式，否则默认使用 `path` 模式。完美适配 SvelteKit 和 SPA。 |
+| `path` | 使用标准的 `/path` 路由 (SvelteKit 默认)。 |
+| `hash` | 使用 `#` 哈希路由 (SPA 默认)。 |

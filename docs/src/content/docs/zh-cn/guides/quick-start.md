@@ -67,6 +67,34 @@ bun run dev
 
 访问 `http://localhost:5173` — 你的管理后台已就绪！
 
+## 可选：富文本编辑器
+
+为了保持核心包的轻量，富文本编辑器是一个可选插件。如果你的资源中包含 `type: 'richtext'` 的字段，你需要显式全局注册编辑器：
+
+```bash
+bun add @svadmin/editor
+```
+
+```svelte
+// 在您的 App.svelte 或 +layout.svelte 中：
+import { setRichTextEditor } from '@svadmin/ui';
+import { Editor } from '@svadmin/editor';
+
+setRichTextEditor(Editor);
+```
+
+## 可选：SvelteKit 未保存拦截
+
+如果你在 SvelteKit 项目中使用，为了防止用户在表单未保存时切换页面导致数据丢失，你需要注入路由拦截器：
+
+```svelte
+// 在根 +layout.svelte 中
+import { beforeNavigate } from '$app/navigation';
+import { initUnsavedChangesNotifier } from '@svadmin/core';
+
+initUnsavedChangesNotifier({ beforeNavigate });
+```
+
 ## 使用认证
 
 添加 `AuthProvider` 启用登录/登出：

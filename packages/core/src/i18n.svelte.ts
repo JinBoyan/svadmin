@@ -519,6 +519,22 @@ export function addTranslations(locale: string, translations: Record<string, str
 }
 
 /**
+ * useTranslate — Svelte 5 reactive translation hook
+ * Tracks locale changes natively.
+ */
+export function useTranslate() {
+  const translate = $derived.by(() => {
+    // Read currentLocale so this $derived depends on it
+    const loc = currentLocale;
+    return (key: string, params?: Record<string, string | number>): string => {
+      // Intentionally passing the key to the main t() function which uses currentLocale
+      return t(key, params);
+    };
+  });
+  return { get t() { return translate; } };
+}
+
+/**
  * useTranslation — standard i18n hook
  * Returns { translate, getLocale, changeLocale }
  */

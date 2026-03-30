@@ -67,6 +67,34 @@ bun run dev
 
 Visit `http://localhost:5173` — your admin panel is ready!
 
+## Optional: Rich Text Editor
+
+To keep the core lightweight, the rich text editor is an optional plugin. If your resources use `type: 'richtext'`, you must explicitly register the editor:
+
+```bash
+bun add @svadmin/editor
+```
+
+```svelte
+// In your App.svelte or +layout.svelte
+import { setRichTextEditor } from '@svadmin/ui';
+import { Editor } from '@svadmin/editor';
+
+setRichTextEditor(Editor);
+```
+
+## Optional: SvelteKit Unsaved Changes
+
+To prevent users from navigating away and losing data using the SvelteKit router, register the `beforeNavigate` lifecycle during app initialization:
+
+```svelte
+// In your root +layout.svelte
+import { beforeNavigate } from '$app/navigation';
+import { initUnsavedChangesNotifier } from '@svadmin/core';
+
+initUnsavedChangesNotifier({ beforeNavigate });
+```
+
 ## With Authentication
 
 Add an `AuthProvider` to enable login/logout:

@@ -37,8 +37,16 @@ const { isAuthenticated, isLoading } = useIsAuthenticated();
 ### `usePermissions<T>()`
 
 ```typescript
-const { data } = usePermissions<string[]>();
-// data → ['admin', 'editor']
+const { raw, has, can, isLoading, refetch } = usePermissions<string[]>();
+
+// Check specific permission
+if (has('admin')) { /* ... */ }
+
+// Check resource:action permission
+if (can('posts', 'edit')) { /* ... */ }
+
+// Session-level refresh (e.g. after role upgrade)
+await refetch();
 ```
 
 ### `useOnError()`
