@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/zuohuadong/svadmin/compare/simple-rest-v0.9.0...simple-rest-v0.9.1) (2026-03-31)
+
+
+### 🐛 Bug Fixes
+
+* **build:** resolve playwright error and preserve semver strings for npm publish using node-workspace ([67e71d4](https://github.com/zuohuadong/svadmin/commit/67e71d4946430122fe1eea7ac06bc40cf9441a85))
+
 ## [0.9.0](https://github.com/zuohuadong/svadmin/compare/simple-rest-v0.8.0...simple-rest-v0.9.0) (2026-03-30)
 
 

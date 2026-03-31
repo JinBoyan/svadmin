@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.23.1...ui-v0.23.2) (2026-03-31)
+
+
+### 🐛 Bug Fixes
+
+* **build:** resolve playwright error and preserve semver strings for npm publish using node-workspace ([67e71d4](https://github.com/zuohuadong/svadmin/commit/67e71d4946430122fe1eea7ac06bc40cf9441a85))
+
 ## [0.23.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.23.0...ui-v0.23.1) (2026-03-31)
 
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/zuohuadong/svadmin/compare/drizzle-v0.10.0...drizzle-v0.10.1) (2026-03-31)
+
+
+### 🐛 Bug Fixes
+
+* **build:** resolve playwright error and preserve semver strings for npm publish using node-workspace ([67e71d4](https://github.com/zuohuadong/svadmin/commit/67e71d4946430122fe1eea7ac06bc40cf9441a85))
+
 ## [0.10.0](https://github.com/zuohuadong/svadmin/compare/drizzle-v0.9.0...drizzle-v0.10.0) (2026-03-30)
 
 
