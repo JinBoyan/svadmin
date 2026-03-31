@@ -439,7 +439,8 @@
                   <select
                     id="filter-{field.key}"
                     class="h-9 text-sm w-full font-normal flex w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    bind:value={filterValues[field.key]}
+                    value={filterValues[field.key] ?? ''}
+                    onchange={(e) => filterValues[field.key] = (e.currentTarget as HTMLSelectElement).value}
                   >
                     <option value="">全部</option>
                     {#each field.options as opt}
@@ -450,7 +451,8 @@
                   <Input
                     id="filter-{field.key}"
                     type="text"
-                    bind:value={filterValues[field.key]}
+                    value={filterValues[field.key] ?? ''}
+                    oninput={(e) => filterValues[field.key] = (e.currentTarget as HTMLInputElement).value}
                     placeholder={field.label}
                     class="h-9 text-sm"
                   />
