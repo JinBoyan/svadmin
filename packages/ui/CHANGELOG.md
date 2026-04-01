@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.25.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.25.0...ui-v0.25.1) (2026-04-01)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** remove invalid Pagination import causing Vite dev crash ([3f9f6c3](https://github.com/zuohuadong/svadmin/commit/3f9f6c337f048b4c4a95e9355ab359f56d033e87))
+* **ui:** remove invalid Pagination import causing Vite dev crash ([076aaed](https://github.com/zuohuadong/svadmin/commit/076aaed088e5ab7e7b104a629d4b0277dc673f3b))
+
 ## [0.25.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.24.1...ui-v0.25.0) (2026-03-31)
 
 
