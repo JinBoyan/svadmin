@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.25.3](https://github.com/zuohuadong/svadmin/compare/ui-v0.25.2...ui-v0.25.3) (2026-04-02)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** add children snippet rendering to AlertDialog header and footer ([bfbf452](https://github.com/zuohuadong/svadmin/commit/bfbf452c0b36799380a152afbe17497757bbfbf6))
+* **ui:** gracefully handle missing optional marked dependencies ([dc90d72](https://github.com/zuohuadong/svadmin/commit/dc90d72b71991d78914b36c2c6e7fb7755af0630))
+* **ui:** gracefully handle missing optional marked dependencies ([d1cdcb7](https://github.com/zuohuadong/svadmin/commit/d1cdcb7b09c749c5efd80cc1b71d5e3e1c304cea))
+
 ## [0.25.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.25.1...ui-v0.25.2) (2026-04-01)
 
 
