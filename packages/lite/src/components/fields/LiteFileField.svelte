@@ -29,8 +29,8 @@
     {/each}
   </div>
 {:else}
+  {@const files = getFiles(value)}
   <div>
-    {@const files = getFiles(value)}
     {#if files.length > 0 && mode === 'edit'}
       <div style="margin-bottom: 8px;">
         <span style="font-size: 12px;">Current files: {files.length}</span>
@@ -41,7 +41,7 @@
       name={field.key}
       id={field.key}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
-      {...field.type === 'files' ? { multiple: true } : {}}
+      {...(field.type as string) === 'files' ? { multiple: true } : {}}
       {...field.required && !files.length ? { required: true } : {}}
     />
     {#if hasError}

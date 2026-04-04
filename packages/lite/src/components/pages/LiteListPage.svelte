@@ -49,7 +49,7 @@
 
   <div class="lite-card" style="margin-bottom: 20px;">
     <div style="padding: 16px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-      <LiteSearch defaultValue={currentSearch} placeholder={t('common.search') || 'Search...'} />
+      <LiteSearch value={currentSearch} placeholder={t('common.search') || 'Search...'} />
       <span style="font-size: 13px; color: #64748b;">
         {t('common.total') || 'Total'}: {total}
       </span>
@@ -69,8 +69,7 @@
     {#if total > pagination.perPage}
       <LitePagination
         page={pagination.page}
-        perPage={pagination.perPage}
-        {total}
+        totalPages={Math.ceil(total / pagination.perPage)}
       />
     {/if}
   </div>

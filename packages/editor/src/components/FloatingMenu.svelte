@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Editor } from '@tiptap/core';
-  import { FloatingMenu as TiptapFloatingMenu } from '@tiptap/extension-floating-menu';
+  import { FloatingMenuPlugin } from '@tiptap/extension-floating-menu';
   import ToolbarButton from './ToolbarButton.svelte';
   import {
     Heading1, Heading2, Heading3,
@@ -19,14 +19,15 @@
     if (!menuElement) return;
 
     const existing = editor.extensionManager.extensions.find(
-      (e) => e.name === 'floatingMenu'
+      (e: any) => e.name === 'floatingMenu'
     );
     if (existing) return;
 
-    const plugin = TiptapFloatingMenu.configure({
+    const plugin = FloatingMenuPlugin({
+      pluginKey: 'floatingMenu',
+      editor,
       element: menuElement,
-      tippyOptions: {
-        duration: 150,
+      options: {
         placement: 'left-start',
       },
       shouldShow: ({ editor: e, state }) => {
@@ -42,7 +43,7 @@
       },
     });
 
-    editor.registerPlugin(plugin.options.plugin(plugin.options));
+    editor.registerPlugin(plugin);
   });
 </script>
 

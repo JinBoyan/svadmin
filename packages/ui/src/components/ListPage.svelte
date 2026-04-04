@@ -63,7 +63,7 @@
   <AutoTable
     {resourceName}
     {selectable}
-    {cellRenderer}
+    defaultCellRenderer={cellRenderer}
     {rowActions}
     {emptyState}
     {expandedRowRender}

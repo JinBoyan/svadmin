@@ -48,7 +48,7 @@
         type="button"
         class="lite-btn lite-btn-sm"
         style="margin-right:8px;"
-        onclick="this.closest('details').removeAttribute('open')"
+        onclick={(e) => (e.currentTarget as HTMLElement).closest('details')?.removeAttribute('open')}
       >
         {cancelLabel}
       </button>

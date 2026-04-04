@@ -28,7 +28,7 @@
       id={field.key}
       value={String(value ?? '')}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
-      placeholder={field.placeholder ?? field.label}
+      placeholder={(field as any).placeholder ?? field.label}
       {...field.required ? { required: true } : {}}
     />
     {#if hasError}

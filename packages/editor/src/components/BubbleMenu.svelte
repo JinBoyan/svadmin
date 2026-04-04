@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Editor } from '@tiptap/core';
-  import { BubbleMenu as TiptapBubbleMenu } from '@tiptap/extension-bubble-menu';
+  import { BubbleMenuPlugin } from '@tiptap/extension-bubble-menu';
   import ToolbarButton from './ToolbarButton.svelte';
   import {
     Bold, Italic, Underline as UnderlineIcon, Strikethrough,
@@ -34,18 +34,18 @@
 
     // Check if BubbleMenu is already registered
     const existing = editor.extensionManager.extensions.find(
-      (e) => e.name === 'bubbleMenu'
+      (e: any) => e.name === 'bubbleMenu'
     );
     if (existing) return;
 
     // We need to register the extension dynamically
     // Tiptap handles this through the plugin system
-    const plugin = TiptapBubbleMenu.configure({
+    const plugin = BubbleMenuPlugin({
+      pluginKey: 'bubbleMenu',
+      editor,
       element: menuElement,
-      tippyOptions: {
-        duration: 150,
-        placement: 'top',
-        animation: 'shift-away',
+      options: {
+        placement: 'top'
       },
       shouldShow: ({ editor: e, state }) => {
         const { selection } = state;
@@ -56,7 +56,7 @@
       },
     });
 
-    editor.registerPlugin(plugin.options.plugin(plugin.options));
+    editor.registerPlugin(plugin);
     return () => {
       // cleanup handled by editor destroy
     };

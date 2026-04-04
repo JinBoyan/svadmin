@@ -34,7 +34,7 @@
     <div class="lite-array-item" style="border:1px solid #e2e8f0;border-radius:6px;padding:12px;margin-bottom:8px;background:#f8fafc;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <span style="font-size:12px;font-weight:600;color:#94a3b8;">#{i + 1}</span>
-        <button type="button" class="lite-btn lite-btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick="this.closest('.lite-array-item').remove()">
+        <button type="button" class="lite-btn lite-btn-sm" style="color:#dc2626;border-color:#fecaca;" onclick={(e) => (e.currentTarget as HTMLElement).closest('.lite-array-item')?.remove()}>
           Remove
         </button>
       </div>
@@ -91,10 +91,11 @@
     <p style="text-align:center;padding:16px;color:#94a3b8;font-size:14px;">No items added yet.</p>
   {/if}
 
-  <button type="button" class="lite-btn" style="margin-top:4px;" onclick="
-    const template = this.previousElementSibling?.previousElementSibling?.cloneNode(true);
-    if (template) this.parentElement.insertBefore(template, this.previousElementSibling);
-  ">
+  <button type="button" class="lite-btn" style="margin-top:4px;" onclick={(e) => {
+    const target = e.currentTarget as HTMLElement;
+    const template = target.previousElementSibling?.previousElementSibling?.cloneNode(true);
+    if (template && target.parentElement) target.parentElement.insertBefore(template, target.previousElementSibling);
+  }}>
     + Add Item
   </button>
 </fieldset>

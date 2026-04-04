@@ -18,7 +18,7 @@
     if (v == null) return '—';
     if (typeof v === 'object' && v !== null && 'id' in v) {
       // It's a populated relation object
-      const labelField = field.relation?.labelField || 'name';
+      const labelField = (field as any).relation?.labelField || 'name';
       return String((v as Record<string, unknown>)[labelField] || (v as Record<string, unknown>).id);
     }
     // Try options

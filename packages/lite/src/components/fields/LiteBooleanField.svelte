@@ -30,7 +30,7 @@
     <input type="hidden" name={field.key} value="false" />
     
     <label for={field.key}>
-      {field.placeholder ?? (field.label || 'Yes')}
+      {(field as any).placeholder ?? (field.label || 'Yes')}
     </label>
     {#if hasError}
       {#each error as err}

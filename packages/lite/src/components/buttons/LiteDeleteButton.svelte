@@ -45,7 +45,7 @@
       <button 
         type="button" 
         class="lite-btn lite-btn-sm" 
-        onclick="this.closest('details').removeAttribute('open')"
+        onclick={(e) => (e.currentTarget as HTMLElement).closest('details')?.removeAttribute('open')}
       >
         {t('common.cancel') || 'Cancel'}
       </button>

@@ -13,6 +13,7 @@
 
   // Only safely import css if hljs exists
   if (hljsModule && Object.keys(hljsModule).length > 0) {
+    // @ts-ignore
     import("highlight.js/styles/github-dark.css").catch(() => {});
   }
 
@@ -27,7 +28,7 @@
 
   let { content, streaming = false, class: className = "" }: Props = $props();
 
-  const hasMarkdownDeps = !!(Marked && markedHighlight && DOMPurify && Object.keys(DOMPurify).length > 0);
+  const hasMarkdownDeps = !!(Marked && Object.keys(DOMPurify || {}).length > 0);
 
   // Configure marked with syntax highlighting if available
   const markedObj = hasMarkdownDeps ? new Marked(
@@ -43,7 +44,7 @@
   // Render HTML safely
   const html = $derived(
     hasMarkdownDeps
-      ? DOMPurify.sanitize(markedObj.parse(content || "") as string)
+      ? DOMPurify.sanitize(markedObj!.parse(content || "") as string)
       : `<div style="white-space: pre-wrap">${String(content || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</div>`
   );
 

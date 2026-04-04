@@ -15,7 +15,7 @@ function fieldToZod(field: FieldDefinition): z.ZodTypeAny {
 
   switch (field.type) {
     case 'number':
-      schema = z.coerce.number({ invalid_type_error: `${field.label} must be a number` });
+      schema = z.coerce.number({ message: `${field.label} must be a number` });
       break;
     case 'boolean':
       schema = z.coerce.boolean();
@@ -36,7 +36,7 @@ function fieldToZod(field: FieldDefinition): z.ZodTypeAny {
       if (field.options?.length) {
         schema = z.enum(
           field.options.map((o: { value: string | number }) => String(o.value)) as [string, ...string[]],
-          { errorMap: () => ({ message: `${field.label} must be one of the options` }) },
+          { message: `${field.label} must be one of the options` },
         );
       } else {
         schema = z.string();

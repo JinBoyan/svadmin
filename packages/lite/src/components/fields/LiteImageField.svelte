@@ -29,8 +29,8 @@
     {/each}
   </div>
 {:else}
+  {@const urls = getUrls(value)}
   <div>
-    {@const urls = getUrls(value)}
     {#if urls.length > 0 && mode === 'edit'}
       <div style="margin-bottom: 8px; display:flex; gap: 8px;">
         {#each urls as url}
@@ -45,7 +45,7 @@
       id={field.key}
       accept="image/*"
       class="lite-input {hasError ? 'lite-input-error' : ''}"
-      {...field.type === 'images' ? { multiple: true } : {}}
+      {...(field.type as string) === 'images' ? { multiple: true } : {}}
       {...field.required && !urls.length ? { required: true } : {}}
     />
     {#if hasError}

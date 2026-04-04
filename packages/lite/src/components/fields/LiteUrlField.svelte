@@ -15,7 +15,7 @@
 {#if mode === 'show'}
   <span>
     {#if value}
-      <a href="{value}" target="_blank" rel="noopener noreferrer">{value}</a>
+      <a href="{String(value)}" target="_blank" rel="noopener noreferrer">{value}</a>
     {:else}
       —
     {/if}
@@ -28,7 +28,7 @@
       id={field.key}
       value={String(value ?? '')}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
-      placeholder={field.placeholder ?? field.label}
+      placeholder={(field as any).placeholder ?? field.label}
       {...field.required ? { required: true } : {}}
     />
     {#if hasError}

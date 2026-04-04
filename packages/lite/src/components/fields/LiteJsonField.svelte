@@ -31,7 +31,7 @@
       id={field.key}
       class="lite-input {hasError ? 'lite-input-error' : ''}"
       style="min-height: 150px; font-family: monospace;"
-      placeholder="{}"
+      placeholder="&lbrace;&rbrace;"
       {...field.required ? { required: true } : {}}
     >{getJsonString(value)}</textarea>
     {#if hasError}
