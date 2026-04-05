@@ -1,6 +1,6 @@
 <script lang="ts">
   import { useList } from '@svadmin/core';
-  import { FileText, Users, MessageCircle, Loader2 } from 'lucide-svelte';
+  import { FileText, Users, MessageCircle, Loader2 } from '@lucide/svelte';
 
   const postsQuery = useList({ resource: 'posts', pagination: { current: 1, pageSize: 1 } });
   const usersQuery = useList({ resource: 'users', pagination: { current: 1, pageSize: 1 } });

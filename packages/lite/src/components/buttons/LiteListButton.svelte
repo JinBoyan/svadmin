@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from '@svadmin/core/i18n';
-  import { List } from 'lucide-svelte';
+  import { List } from '@lucide/svelte';
 
   interface Props {
     resource: string;

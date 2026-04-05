@@ -191,8 +191,8 @@
   });
 
   // Character count
-  const charCount = $derived((editor as any)?.storage?.characterCount?.characters() ?? 0);
-  const wordCount = $derived((editor as any)?.storage?.characterCount?.words() ?? 0);
+  const charCount = $derived((editor?.storage as Record<string, any>)?.characterCount?.characters() ?? 0);
+  const wordCount = $derived((editor?.storage as Record<string, any>)?.characterCount?.words() ?? 0);
 </script>
 
 <div class="svadmin-editor {className}">

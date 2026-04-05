@@ -1,7 +1,7 @@
 <script lang="ts">
   import { getAuthProvider } from '@svadmin/core';
   import { navigate } from '@svadmin/core/router';
-  import { Loader2, Shield } from 'lucide-svelte';
+  import { Loader2, Shield } from '@lucide/svelte';
 
   const auth = getAuthProvider();
 

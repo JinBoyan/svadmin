@@ -3,7 +3,7 @@
   import * as markedHighlightPkg from "marked-highlight";
   import * as hljsPkg from "highlight.js";
   import * as DOMPurifyPkg from "isomorphic-dompurify";
-  import { Check, Copy } from "lucide-svelte";
+  import { Check, Copy } from '@lucide/svelte';
   import { Button } from "./ui/button/index.js";
 
   const Marked = markedPkg.Marked;

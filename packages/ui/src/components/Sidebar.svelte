@@ -15,7 +15,7 @@
   import {
     LayoutDashboard, FileText, Users, Settings, Home,
     ChevronLeft, ChevronRight, ChevronDown, LogOut, Sun, Moon, Palette
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
 
   let { collapsed, identity, title, onToggle, onLogout, menu, routeMode = 'auto' }: {
     collapsed: boolean;

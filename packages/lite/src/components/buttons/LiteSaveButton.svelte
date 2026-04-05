@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from '@svadmin/core/i18n';
-  import { Save } from 'lucide-svelte';
+  import { Save } from '@lucide/svelte';
 
   interface Props {
     hideText?: boolean;

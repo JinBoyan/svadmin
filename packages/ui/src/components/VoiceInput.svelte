@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Mic, MicOff, Loader2 } from 'lucide-svelte';
+  import { Mic, MicOff, Loader2 } from '@lucide/svelte';
   import TooltipButton from './TooltipButton.svelte';
 
   // Web Speech API type declarations

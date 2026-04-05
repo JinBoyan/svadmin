@@ -4,7 +4,7 @@
   import TooltipButton from './TooltipButton.svelte';
   import { Label } from './ui/label/index.js';
   import { Progress } from './ui/progress/index.js';
-  import { Lock, Eye, EyeOff } from 'lucide-svelte';
+  import { Lock, Eye, EyeOff } from '@lucide/svelte';
   import { t } from '@svadmin/core/i18n';
 
   interface Props {

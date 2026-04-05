@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from '@svadmin/core/i18n';
-  import { Pencil } from 'lucide-svelte';
+  import { Pencil } from '@lucide/svelte';
 
   interface Props {
     resource: string;

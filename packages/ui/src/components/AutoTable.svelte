@@ -32,7 +32,7 @@
     Plus, Pencil, Trash2,
     Search, Download, Upload, ChevronDown, ChevronUp, SlidersHorizontal, Filter as FilterIcon,
     Eye, Copy
-  } from 'lucide-svelte';
+  } from '@lucide/svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
   import TooltipButton from './TooltipButton.svelte';
   import InlineEdit from './InlineEdit.svelte';

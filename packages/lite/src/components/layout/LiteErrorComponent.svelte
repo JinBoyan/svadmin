@@ -1,6 +1,6 @@
 <script lang="ts">
   import { t } from '@svadmin/core/i18n';
-  import { AlertTriangle } from 'lucide-svelte';
+  import { AlertTriangle } from '@lucide/svelte';
 
   interface Props {
     title?: string;
