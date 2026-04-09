@@ -80,6 +80,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Build packages for publish
+        run: bun run --filter "@svadmin/ui" build
+
       - name: Publish changed packages
         run: |
           set -e
