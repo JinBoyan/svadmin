@@ -24,7 +24,19 @@ function extendQuery<Q extends object, E extends Record<string, unknown>>(
   query: Q,
   extensions: () => E,
 ): Q & E {
-  return Object.defineProperties(query, Object.getOwnPropertyDescriptors(extensions())) as Q & E;
+  return new Proxy(query, {
+    get(target, prop) {
+      if (typeof prop === 'string') {
+        const ext = extensions();
+        if (prop in ext) return ext[prop as keyof E];
+      }
+      return target[prop as keyof Q];
+    },
+    has(target, prop) {
+      if (typeof prop === 'string' && prop in extensions()) return true;
+      return prop in target;
+    },
+  }) as Q & E;
 }
 
 // ─── useList ───────────────────────────────────────────────────
