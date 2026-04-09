@@ -31,11 +31,15 @@ export function createSupabaseAuthProvider(client: SupabaseClient): AuthProvider
     async getIdentity(): Promise<Identity | null> {
       const { data: { user } } = await client.auth.getUser();
       if (!user) return null;
+      
+      const { data: { session } } = await client.auth.getSession();
+      
       return {
         id: user.id,
         name: user.user_metadata?.name ?? user.email?.split('@')[0] ?? 'User',
         email: user.email,
         avatar: user.user_metadata?.avatar_url,
+        token: session?.access_token,
       };
     },
 
