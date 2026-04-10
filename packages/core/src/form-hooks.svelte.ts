@@ -144,8 +144,9 @@ export function useForm<
   const action = options.action ?? (parsed.action === 'list' ? 'create' : parsed.action as 'create' | 'edit' | 'clone') ?? 'create';
   let currentId = $state<string | number | undefined>(options.id ?? parsed.id);
 
+  const defaultRedirectOpt = action === 'clone' ? adminOptions.redirect?.afterClone : action === 'edit' ? adminOptions.redirect?.afterEdit : adminOptions.redirect?.afterCreate;
   const {
-    redirect: redirectDefault = 'list',
+    redirect: redirectDefault = defaultRedirectOpt ?? 'list',
     successNotification, errorNotification,
     onMutationSuccess, onMutationError,
     meta: hookMeta, queryMeta: hookQueryMeta, mutationMeta: hookMutationMeta,
@@ -265,17 +266,17 @@ export function useForm<
     : null;
 
   // Auto-populate values from query data
-  let queryInitialized = false;
+  let queryInitializedId: string | number | undefined = undefined;
   if (query) {
     $effect.pre(() => {
-      if (queryInitialized) return;
+      if (queryInitializedId === currentId) return;
       const data = query.data as Record<string, unknown> | undefined;
-      if (data) {
+      if (data && (currentId == null || String(data.id) === String(currentId) || !data.id)) {
         // Merge: defaultValues < query data
         const merged = { ...(options.defaultValues ?? {}), ...data } as TVariables;
         values = merged;
         initialValues = { ...merged } as TVariables;
-        queryInitialized = true;
+        queryInitializedId = currentId;
       }
     });
   }
@@ -291,7 +292,11 @@ export function useForm<
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.createSuccess') });
       audit({ action: 'create', resource, recordId: String((data.data as Record<string, unknown>).id) });
       onMutationSuccess?.(data);
-      if (redirectOverride !== false) doRedirect(redirectOverride ?? redirectDefault);
+      if (redirectOverride !== false) {
+        const newId = (data.data as Record<string, unknown>).id;
+        if (newId != null) currentId = newId as string | number;
+        doRedirect(redirectOverride ?? redirectDefault);
+      }
     },
     onError: (error: Error) => { handleHttpError(error); onMutationError?.(error); },
   }));
@@ -344,7 +349,7 @@ export function useForm<
   let lastAutoSaveError = $state<unknown>(null);
 
   function triggerAutoSave() {
-    if (!autoSaveOpts?.enabled || action === 'create') return;
+    if (!autoSaveOpts?.enabled || action === 'create' || action === 'clone') return;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
     autoSaveTimer = setTimeout(async () => {

@@ -33,7 +33,7 @@ export function createHashRouterProvider(): RouterProvider {
       if (type === 'replace') {
         window.location.replace(url);
       } else {
-        window.location.hash = to;
+        window.location.hash = url;
       }
     },
     back() {

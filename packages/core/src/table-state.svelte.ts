@@ -111,9 +111,9 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
         writeURLState({
           page: this.pagination.current,
           pageSize: this.pagination.pageSize,
-          sortField: this.effectiveSorters[0]?.field,
-          sortOrder: this.effectiveSorters[0]?.order,
-          filters: this.effectiveFilters,
+          sortField: this.currentSorters[0]?.field,
+          sortOrder: this.currentSorters[0]?.order,
+          filters: this.currentFilters,
         });
       });
     }

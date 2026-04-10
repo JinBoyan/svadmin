@@ -64,7 +64,12 @@ export function navigate(path: string, options?: { replaceState?: boolean }): vo
 export function currentPath(): string {
   if (_routerProvider) {
     const parsed = _routerProvider.parse();
-    return parsed.pathname || '/';
+    const pathname = parsed.pathname || '/';
+    let qs = '';
+    if (parsed.params && Object.keys(parsed.params).length > 0) {
+      qs = '?' + new URLSearchParams(parsed.params).toString();
+    }
+    return pathname + qs;
   }
   return window.location.hash.replace(/^#/, '') || '/';
 }

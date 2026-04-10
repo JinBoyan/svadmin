@@ -148,6 +148,18 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
 
   const overtime = createOvertimeTracker(() => query.isLoading, options.overtimeOptions ?? adminOptions.overtime);
 
+  createLiveSubscription({
+    resource,
+    liveProvider: getLiveProvider(),
+    liveMode: options.liveMode ?? adminOptions.liveMode,
+    onLiveEvent: (e) => {
+      options.onLiveEvent?.(e);
+      adminOptions.onLiveEvent?.(e);
+    },
+    liveParams: options.liveParams,
+    enabled: (queryOptions?.enabled ?? true) && id != null,
+  });
+
   $effect(() => {
     if (query.isSuccess && options.successNotification) {
       fireSuccessNotification(options.successNotification, '', query.data, undefined, resource);
@@ -212,6 +224,18 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
   }));
 
   const overtime = createOvertimeTracker(() => query.isLoading, options.overtimeOptions ?? adminOptions.overtime);
+
+  createLiveSubscription({
+    resource,
+    liveProvider: getLiveProvider(),
+    liveMode: options.liveMode ?? adminOptions.liveMode,
+    onLiveEvent: (e) => {
+      options.onLiveEvent?.(e);
+      adminOptions.onLiveEvent?.(e);
+    },
+    liveParams: options.liveParams,
+    enabled: (queryOptions?.enabled ?? true) && ids.length > 0,
+  });
 
   $effect(() => {
     if (query.isSuccess && options.successNotification) fireSuccessNotification(options.successNotification, '', query.data, undefined, resource);

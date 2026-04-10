@@ -24,7 +24,7 @@
   const pk = resource.primaryKey ?? 'id';
   const id = record[pk];
   const showFields = $derived(
-    resource.fields.filter(f => f.showInShow !== false && f.showInList !== false)
+    resource.fields.filter(f => f.showInShow !== false)
   );
 </script>
 

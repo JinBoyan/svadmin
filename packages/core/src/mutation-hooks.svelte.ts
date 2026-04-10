@@ -41,6 +41,7 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
     TError,
     UseCreateMutateParams<TVariables>
   >(() => ({
+    ...options.mutationOptions,
     mutationFn: async (params) => {
       isMutating = true;
       const resName = params.resource ?? defaultResource;
@@ -115,6 +116,7 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
     TError,
     UseUpdateMutateParams<TVariables>
   >(() => ({
+    ...options.mutationOptions,
     mutationFn: async (params) => {
       isMutating = true;
       const resName = params.resource ?? defaultResource;
@@ -235,6 +237,7 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
     TError,
     UseDeleteMutateParams<TVariables>
   >(() => ({
+    ...options.mutationOptions,
     mutationFn: async (params) => {
       isMutating = true;
       const resName = params.resource ?? defaultResource;

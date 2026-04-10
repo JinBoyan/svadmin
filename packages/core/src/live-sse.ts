@@ -113,8 +113,10 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
 
   return {
     subscribe({ resource, callback }) {
+      let isNewResource = false;
       if (!subscribers.has(resource)) {
         subscribers.set(resource, new Set());
+        isNewResource = true;
       }
       subscribers.get(resource)!.add(callback);
 
@@ -123,7 +125,7 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
         connect();
       }
       // Add named listener for this resource if connected
-      if (eventSource && resource !== '*') {
+      if (eventSource && resource !== '*' && isNewResource) {
         addNamedListener(resource);
       }
 
