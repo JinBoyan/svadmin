@@ -6,7 +6,7 @@
   import { resources } from './resources';
   import { mockAuthProvider } from './providers/mockAuth';
 
-  const dataProvider = createSimpleRestDataProvider({
+  const dataProviderPromise = createSimpleRestDataProvider({
     apiUrl: 'https://jsonplaceholder.typicode.com',
   });
 
@@ -14,4 +14,10 @@
   setRichTextEditor(Editor);
 </script>
 
-<AdminApp {dataProvider} {resources} authProvider={mockAuthProvider} title="svadmin Demo" locale="en" />
+{#await dataProviderPromise}
+  <div style="display: flex; height: 100vh; align-items: center; justify-content: center;">
+    Loading app...
+  </div>
+{:then dataProvider}
+  <AdminApp {dataProvider} {resources} authProvider={mockAuthProvider} title="svadmin Demo" locale="en" />
+{/await}

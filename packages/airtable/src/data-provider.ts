@@ -9,11 +9,10 @@ import { createRefineAdapter } from '@svadmin/refine-adapter';
  * @param args Arguments required by @refinedev/airtable
  * @returns A fully compatible svadmin DataProvider
  */
-export function createAirtableDataProvider(...args: any[]): DataProvider {
-  
+export async function createAirtableDataProvider(...args: any[]): Promise<DataProvider> {
   // @ts-ignore
-  import * as pkg from '@refinedev/airtable';
-  const init = pkg.default || pkg.dataProvider || pkg.DataProvider;
+  const pkg = await import('@refinedev/airtable');
+  const init = (pkg as any).default || (pkg as any).dataProvider || (pkg as any).DataProvider;
   const refineProvider = init(...args);
   return createRefineAdapter(refineProvider);
 }

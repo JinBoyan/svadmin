@@ -9,11 +9,10 @@ import { createRefineAdapter } from '@svadmin/refine-adapter';
  * @param args Arguments required by @refinedev/simple-rest
  * @returns A fully compatible svadmin DataProvider
  */
-export function createSimpleRestDataProvider(...args: any[]): DataProvider {
-  
+export async function createSimpleRestDataProvider(...args: any[]): Promise<DataProvider> {
   // @ts-ignore
-  import * as pkg from '@refinedev/simple-rest';
-  const init = pkg.default || pkg.dataProvider || pkg.DataProvider;
+  const pkg = await import('@refinedev/simple-rest');
+  const init = (pkg as any).default || (pkg as any).dataProvider || (pkg as any).DataProvider;
   const refineProvider = init(...args);
   return createRefineAdapter(refineProvider);
 }

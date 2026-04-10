@@ -11,6 +11,7 @@ import { createRefineAdapter } from '@svadmin/refine-adapter';
  */
 export async function createSupabaseDataProvider(...args: any[]): Promise<DataProvider> {
   // Dynamic import — @refinedev/supabase is a peerDependency
+  // @ts-ignore
   const pkg = await import('@refinedev/supabase');
   const init = (pkg as any).default || (pkg as any).dataProvider || (pkg as any).DataProvider;
   const refineProvider = init(...args);

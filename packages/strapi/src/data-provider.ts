@@ -9,11 +9,10 @@ import { createRefineAdapter } from '@svadmin/refine-adapter';
  * @param args Arguments required by @refinedev/strapi-v4
  * @returns A fully compatible svadmin DataProvider
  */
-export function createStrapiDataProvider(...args: any[]): DataProvider {
-  
+export async function createStrapiDataProvider(...args: any[]): Promise<DataProvider> {
   // @ts-ignore
-  import * as pkg from '@refinedev/strapi-v4';
-  const init = pkg.default || pkg.dataProvider || pkg.DataProvider;
+  const pkg = await import('@refinedev/strapi-v4');
+  const init = (pkg as any).default || (pkg as any).dataProvider || (pkg as any).DataProvider;
   const refineProvider = init(...args);
   return createRefineAdapter(refineProvider);
 }
