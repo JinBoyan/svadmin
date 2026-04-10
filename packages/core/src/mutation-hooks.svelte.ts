@@ -56,7 +56,7 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
         isMutating = false;
       }
     },
-    onMutate: params.mutationOptions?.onMutate,
+    onMutate: (options.mutationOptions as any)?.onMutate,
     onSuccess: (data, params, context) => {
       const resName = params.resource ?? defaultResource;
       if (params.invalidates !== false) {

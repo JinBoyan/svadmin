@@ -21,8 +21,8 @@
     canEdit = true,
   }: Props = $props();
 
-  const pk = resource.primaryKey ?? 'id';
-  const id = record[pk];
+  let pk = $derived(resource.primaryKey ?? 'id');
+  let id = $derived(record[pk]);
   const showFields = $derived(
     resource.fields.filter(f => f.showInShow !== false)
   );

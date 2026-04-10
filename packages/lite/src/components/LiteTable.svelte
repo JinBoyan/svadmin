@@ -29,7 +29,7 @@
     canDelete = true,
   }: Props = $props();
 
-  const pk = resource.primaryKey ?? 'id';
+  let pk = $derived(resource.primaryKey ?? 'id');
   const listFields = $derived(
     resource.fields.filter(f => f.showInList !== false)
   );

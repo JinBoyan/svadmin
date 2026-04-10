@@ -22,8 +22,8 @@
     canDelete = true,
   }: Props = $props();
 
-  const pk = resource.primaryKey ?? 'id';
-  const idStr = String(record[pk]);
+  let pk = $derived(resource.primaryKey ?? 'id');
+  let idStr = $derived(String(record[pk]));
   
   const showFields = $derived(
     resource.fields.filter(f => f.showInShow !== false)

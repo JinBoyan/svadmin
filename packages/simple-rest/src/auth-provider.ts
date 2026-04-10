@@ -14,7 +14,7 @@ export function createSimpleRestAuthProvider(opts: SimpleRestAuthOptions): AuthP
   const { tokenKey = 'auth_token' } = opts;
 
   function getAuthHeader(): Record<string, string> {
-    if (!tokenKey) return {};
+    if (!tokenKey || typeof window === 'undefined') return {};
     const token = localStorage.getItem(tokenKey);
     return token ? { Authorization: `Bearer ${token}` } : {};
   }
@@ -33,7 +33,7 @@ export function createSimpleRestAuthProvider(opts: SimpleRestAuthOptions): AuthP
           return { success: false, error: { message: error.message ?? 'Login failed' } };
         }
         const data = await response.json();
-        if (tokenKey && data.token) {
+        if (tokenKey && data.token && typeof window !== 'undefined') {
           localStorage.setItem(tokenKey, data.token);
         }
         return { success: true, redirectTo: '/' };
@@ -50,12 +50,12 @@ export function createSimpleRestAuthProvider(opts: SimpleRestAuthOptions): AuthP
           credentials: 'include',
         }).catch((e) => console.warn('[auth] logout request failed:', e));
       }
-      if (tokenKey) localStorage.removeItem(tokenKey);
+      if (tokenKey && typeof window !== 'undefined') localStorage.removeItem(tokenKey);
       return { success: true, redirectTo: '/login' };
     },
 
     async check(): Promise<CheckResult> {
-      if (tokenKey) {
+      if (tokenKey && typeof window !== 'undefined') {
         const token = localStorage.getItem(tokenKey);
         if (!token) return { authenticated: false, redirectTo: '/login', logout: true };
       }

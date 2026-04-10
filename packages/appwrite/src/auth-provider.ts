@@ -4,7 +4,11 @@ import type { AuthProvider, Identity, AuthActionResult, CheckResult } from '@sva
 interface AppwriteAuthOptions {
   /** Appwrite Account instance */
   account: unknown; // Appwrite.Account
+  /** Full base URL for recovery link. Required if forgotPassword is used in SSR. */
+  recoveryUrl?: string;
 }
+
+export type AppwriteProviderOptions = AppwriteAuthOptions;
 
 // Duck-typed Appwrite Account interface
 interface AppwriteAccount {
@@ -85,7 +89,9 @@ export function createAppwriteAuthProvider(options: AppwriteAuthOptions): AuthPr
 
     async forgotPassword({ email }: Record<string, unknown>): Promise<AuthActionResult> {
       try {
-        await account.createRecovery(email as string, `${globalThis.location?.origin ?? ''}/update-password`);
+        const base = options.recoveryUrl ?? (typeof window !== 'undefined' ? window.location.origin : '');
+        if (!base) throw new Error('recoveryUrl is required in options when calling forgotPassword from server');
+        await account.createRecovery(email as string, `${base}/update-password`);
         return { success: true };
       } catch (err) {
         return { success: false, error: { message: (err as Error).message } };

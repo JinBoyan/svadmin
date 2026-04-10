@@ -116,11 +116,10 @@ const STORAGE_PREFIX = 'svadmin_sso_';
 
 function getStorage(config: SSOConfig): TokenStorage {
   if (config.storage && typeof config.storage === 'object') return config.storage;
-  const backend = config.storage === 'session' ? sessionStorage : localStorage;
   return {
-    getItem: (key) => backend.getItem(key),
-    setItem: (key, value) => backend.setItem(key, value),
-    removeItem: (key) => backend.removeItem(key),
+    getItem: (key) => typeof window !== 'undefined' ? (config.storage === 'session' ? sessionStorage : localStorage).getItem(key) : null,
+    setItem: (key, value) => { if (typeof window !== 'undefined') (config.storage === 'session' ? sessionStorage : localStorage).setItem(key, value); },
+    removeItem: (key) => { if (typeof window !== 'undefined') (config.storage === 'session' ? sessionStorage : localStorage).removeItem(key); },
   };
 }
 
