@@ -1,7 +1,7 @@
 {
-  "name": "@svadmin/hasura",
+  "name": "@svadmin/refine-adapter",
   "version": "0.9.3",
-  "description": "Hasura GraphQL DataProvider for svadmin",
+  "description": "Universal Refine DataProvider adapter for svadmin",
   "type": "module",
   "sideEffects": false,
   "files": [
@@ -16,15 +16,12 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "workspace:*",
-    "@svadmin/refine-adapter": "workspace:*",
-    "@refinedev/hasura": "^5.0.0",
-    "graphql-request": "^6.1.0"
+    "@svadmin/core": "workspace:*"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
-    "directory": "packages/hasura"
+    "directory": "packages/refine-adapter"
   }
 }
