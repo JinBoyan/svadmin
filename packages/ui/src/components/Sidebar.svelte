@@ -159,6 +159,26 @@
   let colorPickerRef = $state<HTMLDivElement | null>(null);
   let colorPickerOpenedAt = 0;
 
+  // Density state
+  let density = $state<'compact' | 'standard'>('standard');
+  
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('svadmin-sidebar-density');
+      if (stored === 'compact' || stored === 'standard') density = stored;
+      
+      const onDensityChange = (e: Event) => {
+        const customEvent = e as CustomEvent<'compact' | 'standard'>;
+        density = customEvent.detail;
+      };
+      window.addEventListener('svadmin-density-change', onDensityChange);
+      return () => window.removeEventListener('svadmin-density-change', onDensityChange);
+    }
+  });
+
+  const pyClass = $derived(density === 'compact' ? 'py-1.5' : 'py-2.5');
+  const pyClassGroupItem = $derived(density === 'compact' ? 'py-1.5' : 'py-2');
+
   // Click-outside to close color picker
   $effect(() => {
     if (!colorPickerOpen) return;
@@ -235,7 +255,7 @@
                 {@const active = isActive(item.path)}
                 <a
                   href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200
+                  class="flex items-center gap-3 rounded-lg px-3 {pyClassGroupItem} text-sm font-medium transition-all duration-200
                   {active
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
@@ -258,7 +278,7 @@
                   <a
                     {...props}
                     href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-                    class="flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
+                    class="flex items-center justify-center gap-3 rounded-lg px-3 {pyClass} text-sm font-medium transition-all duration-200
                     {active
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                       : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
@@ -274,7 +294,7 @@
           {:else}
             <a
               href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
+              class="flex items-center gap-3 rounded-lg px-3 {pyClass} text-sm font-medium transition-all duration-200
               {active
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
                 : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"

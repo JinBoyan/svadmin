@@ -35,6 +35,7 @@ export function createHashRouterProvider(): RouterProvider {
         const urlObj = new URL(window.location.href);
         urlObj.hash = url;
         window.history.replaceState(null, '', urlObj.href);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
       } else {
         window.location.hash = url;
       }

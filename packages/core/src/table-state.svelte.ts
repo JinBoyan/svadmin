@@ -94,12 +94,13 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
     this.currentFilters = initFilters;
 
     // Create query
+    const _this = this;
     const { meta, syncWithLocation: _s, dataProviderName, pagination: _p, sorters: _sr, filters: _f, ...restOptions } = options;
     this._queryResult = useList<TData, TError>({
       resource,
-      pagination: this.queryPagination,
-      sorters: this.effectiveSorters,
-      filters: this.effectiveFilters,
+      get pagination() { return _this.queryPagination; },
+      get sorters() { return _this.effectiveSorters; },
+      get filters() { return _this.effectiveFilters; },
       meta,
       dataProviderName,
       ...restOptions,

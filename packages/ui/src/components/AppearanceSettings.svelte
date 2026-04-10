@@ -27,7 +27,10 @@
 
   function setDensity(d: 'compact' | 'standard') {
     density = d;
-    if (typeof window !== 'undefined') localStorage.setItem(DENSITY_KEY, d);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(DENSITY_KEY, d);
+      window.dispatchEvent(new CustomEvent('svadmin-density-change', { detail: d }));
+    }
   }
 
   // Page size

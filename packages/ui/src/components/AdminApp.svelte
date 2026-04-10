@@ -132,6 +132,13 @@
       if (!result.authenticated && _route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
         navigate(result.redirectTo ?? '/login');
       }
+    }).catch(err => {
+      console.warn('Auth check failed:', err);
+      isAuthenticated = false;
+      authChecked = true;
+      if (_route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
+        navigate('/login');
+      }
     });
   });
 </script>

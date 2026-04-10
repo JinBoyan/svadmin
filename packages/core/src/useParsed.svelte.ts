@@ -10,6 +10,15 @@ interface ParsedRoute {
   params: Record<string, string>;
 }
 
+let globalPath = $state('/');
+if (typeof window !== 'undefined') {
+  // Initialize
+  globalPath = currentPath();
+  // Listen to navigation events
+  window.addEventListener('hashchange', () => { globalPath = currentPath(); });
+  window.addEventListener('popstate', () => { globalPath = currentPath(); });
+}
+
 /**
  * Parse the current hash URL into a structured route object.
  * Returns reactive properties that update when the URL changes.
@@ -21,11 +30,10 @@ interface ParsedRoute {
  *   // parsed.id === '123'
  */
 export function useParsed(): ParsedRoute {
-  const path = $derived(currentPath());
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
   const parsed = $derived.by(() => {
-    const p = path;
+    const p = globalPath;
     const result: ParsedRoute = { params: {} };
 
     // Parse query params from hash

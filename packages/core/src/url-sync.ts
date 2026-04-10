@@ -1,6 +1,5 @@
-// URL state sync — sync pagination/sort/filters with hash params
-
 import type { Filter } from './types';
+import { getRouterProvider } from './context.svelte';
 
 export interface URLState {
   page?: number;
@@ -13,29 +12,28 @@ export interface URLState {
 
 export function readURLState(): URLState {
   if (typeof window === 'undefined') return {};
-  const hash = window.location.hash;
-  const queryIdx = hash.indexOf('?');
-  if (queryIdx === -1) return {};
+  const rp = getRouterProvider();
+  if (!rp) return {};
 
-  const params = new URLSearchParams(hash.slice(queryIdx + 1));
+  const { params } = rp.parse();
   const state: URLState = {};
 
-  const page = params.get('page');
+  const page = params['page'];
   if (page) state.page = parseInt(page, 10);
 
-  const pageSize = params.get('pageSize');
+  const pageSize = params['pageSize'];
   if (pageSize) state.pageSize = parseInt(pageSize, 10);
 
-  const sortField = params.get('sort');
+  const sortField = params['sort'];
   if (sortField) state.sortField = sortField;
 
-  const sortOrder = params.get('order');
+  const sortOrder = params['order'];
   if (sortOrder === 'asc' || sortOrder === 'desc') state.sortOrder = sortOrder;
 
-  const search = params.get('q');
+  const search = params['q'];
   if (search) state.search = search;
 
-  const filtersRaw = params.get('filters');
+  const filtersRaw = params['filters'];
   if (filtersRaw) {
     try {
       state.filters = JSON.parse(filtersRaw);
@@ -47,24 +45,42 @@ export function readURLState(): URLState {
 
 export function writeURLState(state: URLState): void {
   if (typeof window === 'undefined') return;
-  const hash = window.location.hash;
-  const pathIdx = hash.indexOf('?');
-  const basePath = pathIdx === -1 ? hash : hash.slice(0, pathIdx);
+  const rp = getRouterProvider();
+  if (!rp) return;
 
-  const params = new URLSearchParams();
-  if (state.page && state.page > 1) params.set('page', String(state.page));
-  if (state.pageSize && state.pageSize !== 10) params.set('pageSize', String(state.pageSize));
-  if (state.sortField) params.set('sort', state.sortField);
-  if (state.sortOrder) params.set('order', state.sortOrder);
-  if (state.search) params.set('q', state.search);
+  const current = rp.parse();
+  const params: Record<string, string> = { ...current.params };
+
+  if (state.page && state.page > 1) params['page'] = String(state.page);
+  else delete params['page'];
+
+  if (state.pageSize && state.pageSize !== 10) params['pageSize'] = String(state.pageSize);
+  else delete params['pageSize'];
+
+  if (state.sortField) params['sort'] = state.sortField;
+  else delete params['sort'];
+
+  if (state.sortOrder) params['order'] = state.sortOrder;
+  else delete params['order'];
+
+  if (state.search) params['q'] = state.search;
+  else delete params['q'];
+
   if (state.filters && state.filters.length > 0) {
-    params.set('filters', JSON.stringify(state.filters));
+    params['filters'] = JSON.stringify(state.filters);
+  } else {
+    delete params['filters'];
   }
 
-  const qs = params.toString();
-  const newHash = qs ? `${basePath}?${qs}` : basePath;
-
-  if (window.location.hash !== newHash) {
-    history.replaceState(null, '', newHash);
+  // Prevent redundant navigation if nothing actually changed
+  const qsOld = new URLSearchParams(current.params).toString();
+  const qsNew = new URLSearchParams(params).toString();
+  
+  if (qsOld !== qsNew) {
+    rp.go({
+      to: current.pathname,
+      query: params,
+      type: 'replace'
+    });
   }
 }

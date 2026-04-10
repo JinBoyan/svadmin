@@ -6,10 +6,10 @@
     type ColumnDef,
     type SortingState,
     type RowSelectionState,
-    type VisibilityState,
+    type ColumnVisibilityState,
     type ExpandedState,
   } from '@tanstack/svelte-table';
-  import { getCoreRowModel } from '@tanstack/table-core';
+  import { createCoreRowModel } from '@tanstack/table-core';
 
   import { useList, useDelete, getResource } from '@svadmin/core';
   import type { Pagination as PaginationState, Sort, Filter, FieldDefinition } from '@svadmin/core';
@@ -101,6 +101,19 @@
   let filters = $state<Filter[]>([]);
   let searchText = $state(urlState.search ?? '');
 
+  // Sync external controlled state
+  $effect(() => {
+    if (externalPagination) {
+      pagination = externalPagination;
+    }
+  });
+
+  $effect(() => {
+    if (externalSorters) {
+      sorters = externalSorters;
+    }
+  });
+
   // URL sync
   $effect(() => {
     writeURLState({
@@ -168,7 +181,7 @@
   let sorting = $state<SortingState>(untrack(() =>
     sorters.map(s => ({ id: s.field, desc: s.order === 'desc' }))
   ));
-  let columnVisibility = $state<VisibilityState>((() => {
+  let columnVisibility = $state<ColumnVisibilityState>((() => {
     // Try to restore from localStorage first
     const storageKey = `svadmin-columns-${resourceName}`;
     if (typeof window !== 'undefined') {
@@ -178,7 +191,7 @@
       } catch { /* ignore */ }
     }
     // Fall back to resource field definitions
-    const vis: VisibilityState = {};
+    const vis: ColumnVisibilityState = {};
     for (const f of resource.fields) {
       if (f.showInList === false) vis[f.key] = false;
     }
@@ -214,7 +227,7 @@
     resource.fields.filter(f => f.showInList !== false)
   );
 
-  const columns = $derived<ColumnDef<Record<string, unknown>>[]>([
+  const columns = $derived<ColumnDef<any, Record<string, unknown>>[]>([
     // Selection column
     ...(selectable && canDelete ? [{
       id: '_select',
@@ -222,7 +235,7 @@
       cell: () => '',
       size: 40,
       enableSorting: false,
-    } satisfies ColumnDef<Record<string, unknown>>] : []),
+    } satisfies ColumnDef<any, Record<string, unknown>>] : []),
     // Expand column
     ...(expandedRowRender ? [{
       id: '_expand',
@@ -230,9 +243,9 @@
       cell: () => '',
       size: 40,
       enableSorting: false,
-    } satisfies ColumnDef<Record<string, unknown>>] : []),
+    } satisfies ColumnDef<any, Record<string, unknown>>] : []),
     // Data columns
-    ...visibleFields.map((field): ColumnDef<Record<string, unknown>> => ({
+    ...visibleFields.map((field): ColumnDef<any, Record<string, unknown>> => ({
       id: field.key,
       accessorKey: field.key,
       header: () => field.label,
@@ -252,10 +265,10 @@
   const tbl = createTable({
     get data() { return query.data?.data ?? []; },
     get columns() { return columns; },
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: createCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
-    getRowId: (row) => String(row[primaryKey]),
+    getRowId: (row: any) => String(row[primaryKey]),
     state: {
       get sorting() { return sorting; },
       get columnVisibility() { return columnVisibility; },
@@ -263,19 +276,19 @@
       get expanded() { return expanded; },
       get columnOrder() { return columnOrder; },
     },
-    onSortingChange: (updater) => {
+    onSortingChange: (updater: any) => {
       sorting = typeof updater === 'function' ? updater(sorting) : updater;
     },
-    onColumnVisibilityChange: (updater) => {
+    onColumnVisibilityChange: (updater: any) => {
       columnVisibility = typeof updater === 'function' ? updater(columnVisibility) : updater;
     },
-    onRowSelectionChange: (updater) => {
+    onRowSelectionChange: (updater: any) => {
       rowSelection = typeof updater === 'function' ? updater(rowSelection) : updater;
     },
-    onExpandedChange: (updater) => {
+    onExpandedChange: (updater: any) => {
       expanded = typeof updater === 'function' ? updater(expanded) : updater;
     },
-    onColumnOrderChange: (updater) => {
+    onColumnOrderChange: (updater: any) => {
       columnOrder = typeof updater === 'function' ? updater(columnOrder) : updater;
     },
     get enableRowSelection() { return selectable && canDelete; },
@@ -390,7 +403,7 @@
           {/snippet}
         </DropdownMenu.Trigger>
         <DropdownMenu.Content align="end" class="w-48">
-          {#each tbl.getAllLeafColumns().filter(c => !c.id.startsWith('_')) as column}
+          {#each tbl.getAllLeafColumns().filter((c: any) => !c.id.startsWith('_')) as column}
             <DropdownMenu.CheckboxItem
               checked={column.getIsVisible()}
               onCheckedChange={(v) => column.toggleVisibility(!!v)}
@@ -515,9 +528,9 @@
           <Table.Header>
             {#each tbl.getHeaderGroups() as headerGroup}
               <DraggableHeader
-                columns={headerGroup.headers.map(h => ({ id: h.column.id, header: h }))}
+                columns={headerGroup.headers.map((h: any) => ({ id: h.column.id, header: h }))}
                 resourceName={resourceName}
-                onReorder={(newOrder) => { columnOrder = newOrder.map(c => c.id); }}
+                onReorder={(newOrder) => { columnOrder = newOrder.map((c: any) => c.id); }}
               >
                 {#snippet header(col, index, dragProps)}
                   {@const header = col.header as typeof headerGroup.headers[0]}
