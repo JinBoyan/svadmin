@@ -72,8 +72,10 @@ export function setAuthProvider(provider: AuthProvider): void {
   authProvider = provider;
 }
 
-export function getAuthProvider(): AuthProvider {
-  if (!authProvider) throw new Error('AuthProvider not found. Did you call setAuthProvider in App.svelte?');
+export function getAuthProvider(): AuthProvider;
+export function getAuthProvider(options: { optional: true }): AuthProvider | null;
+export function getAuthProvider(options?: { optional?: boolean }): AuthProvider | null {
+  if (!authProvider && !options?.optional) throw new Error('AuthProvider not found. Did you call setAuthProvider in App.svelte?');
   return authProvider;
 }
 

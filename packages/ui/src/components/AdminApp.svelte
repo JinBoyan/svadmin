@@ -167,7 +167,7 @@
     <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
       {#key route + (params.resource ?? '') + (params.id ?? '')}
       <div class="svadmin-page-enter">
-      {#if currentPath().startsWith('/settings')}
+      {#if route.startsWith('/settings')}
         <SettingsPage />
       {:else if route === '/' || route === ''}
         {#if dashboard}

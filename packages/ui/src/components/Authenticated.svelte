@@ -31,7 +31,7 @@
         currentString = parsed.pathname + (qs ? `?${qs}` : '');
       }
       const current = encodeURIComponent(currentString);
-      url += `?to=${current}`;
+      url += url.includes('?') ? `&to=${current}` : `?to=${current}`;
     }
     navigate(url);
   }

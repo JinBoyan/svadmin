@@ -8,6 +8,9 @@
   import AboutSettings from './AboutSettings.svelte';
   import RolesSettings from './RolesSettings.svelte';
   import AuditLogViewer from './AuditLogViewer.svelte';
+  import { getAuthProvider } from '@svadmin/core';
+
+  const authProvider = getAuthProvider({ optional: true });
 
   const sections = [
     {
@@ -20,26 +23,29 @@
     {
       group: 'settings.system',
       items: [
-        { key: 'roles', path: '/settings/roles', icon: Shield, label: 'settings.rolesAndPermissions' },
-        { key: 'audit', path: '/settings/audit', icon: FileSearch, label: 'settings.auditLogs' },
+        ...(authProvider ? [
+          { key: 'roles', path: '/settings/roles', icon: Shield, label: 'settings.rolesAndPermissions' },
+          { key: 'audit', path: '/settings/audit', icon: FileSearch, label: 'settings.auditLogs' },
+        ] : []),
         { key: 'about', path: '/settings/about', icon: Info, label: 'settings.about' },
       ],
     },
   ];
 
+  import { getParams, getRoute } from '../router-state.svelte.js';
+
   let activeKey = $derived.by(() => {
-    const path = currentPath();
-    if (path.includes('/settings/appearance')) return 'appearance';
-    if (path.includes('/settings/roles')) return 'roles';
-    if (path.includes('/settings/audit')) return 'audit';
-    if (path.includes('/settings/about')) return 'about';
+    const tab = getParams().tab;
+    if (tab === 'appearance') return 'appearance';
+    if (tab === 'roles') return 'roles';
+    if (tab === 'audit') return 'audit';
+    if (tab === 'about') return 'about';
     return 'profile';
   });
 
   // Default redirect to profile
   $effect(() => {
-    const path = currentPath();
-    if (path === '/settings') {
+    if (getRoute() === '/settings') {
       navigate('/settings/profile');
     }
   });

@@ -9,6 +9,8 @@
     ChevronDown, Folder, ExternalLink, type Icon as LucideIcon,
   } from '@lucide/svelte';
 
+  import { formatLink } from '@svadmin/core/router';
+  
   let { item, currentPath, collapsed = false, depth = 0 }: {
     item: MenuItem;
     currentPath: string;
@@ -37,6 +39,7 @@
   function isActive(itemHref: string | undefined): boolean {
     if (!itemHref) return false;
     if (itemHref === '/') return currentPath === '/';
+    // Remove hash/leading slash for comparison if necessary, but currentPath usually starts with /
     return currentPath.startsWith(itemHref);
   }
 
@@ -49,7 +52,9 @@
   const hasChildren = $derived(item.children && item.children.length > 0);
   const active = $derived(isActive(item.href));
   const childActive = $derived(hasActiveChild(item));
-  const isExternal = $derived(item.target === '_blank');
+  const isExternal = $derived(item.target === '_blank' || item.href?.startsWith('http'));
+
+  const finalHref = $derived(isExternal ? item.href : (item.href ? formatLink(item.href) : undefined));
 
   // Track open state — auto-open if a child is active
   let isOpen = $state(false);
@@ -92,7 +97,7 @@
       {#snippet child({ props }: { props: Record<string, unknown> })}
         <a
           {...props}
-          href={item.href ? `#${item.href}` : undefined}
+          href={finalHref}
           target={isExternal ? '_blank' : undefined}
           rel={isExternal ? 'noopener noreferrer' : undefined}
           class="flex items-center justify-center rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
@@ -111,7 +116,7 @@
 {:else}
   <!-- Leaf node: render as a link -->
   <a
-    href={item.href ? `#${item.href}` : undefined}
+    href={finalHref}
     target={isExternal ? '_blank' : undefined}
     rel={isExternal ? 'noopener noreferrer' : undefined}
     class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200

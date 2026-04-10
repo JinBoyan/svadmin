@@ -50,15 +50,22 @@ export function matchRoute(
   return null;
 }
 
-/**
- * Navigate to a path. Uses RouterProvider if available, falls back to hash.
- */
 export function navigate(path: string, options?: { replaceState?: boolean }): void {
   if (_routerProvider) {
     _routerProvider.go({ to: path, type: options?.replaceState ? 'replace' : 'push' });
   } else if (typeof window !== 'undefined') {
     window.location.hash = '#' + path.replace(/^#/, '');
   }
+}
+
+/**
+ * Format a path into an href suitable for <a> tags.
+ */
+export function formatLink(path: string): string {
+  if (_routerProvider?.formatLink) {
+    return _routerProvider.formatLink(path);
+  }
+  return '#' + path.replace(/^#/, '');
 }
 
 export function currentPath(): string {

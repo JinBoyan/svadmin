@@ -18,6 +18,8 @@ export interface RouterProvider {
     params: Record<string, string>;
     pathname: string;
   };
+  /** Formats an internal path into an href string for <a> tags */
+  formatLink?: (path: string) => string;
 }
 
 // ─── Hash Router (default) ──────────────────────────────────
@@ -65,6 +67,9 @@ export function createHashRouterProvider(): RouterProvider {
         pathname,
       };
     },
+    formatLink(path) {
+      return '#' + path.replace(/^#/, '');
+    },
   };
 }
 
@@ -108,6 +113,9 @@ export function createHistoryRouterProvider(basePath = ''): RouterProvider {
         params,
         pathname,
       };
+    },
+    formatLink(path) {
+      return basePath + path;
     },
   };
 }

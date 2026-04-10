@@ -12,6 +12,8 @@ const ROUTES = [
   '/register',
   '/forgot-password',
   '/update-password',
+  '/settings',
+  '/settings/:tab',
   '/',
   '/:resource',
   '/:resource/create',
