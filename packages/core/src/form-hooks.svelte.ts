@@ -272,8 +272,12 @@ export function useForm<
       if (queryInitializedId === currentId) return;
       const data = query.data as Record<string, unknown> | undefined;
       if (data && (currentId == null || String(data.id) === String(currentId) || !data.id)) {
+        // In clone mode, strip out identifiers
+        const targetData = action === 'clone' 
+          ? Object.fromEntries(Object.entries(data).filter(([k]) => k !== 'id' && k !== '_id'))
+          : data;
         // Merge: defaultValues < query data
-        const merged = { ...(options.defaultValues ?? {}), ...data } as TVariables;
+        const merged = { ...(options.defaultValues ?? {}), ...targetData } as TVariables;
         values = merged;
         initialValues = { ...merged } as TVariables;
         queryInitializedId = currentId;

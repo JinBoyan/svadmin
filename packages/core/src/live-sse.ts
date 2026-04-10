@@ -29,6 +29,7 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
   const subscribers = new Map<string, Set<Callback>>();
   let eventSource: EventSource | null = null;
   let status: 'connecting' | 'connected' | 'disconnected' = 'disconnected';
+  const registeredListeners = new Set<string>();
 
   function connect() {
     if (eventSource) return;
@@ -64,7 +65,8 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
   }
 
   function addNamedListener(resource: string) {
-    if (!eventSource) return;
+    if (!eventSource || registeredListeners.has(resource)) return;
+    registeredListeners.add(resource);
     eventSource.addEventListener(resource, ((event: MessageEvent) => {
       try {
         const parsed = JSON.parse(event.data);
@@ -109,6 +111,7 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
       eventSource = null;
     }
     status = 'disconnected';
+    registeredListeners.clear();
   }
 
   return {

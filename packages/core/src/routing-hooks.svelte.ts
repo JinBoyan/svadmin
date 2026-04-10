@@ -31,12 +31,7 @@ export function useGo() {
   return (options: { to?: string; query?: Record<string, unknown>; type?: 'push' | 'replace'; resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number }) => {
     let targetUrl = options.to;
     if (!targetUrl && options.resource) {
-      if (options.action === 'clone') {
-        targetUrl = getToPath({ resource: options.resource, action: 'create' });
-        options.query = { ...options.query, cloneId: options.id as string };
-      } else {
-        targetUrl = getToPath({ resource: options.resource, action: options.action, id: options.id });
-      }
+      targetUrl = getToPath({ resource: options.resource, action: options.action, id: options.id });
     }
     if (!targetUrl) targetUrl = '/';
 

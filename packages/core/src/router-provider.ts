@@ -25,13 +25,15 @@ export interface RouterProvider {
 export function createHashRouterProvider(): RouterProvider {
   return {
     go({ to, query, type = 'push' }) {
-      let url = `#${to}`;
+      let url = to;
       if (query) {
         const params = new URLSearchParams(query).toString();
         if (params) url += `?${params}`;
       }
       if (type === 'replace') {
-        window.location.replace(url);
+        const urlObj = new URL(window.location.href);
+        urlObj.hash = url;
+        window.history.replaceState(null, '', urlObj.href);
       } else {
         window.location.hash = url;
       }
