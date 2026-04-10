@@ -56,7 +56,7 @@ export function matchRoute(
 export function navigate(path: string, options?: { replaceState?: boolean }): void {
   if (_routerProvider) {
     _routerProvider.go({ to: path, type: options?.replaceState ? 'replace' : 'push' });
-  } else {
+  } else if (typeof window !== 'undefined') {
     window.location.hash = '#' + path.replace(/^#/, '');
   }
 }
@@ -71,5 +71,6 @@ export function currentPath(): string {
     }
     return pathname + qs;
   }
+  if (typeof window === 'undefined') return '/';
   return window.location.hash.replace(/^#/, '') || '/';
 }

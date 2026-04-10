@@ -5,7 +5,7 @@ import { getResources } from './context.svelte';
 
 interface ParsedRoute {
   resource?: string;
-  action?: 'list' | 'create' | 'edit' | 'show';
+  action?: 'list' | 'create' | 'edit' | 'show' | 'clone';
   id?: string;
   params: Record<string, string>;
 }
@@ -73,6 +73,9 @@ export function useParsed(): ParsedRoute {
       } else if (restSegments[0] === 'show' && restSegments[1]) {
         result.action = 'show';
         result.id = restSegments[1];
+      } else if (restSegments[0] === 'clone' && restSegments[1]) {
+        result.action = 'clone';
+        result.id = restSegments[1];
       } else if (restSegments[0]) {
         // Legacy: /:resource/:id
         result.action = 'show';
@@ -91,6 +94,9 @@ export function useParsed(): ParsedRoute {
         result.id = segments[2];
       } else if (segments[1] === 'show' && segments[2]) {
         result.action = 'show';
+        result.id = segments[2];
+      } else if (segments[1] === 'clone' && segments[2]) {
+        result.action = 'clone';
         result.id = segments[2];
       } else if (segments[1]) {
         result.action = 'show';

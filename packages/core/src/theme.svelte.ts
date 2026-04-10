@@ -301,8 +301,8 @@ export const colorThemes: { id: ColorTheme | string; label: string; color: strin
 // ── Dark/Light mode ──────────────────────────────────────
 
 function getStoredTheme(): ThemeMode {
-  if (typeof localStorage === 'undefined') return 'system';
-  return (localStorage.getItem(STORAGE_KEY) as ThemeMode) ?? 'system';
+  if (typeof window === 'undefined') return 'system';
+  try { return (localStorage.getItem(STORAGE_KEY) as ThemeMode) ?? 'system'; } catch { return 'system'; }
 }
 
 function getSystemPreference(): 'light' | 'dark' {
@@ -356,8 +356,8 @@ export function getTheme(): ThemeMode {
 
 export function setTheme(newMode: ThemeMode): void {
   mode = newMode;
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(STORAGE_KEY, newMode);
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem(STORAGE_KEY, newMode); } catch {}
   }
   applyTheme(newMode);
   // Re-apply color preset — light/dark CSS variable overrides differ
@@ -378,8 +378,8 @@ export function getResolvedTheme(): 'light' | 'dark' {
 // ── Color theme ──────────────────────────────────────────
 
 function getStoredColorTheme(): ColorTheme {
-  if (typeof localStorage === 'undefined') return 'blue';
-  return (localStorage.getItem(COLOR_STORAGE_KEY) as ColorTheme) ?? 'blue';
+  if (typeof window === 'undefined') return 'blue';
+  try { return (localStorage.getItem(COLOR_STORAGE_KEY) as ColorTheme) ?? 'blue'; } catch { return 'blue'; }
 }
 
 let colorTheme = $state<ColorTheme>(getStoredColorTheme());
@@ -403,8 +403,8 @@ export function getColorTheme(): ColorTheme {
 
 export function setColorTheme(ct: ColorTheme): void {
   colorTheme = ct;
-  if (typeof localStorage !== 'undefined') {
-    localStorage.setItem(COLOR_STORAGE_KEY, ct);
+  if (typeof window !== 'undefined') {
+    try { localStorage.setItem(COLOR_STORAGE_KEY, ct); } catch {}
   }
   applyColorTheme(ct);
   // Apply the preset's CSS variable overrides for the current resolved theme
