@@ -7,7 +7,7 @@ import { useParsed } from './useParsed.svelte';
 export function useGetToPath() {
   const routerProvider = getRouterProvider();
 
-  return (options: { resource?: string; action?: 'list' | 'create' | 'edit' | 'show'; id?: string | number; meta?: Record<string, unknown> }) => {
+  return (options: { resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number; meta?: Record<string, unknown> }) => {
     const { resource, action, id } = options;
     if (!resource) return '/';
     let path = `/${resource}`;

@@ -68,7 +68,7 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
           ${resource}(limit: $limit, offset: $offset, ${whereClause} ${orderByClause}) {
             ${fields}
           }
-          ${resource}_aggregate {
+          ${resource}_aggregate${whereClause ? `(${whereClause.slice(0, -1)})` : ''} {
             aggregate { count }
           }
         }
@@ -86,13 +86,13 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
     async getOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: GetOneParams): Promise<GetOneResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
-        query getOne($id: uuid!) {
-          ${resource}_by_pk(id: $id) {
+        query getOne {
+          ${resource}_by_pk(id: ${JSON.stringify(id)}) {
             ${fields}
           }
         }
       `;
-      const data = await executeGraphQL(endpoint, query, { id }, defaultHeaders);
+      const data = await executeGraphQL(endpoint, query, {}, defaultHeaders);
       return { data: data[`${resource}_by_pk`] as unknown as unknown as T };
     },
 
@@ -112,26 +112,26 @@ export function createHasuraDataProvider(endpoint: string, defaultHeaders: Recor
     async update<T extends BaseRecord = BaseRecord>({ resource, id, variables, meta }: UpdateParams): Promise<UpdateResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
-        mutation update($id: uuid!, $set: ${resource}_set_input!) {
-          update_${resource}_by_pk(pk_columns: {id: $id}, _set: $set) {
+        mutation update($set: ${resource}_set_input!) {
+          update_${resource}_by_pk(pk_columns: {id: ${JSON.stringify(id)}}, _set: $set) {
             ${fields}
           }
         }
       `;
-      const data = await executeGraphQL(endpoint, query, { id, set: variables }, defaultHeaders);
+      const data = await executeGraphQL(endpoint, query, { set: variables }, defaultHeaders);
       return { data: data[`update_${resource}_by_pk`] as unknown as unknown as T };
     },
 
     async deleteOne<T extends BaseRecord = BaseRecord>({ resource, id, meta }: DeleteParams): Promise<DeleteResult<T>> {
       const fields = (meta?.fields as string[])?.join(' ') || 'id';
       const query = `
-        mutation deleteOne($id: uuid!) {
-          delete_${resource}_by_pk(id: $id) {
+        mutation deleteOne {
+          delete_${resource}_by_pk(id: ${JSON.stringify(id)}) {
             ${fields}
           }
         }
       `;
-      const data = await executeGraphQL(endpoint, query, { id }, defaultHeaders);
+      const data = await executeGraphQL(endpoint, query, {}, defaultHeaders);
       return { data: data[`delete_${resource}_by_pk`] as unknown as unknown as T };
     },
 

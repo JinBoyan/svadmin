@@ -34,7 +34,8 @@ export function createSvelteKitRouterProvider(): RouterProvider {
           pathname = p.url.pathname;
         }
         if (p?.params) {
-          params = { ...p.params };
+          // Do not spread path params into query params
+          // SvelteKit route params (e.g. /posts/edit/[id]) are handled at the root
         }
         if (p?.url?.searchParams) {
           p.url.searchParams.forEach((v: string, k: string) => {
@@ -51,7 +52,13 @@ export function createSvelteKitRouterProvider(): RouterProvider {
         }
       }
 
+      let p_params = {} as any;
+      try { p_params = (get(page) as any)?.params ?? {}; } catch {}
+
       return {
+        resource: p_params?.resource,
+        action: p_params?.action,
+        id: p_params?.id,
         pathname,
         params
       };

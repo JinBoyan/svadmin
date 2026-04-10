@@ -56,16 +56,23 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
         isMutating = false;
       }
     },
-    onSuccess: (data, params) => {
+    onMutate: params.mutationOptions?.onMutate,
+    onSuccess: (data, params, context) => {
       const resName = params.resource ?? defaultResource;
       if (params.invalidates !== false) {
         queryClient.invalidateQueries({ queryKey: [resName] });
       }
       fireSuccessNotification(params.successNotification, 'Created successfully', data.data, params.variables, resName);
       audit({ action: 'create', resource: resName, recordId: String((data.data as Record<string, unknown>).id) });
+      if (typeof options.mutationOptions?.onSuccess === 'function') {
+        (options.mutationOptions.onSuccess as Function)(data, params, context);
+      }
     },
-    onError: (error, params) => {
+    onError: (error, params, context) => {
       fireErrorNotification(params.errorNotification, 'Create failed', error);
+      if (typeof options.mutationOptions?.onError === 'function') {
+        (options.mutationOptions.onError as Function)(error, params, context);
+      }
     },
   }));
 
@@ -172,7 +179,7 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
 
       return { previousDetail, previousList };
     },
-    onSuccess: (data, params) => {
+    onSuccess: (data, params, context) => {
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       if (params.invalidates !== false) {
@@ -180,6 +187,9 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       }
       fireSuccessNotification(params.successNotification, 'Updated successfully', data.data, params.variables, resName);
       audit({ action: 'update', resource: resName, recordId: String(targetId) });
+      if (typeof options.mutationOptions?.onSuccess === 'function') {
+        (options.mutationOptions.onSuccess as Function)(data, params, context);
+      }
     },
     onError: (error, params, context: unknown) => {
       const resName = params.resource ?? defaultResource;
@@ -191,6 +201,9 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       }
       if (error instanceof UndoError) return;
       fireErrorNotification(params.errorNotification, 'Update failed', error);
+      if (typeof options.mutationOptions?.onError === 'function') {
+        (options.mutationOptions.onError as Function)(error, params, context);
+      }
     },
   }));
 
@@ -281,7 +294,7 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
 
       return { previousList };
     },
-    onSuccess: (data, params) => {
+    onSuccess: (data, params, context) => {
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       if (params.invalidates !== false) {
@@ -289,6 +302,9 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       }
       fireSuccessNotification(params.successNotification, 'Deleted successfully', data.data, params.variables, resName);
       audit({ action: 'delete', resource: resName, recordId: String(targetId) });
+      if (typeof options.mutationOptions?.onSuccess === 'function') {
+        (options.mutationOptions.onSuccess as Function)(data, params, context);
+      }
     },
     onError: (error, params, context: unknown) => {
       const ctx = context as { previousList?: [unknown, unknown][] } | undefined;
@@ -297,6 +313,9 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       }
       if (error instanceof UndoError) return;
       fireErrorNotification(params.errorNotification, 'Delete failed', error);
+      if (typeof options.mutationOptions?.onError === 'function') {
+        (options.mutationOptions.onError as Function)(error, params, context);
+      }
     },
   }));
 

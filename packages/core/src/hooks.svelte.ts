@@ -328,7 +328,12 @@ export function useInvalidate() {
       queryClient.invalidateQueries();
       return;
     }
-    queryClient.invalidateQueries({ queryKey: [params.resource] });
+    const scopes = params.invalidates || ['resourceAll'];
+    for (const scope of scopes) {
+      if (scope === 'resourceAll') queryClient.invalidateQueries({ queryKey: [params.resource] });
+      else if (scope === 'detail' && params.id) queryClient.invalidateQueries({ queryKey: [params.resource, 'one', params.id] });
+      else if (scope === 'list') queryClient.invalidateQueries({ queryKey: [params.resource, 'list'] });
+    }
   };
 }
 

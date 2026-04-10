@@ -26,19 +26,31 @@ function buildFirestoreUrl(projectId: string, collection: string, docId?: string
   return docId ? `${base}/${docId}` : base;
 }
 
+function parseFirestoreValue(val: FirestoreFieldValue): unknown {
+  if ('stringValue' in val) return val.stringValue;
+  if ('integerValue' in val) return Number(val.integerValue);
+  if ('doubleValue' in val) return val.doubleValue;
+  if ('booleanValue' in val) return val.booleanValue;
+  if ('timestampValue' in val) return val.timestampValue;
+  if ('nullValue' in val) return null;
+  if ('mapValue' in val) {
+    const parsed: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries((val.mapValue as { fields?: Record<string, FirestoreFieldValue> }).fields ?? {})) {
+      parsed[k] = parseFirestoreValue(v);
+    }
+    return parsed;
+  }
+  if ('arrayValue' in val) {
+    return (val.arrayValue?.values ?? []).map(parseFirestoreValue);
+  }
+  return val;
+}
+
 function parseFirestoreDoc(doc: FirestoreDoc): Record<string, unknown> {
   const fields = doc.fields ?? {};
   const parsed: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(fields) as [string, FirestoreFieldValue][]) {
-    if ('stringValue' in val) parsed[key] = val.stringValue;
-    else if ('integerValue' in val) parsed[key] = Number(val.integerValue);
-    else if ('doubleValue' in val) parsed[key] = val.doubleValue;
-    else if ('booleanValue' in val) parsed[key] = val.booleanValue;
-    else if ('timestampValue' in val) parsed[key] = val.timestampValue;
-    else if ('nullValue' in val) parsed[key] = null;
-    else if ('mapValue' in val) parsed[key] = val.mapValue;
-    else if ('arrayValue' in val) parsed[key] = val.arrayValue?.values ?? [];
-    else parsed[key] = val;
+    parsed[key] = parseFirestoreValue(val);
   }
   // Extract document ID from name path
   const nameParts = (doc.name ?? '').split('/');
@@ -46,16 +58,21 @@ function parseFirestoreDoc(doc: FirestoreDoc): Record<string, unknown> {
   return parsed;
 }
 
+function toFirestoreValue(val: unknown): FirestoreFieldValue {
+  if (typeof val === 'string') return { stringValue: val };
+  if (typeof val === 'number') return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
+  if (typeof val === 'boolean') return { booleanValue: val };
+  if (val === null) return { nullValue: null };
+  if (Array.isArray(val)) return { arrayValue: { values: val.map(toFirestoreValue) } };
+  if (typeof val === 'object') return { mapValue: { fields: toFirestoreFields(val as Record<string, unknown>) } };
+  return {};
+}
+
 function toFirestoreFields(data: Record<string, unknown>): Record<string, unknown> {
   const fields: Record<string, unknown> = {};
   for (const [key, val] of Object.entries(data)) {
     if (key === 'id') continue;
-    if (typeof val === 'string') fields[key] = { stringValue: val };
-    else if (typeof val === 'number') fields[key] = Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
-    else if (typeof val === 'boolean') fields[key] = { booleanValue: val };
-    else if (val === null) fields[key] = { nullValue: null };
-    else if (Array.isArray(val)) fields[key] = { arrayValue: { values: val } };
-    else if (typeof val === 'object') fields[key] = { mapValue: { fields: toFirestoreFields(val as Record<string, unknown>) } };
+    fields[key] = toFirestoreValue(val);
   }
   return fields;
 }
