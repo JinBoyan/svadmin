@@ -55,7 +55,7 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
         ? allRecords.map(options.mapData)
         : allRecords.map(r => r as unknown as Record<string, unknown>);
 
-      if (options.download !== false) {
+      if (options.download !== false && typeof document !== 'undefined') {
         const fields = Object.keys(mapped[0]);
         const header = fields.join(',');
         const rows = mapped.map(record =>

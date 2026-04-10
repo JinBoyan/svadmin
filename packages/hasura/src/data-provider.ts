@@ -1,6 +1,5 @@
 import type { DataProvider } from '@svadmin/core';
 import { createRefineAdapter } from '@svadmin/refine-adapter';
-import dataProvider from '@refinedev/hasura';
 
 /**
  * Creates a Hasura data provider using the official @refinedev/hasura package.
@@ -10,7 +9,10 @@ import dataProvider from '@refinedev/hasura';
  * @param options Optional configuration for the Hasura data provider
  * @returns A fully compatible svadmin DataProvider
  */
-export function createHasuraDataProvider(client: any, options?: any): DataProvider {
-  const refineHasuraProvider = dataProvider(client, options);
+export async function createHasuraDataProvider(client: any, options?: any): Promise<DataProvider> {
+  // @ts-ignore Peer dependency
+  const pkg = (await import('@refinedev/hasura')) as any;
+  const init: any = pkg.default || pkg.dataProvider || pkg.DataProvider;
+  const refineHasuraProvider = init(client, options);
   return createRefineAdapter(refineHasuraProvider);
 }
