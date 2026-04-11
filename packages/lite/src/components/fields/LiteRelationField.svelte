@@ -10,7 +10,7 @@
   }
 
   let { field, value, error = [], mode = 'show' }: Props = $props();
-  const hasError = error.length > 0;
+  let hasError = $derived(error.length > 0);
 
   // In Lite version, relations might need to be rendered via server-side joined data 
   // passed through options, or just standard inputs requesting ID.

@@ -9,7 +9,7 @@
   }
 
   let { field, value, error = [], mode = 'show' }: Props = $props();
-  const hasError = error.length > 0;
+  let hasError = $derived(error.length > 0);
   const tags = $derived(Array.isArray(value) ? value.map(String) : []);
 </script>
 

@@ -7,7 +7,7 @@
   import { toast } from '@svadmin/core/toast';
   import { AlertCircle } from '@lucide/svelte';
 
-  const authProvider = getAuthProvider();
+  const authProvider = getAuthProvider({ optional: true });
   const rawResources = getResources();
 
   let roles = $state<RoleInfo[]>([]);

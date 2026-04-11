@@ -1,7 +1,8 @@
 <script lang="ts">
   import { getResources, canAccessAsync } from '@svadmin/core';
   import type { Identity, MenuItem } from '@svadmin/core';
-  import { currentPath, navigate } from '@svadmin/core/router';
+  import { navigate } from '@svadmin/core/router';
+  import { getPath } from '../router-state.svelte.js';
   import { t, getLocale, setLocale, getAvailableLocales } from '@svadmin/core/i18n';
   import { toggleTheme, getResolvedTheme, colorThemes, getColorTheme, setColorTheme } from '@svadmin/core';
   import { Button } from './ui/button/index.js';
@@ -118,9 +119,7 @@
   const localeLabel = $derived(getLocale() === 'zh-CN' ? '中' : 'EN');
 
   // Track current hash for active state
-  let path = $state(currentPath());
-
-  function onHashChange() { path = currentPath(); }
+  const path = $derived(getPath());
 
   function isActive(itemPath: string): boolean {
     if (itemPath === '/') return path === '/';
@@ -159,6 +158,26 @@
   let colorPickerRef = $state<HTMLDivElement | null>(null);
   let colorPickerOpenedAt = 0;
 
+  // Density state
+  let density = $state<'compact' | 'standard'>('standard');
+  
+  $effect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('svadmin-sidebar-density');
+      if (stored === 'compact' || stored === 'standard') density = stored;
+      
+      const onDensityChange = (e: Event) => {
+        const customEvent = e as CustomEvent<'compact' | 'standard'>;
+        density = customEvent.detail;
+      };
+      window.addEventListener('svadmin-density-change', onDensityChange);
+      return () => window.removeEventListener('svadmin-density-change', onDensityChange);
+    }
+  });
+
+  const pyClass = $derived(density === 'compact' ? 'py-1.5' : 'py-2.5');
+  const pyClassGroupItem = $derived(density === 'compact' ? 'py-1.5' : 'py-2');
+
   // Click-outside to close color picker
   $effect(() => {
     if (!colorPickerOpen) return;
@@ -176,7 +195,7 @@
   });
 </script>
 
-<svelte:window onhashchange={onHashChange} />
+
 
 <aside
   aria-label="Sidebar navigation"
@@ -235,7 +254,7 @@
                 {@const active = isActive(item.path)}
                 <a
                   href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-                  class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200
+                  class="flex items-center gap-3 rounded-lg px-3 {pyClassGroupItem} text-sm font-medium transition-all duration-200
                   {active
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
@@ -258,7 +277,7 @@
                   <a
                     {...props}
                     href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-                    class="flex items-center justify-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
+                    class="flex items-center justify-center gap-3 rounded-lg px-3 {pyClass} text-sm font-medium transition-all duration-200
                     {active
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                       : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
@@ -274,7 +293,7 @@
           {:else}
             <a
               href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-              class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200
+              class="flex items-center gap-3 rounded-lg px-3 {pyClass} text-sm font-medium transition-all duration-200
               {active
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
                 : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"

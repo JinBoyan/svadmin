@@ -9,7 +9,7 @@
   import { Input } from './ui/input/index.js';
   import { Loader2, ChevronLeft, ChevronRight, Search, FileSearch, Eye, X } from '@lucide/svelte';
 
-  const authProvider = getAuthProvider();
+  const authProvider = getAuthProvider({ optional: true });
 
   let logs = $state<AuditLog[]>([]);
   let total = $state(0);
@@ -42,6 +42,8 @@
   }
 
   $effect(() => {
+    // Track `page` to re-fetch on pagination — this is the single trigger
+    void page;
     loadLogs();
   });
 
@@ -162,7 +164,7 @@
         <Button
           variant="outline" size="sm"
           disabled={page <= 1}
-          onclick={() => { page--; loadLogs(); }}
+          onclick={() => { page--; }}
         >
           <ChevronLeft class="h-4 w-4" />
         </Button>
@@ -170,7 +172,7 @@
         <Button
           variant="outline" size="sm"
           disabled={page >= totalPages}
-          onclick={() => { page++; loadLogs(); }}
+          onclick={() => { page++; }}
         >
           <ChevronRight class="h-4 w-4" />
         </Button>

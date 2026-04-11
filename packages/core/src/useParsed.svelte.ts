@@ -5,9 +5,18 @@ import { getResources } from './context.svelte';
 
 interface ParsedRoute {
   resource?: string;
-  action?: 'list' | 'create' | 'edit' | 'show';
+  action?: 'list' | 'create' | 'edit' | 'show' | 'clone';
   id?: string;
   params: Record<string, string>;
+}
+
+let globalPath = $state('/');
+if (typeof window !== 'undefined') {
+  // Initialize
+  globalPath = currentPath();
+  // Listen to navigation events
+  window.addEventListener('hashchange', () => { globalPath = currentPath(); });
+  window.addEventListener('popstate', () => { globalPath = currentPath(); });
 }
 
 /**
@@ -21,11 +30,10 @@ interface ParsedRoute {
  *   // parsed.id === '123'
  */
 export function useParsed(): ParsedRoute {
-  const path = $derived(currentPath());
   const resources = $derived((() => { try { return getResources(); } catch { return []; } })());
 
   const parsed = $derived.by(() => {
-    const p = path;
+    const p = globalPath;
     const result: ParsedRoute = { params: {} };
 
     // Parse query params from hash
@@ -73,6 +81,9 @@ export function useParsed(): ParsedRoute {
       } else if (restSegments[0] === 'show' && restSegments[1]) {
         result.action = 'show';
         result.id = restSegments[1];
+      } else if (restSegments[0] === 'clone' && restSegments[1]) {
+        result.action = 'clone';
+        result.id = restSegments[1];
       } else if (restSegments[0]) {
         // Legacy: /:resource/:id
         result.action = 'show';
@@ -91,6 +102,9 @@ export function useParsed(): ParsedRoute {
         result.id = segments[2];
       } else if (segments[1] === 'show' && segments[2]) {
         result.action = 'show';
+        result.id = segments[2];
+      } else if (segments[1] === 'clone' && segments[2]) {
+        result.action = 'clone';
         result.id = segments[2];
       } else if (segments[1]) {
         result.action = 'show';

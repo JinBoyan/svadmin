@@ -18,6 +18,8 @@ export interface RouterProvider {
     params: Record<string, string>;
     pathname: string;
   };
+  /** Formats an internal path into an href string for <a> tags */
+  formatLink?: (path: string) => string;
 }
 
 // ─── Hash Router (default) ──────────────────────────────────
@@ -25,21 +27,29 @@ export interface RouterProvider {
 export function createHashRouterProvider(): RouterProvider {
   return {
     go({ to, query, type = 'push' }) {
-      let url = `#${to}`;
+      if (typeof window === 'undefined') return;
+      let url = to;
       if (query) {
         const params = new URLSearchParams(query).toString();
         if (params) url += `?${params}`;
       }
       if (type === 'replace') {
-        window.location.replace(url);
+        const urlObj = new URL(window.location.href);
+        urlObj.hash = url;
+        window.history.replaceState(null, '', urlObj.href);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));
       } else {
-        window.location.hash = to;
+        window.location.hash = url;
       }
     },
     back() {
+      if (typeof window === 'undefined') return;
       history.back();
     },
     parse() {
+      if (typeof window === 'undefined') {
+        return { resource: undefined, action: undefined, id: undefined, params: {}, pathname: '/' };
+      }
       const hash = window.location.hash.slice(1) || '/';
       const [pathname, queryString] = hash.split('?');
       const params: Record<string, string> = {};
@@ -57,6 +67,9 @@ export function createHashRouterProvider(): RouterProvider {
         pathname,
       };
     },
+    formatLink(path) {
+      return '#' + path.replace(/^#/, '');
+    },
   };
 }
 
@@ -65,6 +78,7 @@ export function createHashRouterProvider(): RouterProvider {
 export function createHistoryRouterProvider(basePath = ''): RouterProvider {
   return {
     go({ to, query, type = 'push' }) {
+      if (typeof window === 'undefined') return;
       let url = `${basePath}${to}`;
       if (query) {
         const params = new URLSearchParams(query).toString();
@@ -79,9 +93,13 @@ export function createHistoryRouterProvider(basePath = ''): RouterProvider {
       window.dispatchEvent(new PopStateEvent('popstate'));
     },
     back() {
+      if (typeof window === 'undefined') return;
       history.back();
     },
     parse() {
+      if (typeof window === 'undefined') {
+        return { resource: undefined, action: undefined, id: undefined, params: {}, pathname: '/' };
+      }
       const pathname = window.location.pathname.replace(basePath, '') || '/';
       const params: Record<string, string> = {};
       for (const [k, v] of new URLSearchParams(window.location.search).entries()) {
@@ -95,6 +113,9 @@ export function createHistoryRouterProvider(basePath = ''): RouterProvider {
         params,
         pathname,
       };
+    },
+    formatLink(path) {
+      return basePath + path;
     },
   };
 }

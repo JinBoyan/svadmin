@@ -9,7 +9,7 @@ import type {
   ResourceDefinition, FieldDefinition,
   Sort, Filter,
 } from '@svadmin/core';
-import type { RequestEvent } from '@sveltejs/kit';
+import { fail, redirect, type RequestEvent } from '@sveltejs/kit';
 
 // ─── List Loader ──────────────────────────────────────────────
 
@@ -127,8 +127,10 @@ export function createCrudActions(
     delete: async ({ request }: RequestEvent) => {
       const formData = await request.formData();
       const id = formData.get('id') as string;
+      const redirectTo = formData.get('redirect') as string | undefined;
       try {
         await dp.deleteOne({ resource: resource.name, id });
+        if (redirectTo) throw redirect(303, redirectTo);
         return { success: true };
       } catch (e) {
         return { success: false, error: (e as Error).message };
@@ -190,7 +192,7 @@ export function createAuthActions(authProvider: AuthProvider) {
             sameSite: 'lax',
             maxAge: 60 * 60 * 24 * 7, // 7 days
           });
-          return { success: true, redirectTo: result.redirectTo ?? '/lite' };
+          throw redirect(303, result.redirectTo ?? '/lite');
         }
         return { success: false, error: result.error?.message ?? 'Login failed' };
       } catch (e) {

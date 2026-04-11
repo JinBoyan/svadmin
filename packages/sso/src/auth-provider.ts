@@ -116,11 +116,10 @@ const STORAGE_PREFIX = 'svadmin_sso_';
 
 function getStorage(config: SSOConfig): TokenStorage {
   if (config.storage && typeof config.storage === 'object') return config.storage;
-  const backend = config.storage === 'session' ? sessionStorage : localStorage;
   return {
-    getItem: (key) => backend.getItem(key),
-    setItem: (key, value) => backend.setItem(key, value),
-    removeItem: (key) => backend.removeItem(key),
+    getItem: (key) => typeof window !== 'undefined' ? (config.storage === 'session' ? sessionStorage : localStorage).getItem(key) : null,
+    setItem: (key, value) => { if (typeof window !== 'undefined') (config.storage === 'session' ? sessionStorage : localStorage).setItem(key, value); },
+    removeItem: (key) => { if (typeof window !== 'undefined') (config.storage === 'session' ? sessionStorage : localStorage).removeItem(key); },
   };
 }
 
@@ -264,6 +263,9 @@ export function createSSOAuthProvider(config: SSOConfig): AuthProvider {
 
   return {
     async login() {
+      if (typeof window === 'undefined') {
+        return { success: false, error: { message: 'SSO login requires a browser environment' } };
+      }
       const cfg = await discover();
       const { verifier, challenge } = await createPKCEChallenge();
       const state = generateRandomString(32);
@@ -293,7 +295,7 @@ export function createSSOAuthProvider(config: SSOConfig): AuthProvider {
       const tokens = getTokens();
       clearTokens();
 
-      if (cfg.end_session_endpoint && tokens?.id_token) {
+      if (typeof window !== 'undefined' && cfg.end_session_endpoint && tokens?.id_token) {
         const params = new URLSearchParams({
           id_token_hint: tokens.id_token,
           ...(config.postLogoutRedirectUri
@@ -311,6 +313,15 @@ export function createSSOAuthProvider(config: SSOConfig): AuthProvider {
     },
 
     async check() {
+      // SSR: no tokens, no callback — return unauthenticated
+      if (typeof window === 'undefined') {
+        const tokens = getTokens();
+        if (tokens && (!tokens.expires_at || tokens.expires_at > Math.floor(Date.now() / 1000))) {
+          return { authenticated: true };
+        }
+        return { authenticated: false, logout: true };
+      }
+
       // Handle callback — exchange authorization code for tokens
       const url = new URL(window.location.href);
       const code = url.searchParams.get('code');

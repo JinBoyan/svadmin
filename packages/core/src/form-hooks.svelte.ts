@@ -1,12 +1,12 @@
 import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { getAdminOptions } from './options.svelte';
-import { getDataProviderForResource } from './context.svelte';
+import { getDataProviderForResource, getResource } from './context.svelte';
 import { createQuery, createMutation } from '@tanstack/svelte-query';
 import { notify } from './notification.svelte';
 import { t } from './i18n.svelte';
 import { audit } from './audit';
-import { navigate } from './router';
+import { navigate, currentPath } from './router';
 import { HttpError } from './types';
 import type { BaseRecord, MutationMode, KnownResources } from './types';
 
@@ -110,14 +110,16 @@ export interface UseFormReturn<
   /** Reset form to initial/query values. Clears tainted and errors. */
   reset: () => void;
 
-  // ─── State ────────────────────────────────────────────────────
+  // ─── State ──────────────────────────────────────────────────────
   readonly loading: boolean;
   readonly submitting: boolean;
-  readonly resource: string;
   readonly action: 'create' | 'edit' | 'clone';
+  readonly resource: string;
   readonly id: string | number | undefined;
-  setId: (newId: string | number) => void;
-  readonly mutationMode: MutationMode;
+  readonly isDirty: boolean;
+  setId: (id: string | number | undefined) => void;
+  setAction: (action: 'create' | 'edit' | 'clone') => void;
+  mutationMode: MutationMode;
   redirect: (to: 'list' | 'edit' | 'show' | false) => void;
 
   // ─── AutoSave ─────────────────────────────────────────────────
@@ -140,12 +142,13 @@ export function useForm<
   const parsed = useParsed();
   const adminOptions = getAdminOptions();
 
-  const resource = options.resource ?? parsed.resource ?? '';
-  const action = options.action ?? (parsed.action === 'list' ? 'create' : parsed.action as 'create' | 'edit' | 'clone') ?? 'create';
+  const resource = $derived(options.resource ?? parsed.resource ?? '');
+  let action = $state<'create' | 'edit' | 'clone'>(options.action ?? (parsed.action === 'list' ? 'create' : parsed.action as 'create' | 'edit' | 'clone') ?? 'create');
   let currentId = $state<string | number | undefined>(options.id ?? parsed.id);
 
+  const defaultRedirectOpt = $derived(action === 'clone' ? adminOptions.redirect?.afterClone : action === 'edit' ? adminOptions.redirect?.afterEdit : adminOptions.redirect?.afterCreate);
   const {
-    redirect: redirectDefault = 'list',
+    redirect: redirectOption,
     successNotification, errorNotification,
     onMutationSuccess, onMutationError,
     meta: hookMeta, queryMeta: hookQueryMeta, mutationMeta: hookMutationMeta,
@@ -158,13 +161,17 @@ export function useForm<
     onChange: onChangeFn,
     onSubmit: onSubmitFn,
   } = options;
+  // Reactive redirect: uses $derived `defaultRedirectOpt` so redirect target
+  // updates when `action` changes at runtime (e.g., via `setAction`).
+  const redirectDefault = $derived(redirectOption ?? defaultRedirectOpt ?? 'list');
 
-  const provider = getDataProviderForResource(resource, dataProviderName);
-  const parsedMeta = typeof window !== 'undefined' ? Object.fromEntries(new URLSearchParams(window.location.search).entries()) : {};
+  const provider = $derived(getDataProviderForResource(resource, dataProviderName));
+  const parsedMeta = useParsed().params || {};
   const queryMeta = { ...parsedMeta, ...hookMeta, ...hookQueryMeta };
   const mutationMeta = { ...parsedMeta, ...hookMeta, ...hookMutationMeta };
 
-  function setId(newId: string | number) { currentId = newId; }
+  function setId(newId: string | number | undefined) { currentId = newId; }
+  function setAction(newAction: 'create' | 'edit' | 'clone') { action = newAction; }
 
   // ─── Form values (single source of truth) ───────────────────────
   let values = $state<TVariables>((options.defaultValues ?? {}) as TVariables);
@@ -252,30 +259,35 @@ export function useForm<
   }
 
   // ─── Query (edit/clone mode) ────────────────────────────────────
-  const query = (action === 'edit' || action === 'clone')
-    ? createQuery(() => ({
-        queryKey: [resource, 'one', currentId],
-        queryFn: async () => {
-          const result = await provider.getOne<BaseRecord>({ resource, id: currentId!, meta: queryMeta });
-          return result.data;
-        },
-        enabled: (queryOptions?.enabled ?? true) && currentId != null,
-        staleTime: queryOptions?.staleTime,
-      }))
-    : null;
+  // Always create the query — use `enabled` to conditionally activate.
+  // This ensures setAction('edit') at runtime will trigger a fetch.
+  const query = createQuery(() => ({
+    queryKey: [resource, 'one', currentId],
+    queryFn: async () => {
+      const result = await provider.getOne<BaseRecord>({ resource, id: currentId!, meta: queryMeta });
+      return result.data;
+    },
+    enabled: (queryOptions?.enabled ?? true) && (action === 'edit' || action === 'clone') && currentId != null,
+    staleTime: queryOptions?.staleTime,
+  }));
 
   // Auto-populate values from query data
-  let queryInitialized = false;
-  if (query) {
+  let queryInitializedId: string | number | undefined = undefined;
+  {
     $effect.pre(() => {
-      if (queryInitialized) return;
+      if (queryInitializedId === currentId) return;
       const data = query.data as Record<string, unknown> | undefined;
-      if (data) {
+      const pk = getResource(resource).primaryKey ?? 'id';
+      if (data && (currentId == null || String(data[pk]) === String(currentId) || !data[pk])) {
+        // In clone mode, strip out identifiers
+        const targetData = action === 'clone' 
+          ? Object.fromEntries(Object.entries(data).filter(([k]) => k !== 'id' && k !== '_id' && k !== pk))
+          : data;
         // Merge: defaultValues < query data
-        const merged = { ...(options.defaultValues ?? {}), ...data } as TVariables;
+        const merged = { ...(options.defaultValues ?? {}), ...targetData } as TVariables;
         values = merged;
         initialValues = { ...merged } as TVariables;
-        queryInitialized = true;
+        queryInitializedId = currentId;
       }
     });
   }
@@ -289,9 +301,14 @@ export function useForm<
     onSuccess: (data: { data: TData }) => {
       if (invalidateScopes !== false) queryClient.invalidateQueries({ queryKey: [resource] });
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.createSuccess') });
-      audit({ action: 'create', resource, recordId: String((data.data as Record<string, unknown>).id) });
+      const pk = getResource(resource).primaryKey ?? 'id';
+      audit({ action: 'create', resource, recordId: String((data.data as Record<string, unknown>)[pk]) });
       onMutationSuccess?.(data);
-      if (redirectOverride !== false) doRedirect(redirectOverride ?? redirectDefault);
+      if (redirectOverride !== false) {
+        const newId = (data.data as Record<string, unknown>)[pk];
+        if (newId != null) currentId = newId as string | number;
+        doRedirect(redirectOverride ?? redirectDefault);
+      }
     },
     onError: (error: Error) => { handleHttpError(error); onMutationError?.(error); },
   }));
@@ -310,9 +327,14 @@ export function useForm<
   }));
 
   function doRedirect(to: 'list' | 'edit' | 'show' | false) {
-    if (to === 'list') navigate(`/${resource}`);
-    else if (to === 'edit' && currentId) navigate(`/${resource}/edit/${currentId}`);
-    else if (to === 'show' && currentId) navigate(`/${resource}/show/${currentId}`);
+    const path = currentPath().split('?')[0];
+    const parts = path.split('/');
+    const resIdx = parts.lastIndexOf(String(resource));
+    const base = resIdx >= 0 ? parts.slice(0, resIdx + 1).join('/') : `/${resource}`;
+
+    if (to === 'list') navigate(base);
+    else if (to === 'edit' && currentId) navigate(`${base}/edit/${currentId}`);
+    else if (to === 'show' && currentId) navigate(`${base}/show/${currentId}`);
   }
 
   // ─── Submit ─────────────────────────────────────────────────────
@@ -344,7 +366,8 @@ export function useForm<
   let lastAutoSaveError = $state<unknown>(null);
 
   function triggerAutoSave() {
-    if (!autoSaveOpts?.enabled || action === 'create') return;
+    const currentAction = action; // read $state reactively at call time
+    if (!autoSaveOpts?.enabled || currentAction === 'create' || currentAction === 'clone') return;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
     autoSaveTimer = setTimeout(async () => {
@@ -410,11 +433,16 @@ export function useForm<
     reset,
 
     // State
-    get loading() { return query?.isLoading ?? false; },
+    get loading() { return query.isLoading ?? false; },
     get submitting() { return createMut.isPending || updateMut.isPending; },
-    resource, action,
+    get action() { return action; },
+    get resource() { return resource; },
     get id() { return currentId; },
-    setId, mutationMode, redirect: doRedirect,
+    get isDirty() { return Object.keys(tainted).length > 0; },
+    setId,
+    setAction,
+    mutationMode,
+    redirect: doRedirect,
 
     // AutoSave
     triggerAutoSave,
@@ -428,6 +456,6 @@ export function useForm<
 
     // Raw escape hatches
     query,
-    mutation: action === 'edit' ? updateMut : createMut,
+    get mutation() { return action === 'edit' ? updateMut : createMut; },
   };
 }

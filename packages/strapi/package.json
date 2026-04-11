@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/strapi",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Strapi v4/v5 DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,9 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "workspace:*"
+    "@svadmin/core": "workspace:*",
+    "@refinedev/strapi-v4": "^5.0.0",
+    "@svadmin/refine-adapter": "workspace:*"
   },
   "license": "MIT",
   "repository": {

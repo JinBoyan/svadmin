@@ -94,12 +94,13 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
     this.currentFilters = initFilters;
 
     // Create query
+    const _this = this;
     const { meta, syncWithLocation: _s, dataProviderName, pagination: _p, sorters: _sr, filters: _f, ...restOptions } = options;
     this._queryResult = useList<TData, TError>({
       resource,
-      pagination: this.queryPagination,
-      sorters: this.effectiveSorters,
-      filters: this.effectiveFilters,
+      get pagination() { return _this.queryPagination; },
+      get sorters() { return _this.effectiveSorters; },
+      get filters() { return _this.effectiveFilters; },
       meta,
       dataProviderName,
       ...restOptions,
@@ -111,9 +112,9 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
         writeURLState({
           page: this.pagination.current,
           pageSize: this.pagination.pageSize,
-          sortField: this.effectiveSorters[0]?.field,
-          sortOrder: this.effectiveSorters[0]?.order,
-          filters: this.effectiveFilters,
+          sortField: this.currentSorters[0]?.field,
+          sortOrder: this.currentSorters[0]?.order,
+          filters: this.currentFilters,
         });
       });
     }

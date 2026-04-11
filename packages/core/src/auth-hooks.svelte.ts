@@ -123,7 +123,9 @@ export function useGetIdentity() {
     });
   }
 
-  fetch();
+  if (typeof window !== 'undefined') {
+    fetch();
+  }
 
   return {
     get data() { return data; },
@@ -141,13 +143,19 @@ export function useIsAuthenticated() {
   let isLoading = $state(true);
 
   if (provider) {
-    provider.check().then((result: CheckResult) => {
-      isAuthenticated = result.authenticated;
-      isLoading = false;
-    }).catch(() => {
+    if (typeof window !== 'undefined') {
+      provider.check().then((result: CheckResult) => {
+        isAuthenticated = result.authenticated;
+        isLoading = false;
+      }).catch(() => {
+        isAuthenticated = false;
+        isLoading = false;
+      });
+    } else {
+      // In SSR we assume false to prevent hydration mismatch before check
       isAuthenticated = false;
       isLoading = false;
-    });
+    }
   } else {
     // No auth provider — treat as authenticated
     isAuthenticated = true;
@@ -230,7 +238,9 @@ export function usePermissions<T = unknown>() {
     });
   }
 
-  fetch();
+  if (typeof window !== 'undefined') {
+    fetch();
+  }
 
   return {
     get isLoading() { return isLoading; },

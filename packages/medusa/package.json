@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/medusa",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Medusa DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,9 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "workspace:*"
+    "@svadmin/core": "workspace:*",
+    "@refinedev/medusa": "^5.0.0",
+    "@svadmin/refine-adapter": "workspace:*"
   },
   "license": "MIT",
   "repository": {

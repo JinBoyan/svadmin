@@ -10,7 +10,7 @@
   }
 
   let { field, value, error = [], mode = 'show' }: Props = $props();
-  const hasError = error.length > 0;
+  let hasError = $derived(error.length > 0);
 
   function displaySelect(v: unknown): string {
     if (v == null) return '—';

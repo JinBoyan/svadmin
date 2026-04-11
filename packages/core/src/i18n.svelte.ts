@@ -46,6 +46,7 @@ const locales: Record<string, Record<string, string>> = {
     'common.darkMode': '暗色模式',
     'common.lightMode': '亮色模式',
     'common.detail': '详情',
+    'common.show': '查看',
     'common.loadFailed': '加载失败: {message}',
     'common.pageNotFound': '页面未找到',
     'common.error': '出错了',
@@ -283,6 +284,7 @@ const locales: Record<string, Record<string, string>> = {
     'common.darkMode': 'Dark mode',
     'common.lightMode': 'Light mode',
     'common.detail': 'Detail',
+    'common.show': 'Show',
     'common.loadFailed': 'Load failed: {message}',
     'common.pageNotFound': 'Page not found',
     'common.error': 'Something went wrong',
@@ -513,7 +515,7 @@ export function t(key: string, params?: Record<string, string | number>): string
 
   if (params) {
     for (const [k, v] of Object.entries(params)) {
-      text = text.replace(`{${k}}`, String(v));
+      text = text.replaceAll(`{${k}}`, String(v));
     }
   }
   return text;

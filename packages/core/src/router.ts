@@ -50,21 +50,34 @@ export function matchRoute(
   return null;
 }
 
-/**
- * Navigate to a path. Uses RouterProvider if available, falls back to hash.
- */
 export function navigate(path: string, options?: { replaceState?: boolean }): void {
   if (_routerProvider) {
     _routerProvider.go({ to: path, type: options?.replaceState ? 'replace' : 'push' });
-  } else {
+  } else if (typeof window !== 'undefined') {
     window.location.hash = '#' + path.replace(/^#/, '');
   }
+}
+
+/**
+ * Format a path into an href suitable for <a> tags.
+ */
+export function formatLink(path: string): string {
+  if (_routerProvider?.formatLink) {
+    return _routerProvider.formatLink(path);
+  }
+  return '#' + path.replace(/^#/, '');
 }
 
 export function currentPath(): string {
   if (_routerProvider) {
     const parsed = _routerProvider.parse();
-    return parsed.pathname || '/';
+    const pathname = parsed.pathname || '/';
+    let qs = '';
+    if (parsed.params && Object.keys(parsed.params).length > 0) {
+      qs = '?' + new URLSearchParams(parsed.params).toString();
+    }
+    return pathname + qs;
   }
+  if (typeof window === 'undefined') return '/';
   return window.location.hash.replace(/^#/, '') || '/';
 }

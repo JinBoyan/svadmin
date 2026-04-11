@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/firebase",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Firebase DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,8 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "workspace:*"
+    "@svadmin/core": "workspace:*",
+    "@svadmin/refine-adapter": "workspace:*"
   },
   "license": "MIT",
   "repository": {

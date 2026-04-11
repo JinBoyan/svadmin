@@ -5,6 +5,7 @@ export {
   setAuthProvider, getAuthProvider,
   setResources, getResources, getResource,
   setRouterProvider, getRouterProvider,
+  setLiveProvider, getLiveProvider,
 } from './context.svelte';
 export type { DataProviderInput } from './context.svelte';
 export {

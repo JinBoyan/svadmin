@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useIsAuthenticated } from '@svadmin/core';
+  import { useIsAuthenticated, getRouterProvider } from '@svadmin/core';
   import type { Snippet } from 'svelte';
   import { navigate } from '@svadmin/core';
 
@@ -23,8 +23,15 @@
     if (fallback) return;
     let url = redirectTo;
     if (appendCurrentPathToQuery && typeof window !== 'undefined') {
-      const current = encodeURIComponent(window.location.pathname + window.location.search);
-      url += `?to=${current}`;
+      const rp = getRouterProvider();
+      let currentString = window.location.pathname + window.location.search;
+      if (rp) {
+        const parsed = rp.parse();
+        const qs = new URLSearchParams(parsed.params).toString();
+        currentString = parsed.pathname + (qs ? `?${qs}` : '');
+      }
+      const current = encodeURIComponent(currentString);
+      url += url.includes('?') ? `&to=${current}` : `?to=${current}`;
     }
     navigate(url);
   }

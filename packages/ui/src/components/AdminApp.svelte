@@ -128,21 +128,35 @@
   let authChecked = $state(false);
 
   $effect(() => {
+    let cancelled = false;
     // Explicitly track route so auth is re-checked on navigation
     const _route = route;
 
     if (!authProvider) {
-      isAuthenticated = true;
-      authChecked = true;
+      if (!cancelled) {
+        isAuthenticated = true;
+        authChecked = true;
+      }
       return;
     }
     authProvider.check().then(result => {
+      if (cancelled) return;
       isAuthenticated = result.authenticated;
       authChecked = true;
       if (!result.authenticated && _route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
         navigate(result.redirectTo ?? '/login');
       }
+    }).catch(err => {
+      if (cancelled) return;
+      console.warn('Auth check failed:', err);
+      isAuthenticated = false;
+      authChecked = true;
+      if (_route !== '/login' && _route !== '/register' && _route !== '/forgot-password' && _route !== '/update-password') {
+        navigate('/login');
+      }
     });
+
+    return () => { cancelled = true; };
   });
 </script>
 
@@ -170,7 +184,7 @@
     <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
       {#key route + (params.resource ?? '') + (params.id ?? '')}
       <div class="svadmin-page-enter">
-      {#if currentPath().startsWith('/settings')}
+      {#if route.startsWith('/settings')}
         <SettingsPage />
       {:else if route === '/' || route === ''}
         {#if dashboard}
@@ -181,25 +195,30 @@
             <p class="text-muted-foreground">{t('common.dashboardHint')}</p>
           </div>
         {/if}
-      {:else if route === '/:resource'}
+      {:else if route === '/:resource' || route === '/:parent/:parentId/:resource'}
         {#key params.resource}
           {@const Comp = getComponentRegistry().AutoTable}
           <Comp resourceName={params.resource} />
         {/key}
-      {:else if route === '/:resource/create'}
+      {:else if route === '/:resource/create' || route === '/:parent/:parentId/:resource/create'}
         {#key params.resource}
           {@const Comp = getComponentRegistry().AutoForm}
           <Comp resourceName={params.resource} mode="create" />
         {/key}
-      {:else if route === '/:resource/edit/:id'}
+      {:else if route === '/:resource/edit/:id' || route === '/:parent/:parentId/:resource/edit/:id'}
         {#key `${params.resource}-${params.id}`}
           {@const Comp = getComponentRegistry().AutoForm}
           <Comp resourceName={params.resource} mode="edit" id={params.id} />
         {/key}
-      {:else if route === '/:resource/show/:id'}
+      {:else if route === '/:resource/show/:id' || route === '/:parent/:parentId/:resource/show/:id'}
         {#key `${params.resource}-${params.id}`}
           {@const Comp = getComponentRegistry().ShowPage}
           <Comp resourceName={params.resource} id={params.id} />
+        {/key}
+      {:else if route === '/:resource/clone/:id' || route === '/:parent/:parentId/:resource/clone/:id'}
+        {#key `${params.resource}-clone-${params.id}`}
+          {@const Comp = getComponentRegistry().AutoForm}
+          <Comp resourceName={params.resource} mode="clone" id={params.id} />
         {/key}
       {/if}
       </div>

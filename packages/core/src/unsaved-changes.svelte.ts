@@ -98,7 +98,6 @@ export function initUnsavedChangesNotifier(options?: {
   const onHashChange = (e: HashChangeEvent) => {
     if (!dirty) return;
     if (!confirm(t('common.unsavedChanges'))) {
-      e.preventDefault();
       if (e.oldURL) {
         history.replaceState(null, '', new URL(e.oldURL).hash || '#');
       }

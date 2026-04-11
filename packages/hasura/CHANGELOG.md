@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.5](https://github.com/zuohuadong/svadmin/compare/hasura-v0.9.4...hasura-v0.9.5) (2026-04-11)
+
+
+### 🐛 Bug Fixes
+
+* **core,hasura:** add ssr guard for csv export, migrate hasura to async import ([722dd3d](https://github.com/zuohuadong/svadmin/commit/722dd3da5a92cacc2681221736463b79e6beea05))
+
+## [0.9.4](https://github.com/zuohuadong/svadmin/compare/hasura-v0.9.3...hasura-v0.9.4) (2026-04-10)
+
+
+### 🐛 Bug Fixes
+
+* **core:** resolve data provider regressions and type errors ([8728fcc](https://github.com/zuohuadong/svadmin/commit/8728fcc737cbf6ece7400de7282984e3f2dce9f0))
+* **ui:** explicitly upgrade @tanstack/table-core to v9.x to resolve alpha and v8 type conflicts ([933e7a3](https://github.com/zuohuadong/svadmin/commit/933e7a3e2afa13b6c1e66b9e194d629e4aa77c73))
+
 ## [0.9.3](https://github.com/zuohuadong/svadmin/compare/hasura-v0.9.2...hasura-v0.9.3) (2026-04-03)
 
 

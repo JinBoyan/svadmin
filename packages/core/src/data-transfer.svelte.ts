@@ -21,7 +21,7 @@ export interface UseExportOptions<TData extends BaseRecord = BaseRecord> {
  */
 export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExportOptions<TData> = {}) {
   const parsed = useParsed();
-  const resource = options.resource ?? parsed.resource ?? '';
+  const resource = $derived(options.resource ?? parsed.resource ?? '');
   let isLoading = $state(false);
 
   async function triggerExport() {
@@ -55,7 +55,7 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
         ? allRecords.map(options.mapData)
         : allRecords.map(r => r as unknown as Record<string, unknown>);
 
-      if (options.download !== false) {
+      if (options.download !== false && typeof document !== 'undefined') {
         const fields = Object.keys(mapped[0]);
         const header = fields.join(',');
         const rows = mapped.map(record =>
@@ -109,7 +109,7 @@ export interface UseImportOptions<TData = Record<string, unknown>> {
  */
 export function useImport<TData = Record<string, unknown>>(options: UseImportOptions<TData> = {}) {
   const parsed = useParsed();
-  const resource = options.resource ?? parsed.resource ?? '';
+  const resource = $derived(options.resource ?? parsed.resource ?? '');
   let isLoading = $state(false);
   let mutationResult = $state<{ succeeded: unknown[]; errored: { request: unknown; error: unknown }[] } | null>(null);
 

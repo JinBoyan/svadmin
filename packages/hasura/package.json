@@ -1,6 +1,6 @@
 {
   "name": "@svadmin/hasura",
-  "version": "0.9.3",
+  "version": "0.9.5",
   "description": "Hasura GraphQL DataProvider for svadmin",
   "type": "module",
   "sideEffects": false,
@@ -16,7 +16,10 @@
     }
   },
   "peerDependencies": {
-    "@svadmin/core": "workspace:*"
+    "@svadmin/core": "workspace:*",
+    "@svadmin/refine-adapter": "workspace:*",
+    "@refinedev/hasura": "^5.0.0",
+    "graphql-request": "^6.1.0"
   },
   "license": "MIT",
   "repository": {

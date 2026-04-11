@@ -7,13 +7,14 @@ import { useParsed } from './useParsed.svelte';
 export function useGetToPath() {
   const routerProvider = getRouterProvider();
 
-  return (options: { resource?: string; action?: 'list' | 'create' | 'edit' | 'show'; id?: string | number; meta?: Record<string, unknown> }) => {
+  return (options: { resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number; meta?: Record<string, unknown> }) => {
     const { resource, action, id } = options;
     if (!resource) return '/';
     let path = `/${resource}`;
     if (action === 'create') path += '/create';
     else if (action === 'edit' && id) path += `/edit/${id}`;
     else if (action === 'show' && id) path += `/show/${id}`;
+    else if (action === 'clone' && id) path += `/clone/${id}`;
 
     // Apply router mapping if the router provider defines custom path transformers
     if (routerProvider?.go) {
@@ -30,7 +31,7 @@ export function useGo() {
   return (options: { to?: string; query?: Record<string, unknown>; type?: 'push' | 'replace'; resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number }) => {
     let targetUrl = options.to;
     if (!targetUrl && options.resource) {
-      targetUrl = getToPath({ resource: options.resource, action: options.action === 'clone' ? 'edit' : options.action, id: options.id });
+      targetUrl = getToPath({ resource: options.resource, action: options.action, id: options.id });
     }
     if (!targetUrl) targetUrl = '/';
 

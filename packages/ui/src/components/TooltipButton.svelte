@@ -6,6 +6,9 @@
 
   interface Props extends Omit<HTMLButtonAttributes, 'class' | 'children'> {
     tooltip: string;
+    href?: string;
+    target?: string;
+    rel?: string;
     variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
     size?: 'default' | 'sm' | 'lg' | 'icon' | 'icon-sm';
     side?: 'top' | 'right' | 'bottom' | 'left';
@@ -24,6 +27,9 @@
     disabled = false,
     type = 'button',
     tabindex,
+    href,
+    target,
+    rel,
     children,
     ...restProps
   }: Props = $props();
@@ -32,7 +38,7 @@
 <Tooltip.Root>
   <Tooltip.Trigger>
     {#snippet child({ props })}
-      {@const buttonProps = { ...props, ...restProps, variant, size, type, class: className, 'aria-label': restProps['aria-label'] ?? tooltip, onclick, disabled, tabindex } as any}
+      {@const buttonProps = { ...props, ...restProps, href, target, rel, variant, size, type, class: className, 'aria-label': restProps['aria-label'] ?? tooltip, onclick, disabled, tabindex } as any}
       <Button {...buttonProps}>
         {@render children()}
       </Button>

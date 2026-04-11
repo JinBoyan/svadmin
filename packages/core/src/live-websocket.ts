@@ -104,10 +104,7 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
     status = 'disconnected';
   }
 
-  // Auto-connect on creation
-  if (typeof WebSocket !== 'undefined') {
-    connect();
-  }
+
 
   return {
     subscribe({ resource, callback }) {

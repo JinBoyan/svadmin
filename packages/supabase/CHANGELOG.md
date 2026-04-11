@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.9.3](https://github.com/zuohuadong/svadmin/compare/supabase-v0.9.2...supabase-v0.9.3) (2026-04-11)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** upgrade tanstack table to 9.0.0-alpha.32, fix autotable api compat ([8868f96](https://github.com/zuohuadong/svadmin/commit/8868f96762ec00f9ab40eec2e4600d389bc5c00a))
+
+## [0.9.2](https://github.com/zuohuadong/svadmin/compare/supabase-v0.9.1...supabase-v0.9.2) (2026-04-10)
+
+
+### 🐛 Bug Fixes
+
+* **providers,auth:** lazy dynamic imports for peer deps, SSR safeguards for window.location access ([2bc5819](https://github.com/zuohuadong/svadmin/commit/2bc5819d59ad223f71e42fa208c8e717412b2552))
+* **ui,supabase:** clone route support, SSR localStorage guards, missing i18n key ([e1e96ad](https://github.com/zuohuadong/svadmin/commit/e1e96ad991ae1bb545aade3033b9776ae8805347))
+
+
+### 💅 Elegance & Refactoring
+
+* **core:** migrate 9 data provider pkgs to refine-adapter ([1ba465d](https://github.com/zuohuadong/svadmin/commit/1ba465d1f7de63e7efb6d632ad1f4750be07cfd5))
+
+## [0.9.1](https://github.com/zuohuadong/svadmin/compare/supabase-v0.9.0...supabase-v0.9.1) (2026-04-09)
+
+
+### 🐛 Bug Fixes
+
+* **supabase:** prevent false logout during token refresh race condition ([cdeecc6](https://github.com/zuohuadong/svadmin/commit/cdeecc6501eebd7f5b63dfc23ae566b6707b2371))
+
 ## [0.9.0](https://github.com/zuohuadong/svadmin/compare/supabase-v0.8.4...supabase-v0.9.0) (2026-04-09)
 
 

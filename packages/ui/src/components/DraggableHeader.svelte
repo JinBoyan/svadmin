@@ -29,10 +29,13 @@
   let dragIndex = $state<number | null>(null);
   let dropIndex = $state<number | null>(null);
 
-  // Restore saved order from localStorage
+  // Restore saved order from localStorage (once on mount)
+  let _restored = false;
   $effect(() => {
+    if (_restored) return;
     const storageKey = `svadmin-colorder-${resourceName}`;
-    if (typeof localStorage === 'undefined') return;
+    if (typeof window === 'undefined') return;
+    _restored = true;
     try {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
@@ -79,7 +82,7 @@
 
     // Persist to localStorage
     const storageKey = `svadmin-colorder-${resourceName}`;
-    if (typeof localStorage !== 'undefined') {
+    if (typeof window !== 'undefined') {
       try {
         localStorage.setItem(storageKey, JSON.stringify(newColumns.map(c => c.id)));
       } catch { /* ignore */ }

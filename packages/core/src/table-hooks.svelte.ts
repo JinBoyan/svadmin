@@ -115,9 +115,9 @@ export function useTable<
       writeURLState({
         page: pagination.current,
         pageSize: pagination.pageSize,
-        sortField: effectiveSorters[0]?.field,
-        sortOrder: effectiveSorters[0]?.order,
-        filters: effectiveFilters,
+        sortField: currentSorters[0]?.field,
+        sortOrder: currentSorters[0]?.order,
+        filters: currentFilters,
       });
     });
   }
@@ -126,12 +126,12 @@ export function useTable<
     const params = new URLSearchParams();
     if (pagination.current) params.set('page', String(pagination.current));
     if (pagination.pageSize) params.set('pageSize', String(pagination.pageSize));
-    if (effectiveSorters[0]) {
-      params.set('sortField', effectiveSorters[0].field);
-      params.set('sortOrder', effectiveSorters[0].order);
+    if (currentSorters[0]) {
+      params.set('sort', currentSorters[0].field);
+      params.set('order', currentSorters[0].order);
     }
-    if (effectiveFilters.length > 0) {
-      params.set('filters', JSON.stringify(effectiveFilters));
+    if (currentFilters.length > 0) {
+      params.set('filters', JSON.stringify(currentFilters));
     }
     return `?${params.toString()}`;
   }

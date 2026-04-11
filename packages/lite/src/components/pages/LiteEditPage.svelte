@@ -24,8 +24,8 @@
     canShow = true,
   }: Props = $props();
 
-  const pk = resource.primaryKey ?? 'id';
-  const idStr = String(record[pk]);
+  let pk = $derived(resource.primaryKey ?? 'id');
+  let idStr = $derived(String(record[pk]));
 </script>
 
 <div class="lite-page">

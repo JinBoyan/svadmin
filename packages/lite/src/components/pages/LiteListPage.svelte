@@ -70,6 +70,11 @@
       <LitePagination
         page={pagination.page}
         totalPages={Math.ceil(total / pagination.perPage)}
+        preserveParams={{
+          ...(currentSort ? { sort: currentSort } : {}),
+          ...(currentOrder ? { order: currentOrder } : {}),
+          ...(currentSearch ? { q: currentSearch } : {})
+        }}
       />
     {/if}
   </div>

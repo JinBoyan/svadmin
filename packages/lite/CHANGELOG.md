@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.3.2](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.1...lite-v0.3.2) (2026-04-11)
+
+
+### 🐛 Bug Fixes
+
+* **core:** resolve P2 lifecycle and routing bugs ([f9e3969](https://github.com/zuohuadong/svadmin/commit/f9e3969cb30b6ff94ef69a66ba19d939ef4998bb))
+* **lite:** resolve modal action binding, auth/delete redirects, and select components schemas ([f4da5cd](https://github.com/zuohuadong/svadmin/commit/f4da5cd9e5c81cf0c4673eb05777999b34632c4f))
+
+## [0.3.1](https://github.com/zuohuadong/svadmin/compare/lite-v0.3.0...lite-v0.3.1) (2026-04-10)
+
+
+### 🐛 Bug Fixes
+
+* **core:** resolve functional regressions in routing, forms, and live providers ([09e4f69](https://github.com/zuohuadong/svadmin/commit/09e4f69246ae96c1e4357391e2b53aaad8756902))
+* **core:** resolve regressions across SSR auth, mutation hooks, lite components and editor types ([5b716e2](https://github.com/zuohuadong/svadmin/commit/5b716e22dd1f0664b3a884b8d74a583590467065))
+
 ## [0.3.0](https://github.com/zuohuadong/svadmin/compare/lite-v0.2.5...lite-v0.3.0) (2026-04-05)
 
 

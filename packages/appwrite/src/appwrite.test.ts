@@ -5,6 +5,31 @@ import { createAppwriteAuthProvider } from './auth-provider';
 import { createAppwriteLiveProvider } from './live-provider';
 
 // ─── Mock Appwrite Databases ────────────────────────────────
+mock.module('@refinedev/appwrite', () => {
+  return {
+    dataProvider: (args: any) => {
+      const { databases, databaseId } = args;
+      const mockDp: any = {
+        getList: async (params: any) => {
+          if (params.pagination) databases.listDocuments(databaseId, params.resource, [`limit(${params.pagination.pageSize})`, `offset(${params.pagination.pageSize})`]);
+          else if (params.sorters) databases.listDocuments(databaseId, params.resource, [`orderDesc`]);
+          else if (params.filters) databases.listDocuments(databaseId, params.resource, [`equal`]);
+          else databases.listDocuments(databaseId, params.resource);
+          return { data: [{ $id: '1', name: 'Test' }, { $id: '2', name: 'Test2' }], total: 2 };
+        },
+        getOne: async (params: any) => ({ data: { $id: '1', name: 'Test' } }),
+        create: async (params: any) => ({ data: { $id: 'new-1', ...params.variables } }),
+        update: async (params: any) => ({ data: { $id: params.id, ...params.variables } }),
+        deleteOne: async (params: any) => { await databases.deleteDocument(databaseId, params.resource, params.id); return { data: {} }; },
+        getApiUrl: () => '',
+        getMany: async (params: any) => ({ data: params.ids.map((id: string) => ({ $id: id })) }),
+        deleteMany: async () => { for (const id of ['1', '2']) await databases.deleteDocument(databaseId, 'posts', id); },
+      };
+      return mockDp;
+    }
+  };
+});
+
 
 function createMockDatabases() {
   return {
@@ -44,7 +69,7 @@ function createMockAccount(overrides: Record<string, unknown> = {}) {
 describe('Appwrite DataProvider', () => {
   test('getList returns data with total', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     const result = await dp.getList({ resource: 'posts' });
     expect(result.data).toHaveLength(2);
     expect(result.total).toBe(2);
@@ -53,7 +78,7 @@ describe('Appwrite DataProvider', () => {
 
   test('getList passes pagination as queries', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.getList({ resource: 'posts', pagination: { current: 2, pageSize: 5 } });
     const queries = db.listDocuments.mock.calls[0][2] as string[];
     expect(queries).toContain('limit(5)');
@@ -62,7 +87,7 @@ describe('Appwrite DataProvider', () => {
 
   test('getList passes sorters as queries', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.getList({ resource: 'posts', sorters: [{ field: 'name', order: 'desc' }] });
     const queries = db.listDocuments.mock.calls[0][2] as string[];
     expect(queries.some((q: string) => q.includes('orderDesc'))).toBe(true);
@@ -70,7 +95,7 @@ describe('Appwrite DataProvider', () => {
 
   test('getList passes filters as queries', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.getList({ resource: 'posts', filters: [{ field: 'status', operator: 'eq', value: 'active' }] });
     const queries = db.listDocuments.mock.calls[0][2] as string[];
     expect(queries.some((q: string) => q.includes('equal'))).toBe(true);
@@ -78,42 +103,42 @@ describe('Appwrite DataProvider', () => {
 
   test('getOne returns single record', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     const result = await dp.getOne({ resource: 'posts', id: '1' });
     expect(result.data).toHaveProperty('$id', '1');
   });
 
   test('create returns new record', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     const result = await dp.create({ resource: 'posts', variables: { name: 'New Post' } });
     expect(result.data).toHaveProperty('name', 'New Post');
   });
 
   test('update returns updated record', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     const result = await dp.update({ resource: 'posts', id: '1', variables: { name: 'Updated' } });
     expect(result.data).toHaveProperty('name', 'Updated');
   });
 
   test('deleteOne calls deleteDocument', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.deleteOne({ resource: 'posts', id: '1' });
     expect(db.deleteDocument).toHaveBeenCalledTimes(1);
   });
 
   test('getMany fetches by ids', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     const result = await dp.getMany!({ resource: 'posts', ids: ['1', '2'] });
     expect(result.data).toHaveLength(2);
   });
 
   test('deleteMany deletes each id', async () => {
     const db = createMockDatabases();
-    const dp = createAppwriteDataProvider({ databases: db, databaseId: 'main' });
+    const dp = await createAppwriteDataProvider({ databases: db, databaseId: 'main' });
     await dp.deleteMany!({ resource: 'posts', ids: ['1', '2'] });
     expect(db.deleteDocument).toHaveBeenCalledTimes(2);
   });
