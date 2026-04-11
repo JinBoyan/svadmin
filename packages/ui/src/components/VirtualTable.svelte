@@ -66,11 +66,13 @@
   style="height: {containerHeight}px;"
   onscroll={handleScroll}
 >
-  <div style="position: relative; height: {totalHeight}px; width: 100%;">
-    {#each visibleItems as { item, index, offsetY } (index)}
-      <div style="position: absolute; top: {offsetY}px; left: 0; right: 0; height: {rowHeight}px;">
+  <table class="w-full relative" style="border-spacing: 0;">
+    <tbody style="display: block;">
+      <tr style="height: {visibleRange.start * rowHeight}px; border: none; padding: 0; display: block;"></tr>
+      {#each visibleItems as { item, index } (index)}
         {@render row(item, index)}
-      </div>
-    {/each}
-  </div>
+      {/each}
+      <tr style="height: {Math.max(0, (items.length - visibleRange.end - 1) * rowHeight)}px; border: none; padding: 0; display: block;"></tr>
+    </tbody>
+  </table>
 </div>

@@ -29,10 +29,9 @@
   let dragIndex = $state<number | null>(null);
   let dropIndex = $state<number | null>(null);
 
-  // Restore saved order from localStorage (once on mount)
   let _restored = false;
   $effect(() => {
-    if (_restored) return;
+    if (_restored || columns.length === 0) return;
     const storageKey = `svadmin-colorder-${resourceName}`;
     if (typeof window === 'undefined') return;
     _restored = true;

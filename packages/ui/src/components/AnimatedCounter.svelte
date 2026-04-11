@@ -14,6 +14,7 @@
 
   let displayValue = $state('0');
   let prevTarget = 0;
+  let currentRaf: number | null = null;
 
   $effect(() => {
     const target = typeof value === 'number' ? value : parseInt(value, 10);
@@ -35,11 +36,16 @@
       displayValue = current.toLocaleString();
 
       if (progress < 1) {
-        requestAnimationFrame(tick);
+        currentRaf = requestAnimationFrame(tick);
       }
     }
 
-    requestAnimationFrame(tick);
+    if (currentRaf) cancelAnimationFrame(currentRaf);
+    currentRaf = requestAnimationFrame(tick);
+
+    return () => {
+      if (currentRaf) cancelAnimationFrame(currentRaf);
+    };
   });
 </script>
 

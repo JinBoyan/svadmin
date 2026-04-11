@@ -49,10 +49,20 @@
     return '';
   });
 
+  import { getChatProvider } from '@svadmin/core';
+
   const suffixText = $derived(ghostText ? ghostText.slice(value.length) : '');
 
+  const resolvedProvider = $derived(provider ?? (() => {
+    try {
+      return getChatProvider();
+    } catch {
+      return null;
+    }
+  })());
+
   async function predict() {
-    if (!provider || !value.trim()) {
+    if (!resolvedProvider || !value.trim()) {
       suggestion = '';
       return;
     }
@@ -70,7 +80,7 @@ Provide ONLY the most likely completion of the exact phrase the user is typing.
 Include the user's input in your returned string. 
 Do not include any other text, Markdown formatting, quotes, or explanations.`;
 
-      const result = provider.sendMessage(
+      const result = resolvedProvider.sendMessage(
         [{ id: 'prompt', role: 'user', content: prompt, timestamp: Date.now() }],
         { signal: abortController.signal }
       );

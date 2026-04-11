@@ -23,9 +23,15 @@
   type StatusKey = 'connected' | 'connecting' | 'disconnected';
   const cfg = $derived(statusConfigs[status as StatusKey]);
 
+  let now = $state(Date.now());
+  $effect(() => {
+    const itv = setInterval(() => { now = Date.now(); }, 1000);
+    return () => clearInterval(itv);
+  });
+
   const timeSinceEvent = $derived(
     lastEvent?.timestamp
-      ? Math.floor((Date.now() - lastEvent.timestamp) / 1000)
+      ? Math.floor((now - lastEvent.timestamp) / 1000)
       : null
   );
 </script>
