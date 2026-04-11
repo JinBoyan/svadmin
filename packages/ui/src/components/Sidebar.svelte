@@ -82,6 +82,7 @@
   $effect(() => {
     // Re-run when locale or resources change
     const localeVal = getLocale();
+    let cancelled = false;
 
     Promise.all(resources.map(async (r) => {
       try {
@@ -91,6 +92,7 @@
         return { r, can: false };
       }
     })).then(results => {
+      if (cancelled) return;
       const items: NavItem[] = [{ path: '/', label: t('common.home'), Icon: LayoutDashboard }];
       for (const { r, can } of results) {
         if (can) {
@@ -104,6 +106,8 @@
       }
       navItems = items;
     });
+
+    return () => { cancelled = true; };
   });
 
   /** Toggle between available locales */

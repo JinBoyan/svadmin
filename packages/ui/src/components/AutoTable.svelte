@@ -334,7 +334,12 @@
     const ids = Object.keys(rowSelection);
     confirmMessage = t('common.batchDeleteConfirm', { count: ids.length });
     confirmAction = async () => {
-      await Promise.allSettled(ids.map(id => deleteMutation.mutateAsync({ id, resource: resourceName })));
+      const results = await Promise.allSettled(ids.map(id => deleteMutation.mutateAsync({ id, resource: resourceName })));
+      const failed = results.filter(r => r.status === 'rejected');
+      if (failed.length > 0) {
+        console.error('Batch delete partial failure', failed);
+        // Rely on individual mutation error toasts, or show a summary
+      }
       rowSelection = {};
       confirmOpen = false;
     };
@@ -465,7 +470,7 @@
                     value={filterValues[field.key] ?? ''}
                     onchange={(e) => filterValues[field.key] = (e.currentTarget as HTMLSelectElement).value}
                   >
-                    <option value="">全部</option>
+                    <option value="">{t('common.all') ?? '全部'}</option>
                     {#each field.options as opt}
                       <option value={opt.value}>{opt.label}</option>
                     {/each}

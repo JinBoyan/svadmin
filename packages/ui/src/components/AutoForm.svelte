@@ -71,6 +71,19 @@
 
   const validator = $derived(deriveValidator(formFields));
 
+  $effect(() => {
+    // If id changes or defaults magically change, we might want to update form values
+    // But to respect user input, only update if not tainted, or if changing record
+    if (!form.isTainted()) {
+      for (const key in defaults) {
+        if (form.values[key] !== defaults[key]) {
+          form.setFieldValue(key, defaults[key]);
+        }
+      }
+      form.untaint();
+    }
+  });
+
   // ─── useForm: single source of truth for values, errors, tainted ──
   const form = useForm({
     get resource() { return resourceName; },

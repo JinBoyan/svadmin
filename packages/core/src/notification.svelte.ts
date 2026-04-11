@@ -4,7 +4,7 @@
 import { toast } from './toast.svelte';
 import type { NotificationProvider } from './types';
 
-let notificationProvider: NotificationProvider | null = null;
+let notificationProvider = $state<NotificationProvider | null>(null);
 
 export function setNotificationProvider(provider: NotificationProvider): void {
   notificationProvider = provider;
@@ -29,10 +29,10 @@ export function notify(params: {
     // Fallback to built-in toast
     const { type, message } = params;
     switch (type) {
-      case 'success': toast.success(message); break;
-      case 'error': toast.error(message); break;
-      case 'warning': toast.warning(message); break;
-      case 'info': toast.info(message); break;
+      case 'success': toast.success(message, undefined, { key: params.key }); break;
+      case 'error': toast.error(message, undefined, { key: params.key }); break;
+      case 'warning': toast.warning(message, undefined, { key: params.key }); break;
+      case 'info': toast.info(message, undefined, { key: params.key }); break;
     }
   }
 }

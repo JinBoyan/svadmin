@@ -48,11 +48,13 @@ export type CrudOperator =
   | 'null' | 'nnull'
   | 'between' | 'nbetween';
 
-export interface Filter {
+export interface FieldFilter {
   field: string;
   operator: CrudOperator;
   value: unknown;
 }
+
+export type Filter = FieldFilter | LogicalFilter;
 
 export interface LogicalFilter {
   operator: 'or' | 'and';

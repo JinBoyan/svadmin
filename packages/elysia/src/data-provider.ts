@@ -127,9 +127,9 @@ export function createElysiaDataProvider(opts: ElysiaDataProviderOptions): DataP
 
       if (filters?.length) {
         for (const f of filters) {
-          if (f.operator === 'eq') params.set(f.field, String(f.value));
-          else if (f.operator === 'contains') params.set(`${f.field}_like`, String(f.value));
-          else params.set(`${f.field}_${f.operator}`, String(f.value));
+          if ((f as any).operator === 'eq') params.set((f as any).field, String((f as any).value));
+          else if ((f as any).operator === 'contains') params.set(`${(f as any).field}_like`, String((f as any).value));
+          else params.set(`${(f as any).field}_${(f as any).operator}`, String((f as any).value));
         }
       }
 

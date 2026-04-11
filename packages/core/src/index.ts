@@ -44,10 +44,10 @@ export { setAdminOptions, getAdminOptions, getTextTransformers } from './options
 export type { AdminOptions, TextTransformers, OvertimeConfig } from './options.svelte';
 
 export * from './query-keys';
-export { HttpError } from './types';
+export { HttpError, UndoError } from './types';
 export type {
   DataProvider, AuthProvider, NotificationProvider, MutationMode,
-  ValidationErrors, CrudOperator, LogicalFilter,
+  ValidationErrors, CrudOperator, LogicalFilter, FieldFilter,
   CustomParams, CustomResult,
   GetListParams, GetListResult,
   GetOneParams, GetOneResult,
@@ -101,3 +101,6 @@ export {
 } from './helpers';
 export { TableState } from './table-state.svelte';
 export type { TableStateOptions } from './table-state.svelte';
+export type { UseInfiniteListOptions } from './hooks.svelte';
+export type { UseSelectOptions } from './hooks.svelte';
+export type { UseFormReturn } from './form-hooks.svelte';

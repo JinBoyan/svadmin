@@ -200,7 +200,8 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
     if (behavior === 'merge') {
       const merged = [...this.currentFilters];
       for (const nf of newFilters) {
-        const idx = merged.findIndex(f => f.field === nf.field && f.operator === nf.operator);
+        if (!('field' in nf)) { merged.push(nf); continue; }
+          const idx = merged.findIndex(f => 'field' in f && f.field === nf.field && f.operator === nf.operator);
         if (idx >= 0) {
           if (nf.value === undefined || nf.value === null || nf.value === '') merged.splice(idx, 1);
           else merged[idx] = nf;

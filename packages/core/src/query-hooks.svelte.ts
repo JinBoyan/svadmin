@@ -22,19 +22,18 @@ import type { LiveMode, LiveEvent } from './live.svelte';
  */
 function extendQuery<Q extends object, E extends Record<string, unknown>>(
   query: Q,
-  extensions: () => E,
+  extensions: E,
 ): Q & E {
   return new Proxy(query, {
     get(target, prop) {
-      if (typeof prop === 'string') {
-        const ext = extensions();
-        if (prop in ext) return ext[prop as keyof E];
+      if (typeof prop === 'string' && prop in extensions) {
+        return extensions[prop as keyof E];
       }
-      return target[prop as keyof Q];
+      return Reflect.get(target, prop);
     },
     has(target, prop) {
-      if (typeof prop === 'string' && prop in extensions()) return true;
-      return prop in target;
+      if (typeof prop === 'string' && prop in extensions) return true;
+      return Reflect.has(target, prop);
     },
   }) as Q & E;
 }
@@ -139,7 +138,7 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     }
   });
 
-  return extendQuery(query, () => ({ overtime }));
+  return extendQuery(query, { overtime });
 }
 
 // ─── useOne ────────────────────────────────────────────────────
@@ -207,7 +206,7 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
     }
   });
 
-  return extendQuery(query, () => ({ overtime }));
+  return extendQuery(query, { overtime });
 }
 
 // ─── useShow ──────────────────────────────────────────────────
@@ -230,7 +229,7 @@ export function useShow<TData extends BaseRecord = BaseRecord, TError = HttpErro
     id: showId,
   }));
 
-  return extendQuery(result, () => ({ showId, setShowId }));
+  return extendQuery(result, { get showId() { return showId; }, setShowId });
 }
 
 // ─── useMany ───────────────────────────────────────────────────
@@ -291,7 +290,7 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
     }
   });
 
-  return extendQuery(query, () => ({ overtime }));
+  return extendQuery(query, { overtime });
 }
 
 export function useApiUrl(dataProviderName?: string): string {

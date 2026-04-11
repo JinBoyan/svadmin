@@ -76,7 +76,7 @@ export function createPocketBaseDataProvider(options: PocketBaseProviderOptions)
       const perPage = params.pagination?.pageSize ?? 10;
       const result = await pb.collection(params.resource).getList(page, perPage, {
         sort: buildSort(params.sorters),
-        filter: buildFilter(params.filters),
+        filter: buildFilter((params.filters || []).filter((f) => 'field' in f) as any),
       });
       return {
         data: result.items as unknown as TData[],

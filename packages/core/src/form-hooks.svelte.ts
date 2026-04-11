@@ -95,6 +95,7 @@ export interface UseFormReturn<
   // ─── Tainted (dirty) ──────────────────────────────────────────
   readonly tainted: Record<string, boolean>;
   isTainted: (field?: string) => boolean;
+  untaint: () => void;
 
   // ─── Errors ───────────────────────────────────────────────────
   readonly errors: Record<string, string>;
@@ -398,6 +399,7 @@ export function useForm<
     } catch (error) {
       // Errors are already handled by the mutation's onError callback.
       // We catch here to prevent unhandled promise rejections.
+      throw error;
     }
   }
 
@@ -418,15 +420,16 @@ export function useForm<
     if (!autoSaveOpts?.enabled || currentAction === 'create' || currentAction === 'clone' || currentId == null) return;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
+    const safeId = currentId;
     autoSaveTimer = setTimeout(async () => {
       const finalValues = autoSaveOpts.onFinish ? autoSaveOpts.onFinish(values) : values;
       autoSaveStatus = 'saving';
       try {
-        await provider.update<TData, TVariables>({ resource, id: currentId, variables: finalValues, meta: mutationMeta });
+        await provider.update<TData, TVariables>({ resource, id: safeId as string | number, variables: finalValues, meta: mutationMeta });
         const scopes = autoSaveOpts.invalidates ?? ['resourceAll'];
         for (const scope of scopes) {
           if (scope === 'resourceAll') queryClient.invalidateQueries({ queryKey: [resource] });
-          else if (scope === 'detail' && currentId) queryClient.invalidateQueries({ queryKey: [resource, 'one', currentId] });
+          else if (scope === 'detail' && safeId != null) queryClient.invalidateQueries({ queryKey: [resource, 'one', safeId!] });
           else if (scope === 'list') queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
         }
         autoSaveStatus = 'saved';
@@ -470,6 +473,7 @@ export function useForm<
     // Tainted
     get tainted() { return tainted; },
     isTainted,
+    untaint: () => { tainted = {}; },
 
     // Errors
     get errors() { return errors; },

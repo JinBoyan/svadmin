@@ -89,6 +89,16 @@
       isListening = false;
       if (onend) onend();
     };
+
+    return () => {
+      if (recognition) {
+        recognition.stop();
+        recognition.onstart = null;
+        recognition.onresult = null;
+        recognition.onerror = null;
+        recognition.onend = null;
+      }
+    };
   });
 
   function toggleListening(e?: MouseEvent) {
