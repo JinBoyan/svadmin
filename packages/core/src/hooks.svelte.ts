@@ -93,10 +93,14 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     enabled: options.queryOptions?.enabled ?? true,
   }));
 
+  let lastSuccessAt = 0;
+  let lastErrorAt = 0;
   $effect(() => {
-    if (query.isSuccess && options.successNotification) {
+    if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && options.successNotification) {
+      lastSuccessAt = query.dataUpdatedAt;
       fireSuccessNotification(options.successNotification, '', query.data, undefined, options.resource ?? parsed.resource ?? '');
-    } else if (query.isError) {
+    } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
+      lastErrorAt = query.errorUpdatedAt;
       fireErrorNotification(options.errorNotification, 'Fetch failed', query.error);
     }
   });
@@ -290,7 +294,10 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
         return { data: results.map(r => r.data) };
       } finally { isMutating = false; }
     },
-    onSuccess: (_d, params) => { queryClient.invalidateQueries({ queryKey: [params.resource ?? resource] }); },
+    onSettled: (_d, _e, params) => {
+      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'many'] });
+    },
   }));
 
   return { mutation, get overtime() { return overtime; } };
@@ -315,7 +322,11 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
         return { data: results.map(r => r.data) };
       } finally { isMutating = false; }
     },
-    onSuccess: (_d, params) => { queryClient.invalidateQueries({ queryKey: [params.resource ?? resource] }); },
+    onSettled: (_d, _e, params) => {
+      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'many'] });
+      for (const id of params.ids) queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'one', id] });
+    },
   }));
 
   return { mutation, get overtime() { return overtime; } };
@@ -340,7 +351,11 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
         return { data: results.map(r => r.data) };
       } finally { isMutating = false; }
     },
-    onSuccess: (_d, params) => { queryClient.invalidateQueries({ queryKey: [params.resource ?? resource] }); },
+    onSettled: (_d, _e, params) => {
+      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'many'] });
+      for (const id of params.ids) queryClient.removeQueries({ queryKey: [params.resource ?? resource, 'one', id] });
+    },
   }));
 
   return { mutation, get overtime() { return overtime; } };

@@ -105,11 +105,16 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     };
   });
 
+  // Track last notification timestamps to prevent duplicate firings on re-render
+  let lastSuccessAt = 0;
+  let lastErrorAt = 0;
   $effect(() => {
     const opts = getOptions();
-    if (query.isSuccess && opts.successNotification) {
+    if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && opts.successNotification) {
+      lastSuccessAt = query.dataUpdatedAt;
       fireSuccessNotification(opts.successNotification, '', query.data, undefined, getResource());
-    } else if (query.isError) {
+    } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
+      lastErrorAt = query.errorUpdatedAt;
       fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
     }
   });
@@ -168,11 +173,15 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
 
   const overtime = createOvertimeTracker(() => query.isLoading, typeof optionsOrGetter === 'function' ? optionsOrGetter().overtimeOptions : optionsOrGetter.overtimeOptions ?? adminOptions.overtime);
 
+  let lastSuccessAt = 0;
+  let lastErrorAt = 0;
   $effect(() => {
     const opts = getOptions();
-    if (query.isSuccess && opts.successNotification) {
+    if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && opts.successNotification) {
+      lastSuccessAt = query.dataUpdatedAt;
       fireSuccessNotification(opts.successNotification, '', query.data, undefined, getResource());
-    } else if (query.isError) {
+    } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
+      lastErrorAt = query.errorUpdatedAt;
       fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
     }
   });
@@ -247,10 +256,17 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
 
   const overtime = createOvertimeTracker(() => query.isLoading, typeof optionsOrGetter === 'function' ? optionsOrGetter().overtimeOptions : optionsOrGetter.overtimeOptions ?? adminOptions.overtime);
 
+  let lastSuccessAt = 0;
+  let lastErrorAt = 0;
   $effect(() => {
     const opts = getOptions();
-    if (query.isSuccess && opts.successNotification) fireSuccessNotification(opts.successNotification, '', query.data, undefined, opts.resource);
-    else if (query.isError) fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
+    if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && opts.successNotification) {
+      lastSuccessAt = query.dataUpdatedAt;
+      fireSuccessNotification(opts.successNotification, '', query.data, undefined, opts.resource);
+    } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
+      lastErrorAt = query.errorUpdatedAt;
+      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
+    }
   });
 
   return extendQuery(query, () => ({ overtime }));

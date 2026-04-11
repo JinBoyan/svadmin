@@ -26,11 +26,11 @@ export function useLive(
   options?: { liveMode?: LiveMode; onLiveEvent?: (event: LiveEvent) => void }
 ): void {
   const queryClient = useQueryClient();
-  const liveMode = options?.liveMode ?? 'auto';
-
-  if (liveMode === 'off') return;
 
   $effect(() => {
+    const liveMode = options?.liveMode ?? 'auto';
+    if (liveMode === 'off') return;
+
     const unsubscribe = liveProvider.subscribe({
       resource,
       callback: (event) => {
@@ -54,11 +54,10 @@ interface UseSubscriptionOptions {
 }
 
 export function useSubscription(options: UseSubscriptionOptions): void {
-  const { resource, liveProvider, onLiveEvent, enabled = true } = options;
-
-  if (!enabled) return;
-
   $effect(() => {
+    const { resource, liveProvider, onLiveEvent, enabled = true } = options;
+    if (!enabled) return;
+
     const unsubscribe = liveProvider.subscribe({
       resource,
       callback: onLiveEvent,

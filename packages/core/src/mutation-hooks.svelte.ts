@@ -1,6 +1,6 @@
 import { createMutation, useQueryClient } from '@tanstack/svelte-query';
 import { getAdminOptions } from './options.svelte';
-import { getDataProviderForResource, getResource } from './context.svelte';
+import { getDataProviderForResource, getResource, getLiveProvider } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
 import { audit } from './audit';
 import { UndoError } from './types';
@@ -8,6 +8,21 @@ import type { BaseRecord, HttpError, CreateParams, UpdateParams, DeleteParams, K
 import { createOvertimeTracker, fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';
 import type { NotificationConfig, OvertimeOptions } from './hook-utils.svelte';
 import { toast } from './toast.svelte';
+
+// ─── Helper: publish live events after mutations ────────────────
+
+function publishLiveEvent(resource: string, type: 'created' | 'updated' | 'deleted', ids?: (string | number)[]) {
+  try {
+    const liveProvider = getLiveProvider();
+    if (liveProvider?.publish) {
+      liveProvider.publish({
+        type: type === 'created' ? 'INSERT' : type === 'updated' ? 'UPDATE' : 'DELETE',
+        resource,
+        payload: { ids },
+      });
+    }
+  } catch { /* LiveProvider not configured — skip silently */ }
+}
 
 // ─── useCreate ─────────────────────────────────────────────────
 
@@ -59,15 +74,22 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
     onMutate: (options.mutationOptions as any)?.onMutate,
     onSuccess: (data, params, context) => {
       const resName = params.resource ?? defaultResource;
-      if (params.invalidates !== false) {
-        queryClient.invalidateQueries({ queryKey: [resName] });
-      }
       fireSuccessNotification(params.successNotification, 'Created successfully', data.data, params.variables, resName);
       const res = getResource(resName);
       const pk = res.primaryKey ?? 'id';
-      audit({ action: 'create', resource: resName, recordId: String((data.data as Record<string, unknown>)[pk]) });
+      const newId = (data.data as Record<string, unknown>)[pk];
+      audit({ action: 'create', resource: resName, recordId: String(newId) });
+      publishLiveEvent(resName, 'created', newId != null ? [newId as string | number] : undefined);
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as Function)(data, params, context);
+      }
+    },
+    // Invalidation in onSettled ensures cache is refreshed on BOTH success and error
+    onSettled: (_data, _error, params) => {
+      const resName = params.resource ?? defaultResource;
+      if (params.invalidates !== false) {
+        queryClient.invalidateQueries({ queryKey: [resName, 'list'] });
+        queryClient.invalidateQueries({ queryKey: [resName, 'many'] });
       }
     },
     onError: (error, params, context) => {
@@ -103,8 +125,9 @@ export interface UseUpdateMutateParams<TVariables> {
   dataProviderName?: string;
   onCancel?: () => void;
   optimisticUpdateMap?: {
-    detail?: (previous: unknown, variables: TVariables, id?: string | number) => unknown;
-    list?: (previous: unknown, variables: TVariables, id?: string | number) => unknown;
+    detail?: boolean | ((previous: unknown, variables: TVariables, id?: string | number) => unknown);
+    list?: boolean | ((previous: unknown, variables: TVariables, id?: string | number) => unknown);
+    many?: boolean | ((previous: unknown, variables: TVariables, id?: string | number) => unknown);
   };
 }
 
@@ -161,54 +184,80 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       
+      // Cancel in-flight queries for this resource
       await queryClient.cancelQueries({ queryKey: [resName] });
-      const previousDetail = queryClient.getQueryData([resName, 'one', targetId]);
-      const previousList = queryClient.getQueriesData({ queryKey: [resName, 'list'] });
+
+      // Snapshot ALL previous queries for rollback (matches refine pattern)
+      const previousQueries = queryClient.getQueriesData({ queryKey: [resName] });
       
       const pk = getResource(resName).primaryKey ?? 'id';
-      const updater = params.optimisticUpdateMap;
+      const updater = params.optimisticUpdateMap ?? { list: true, many: true, detail: true };
       
-      if (updater?.detail) {
-        queryClient.setQueryData([resName, 'one', targetId], (old: unknown) => updater.detail!(old, params.variables, targetId));
-      } else {
-        queryClient.setQueryData([resName, 'one', targetId], (old: Record<string, unknown> | undefined) => old ? { ...old, ...params.variables } : old);
+      // Optimistic update: detail queries
+      if (updater.detail !== false) {
+        const detailFn = updater.detail;
+        if (typeof detailFn === 'function') {
+          queryClient.setQueryData([resName, 'one', targetId], (old: unknown) => detailFn(old, params.variables, targetId));
+        } else {
+          queryClient.setQueryData([resName, 'one', targetId], (old: Record<string, unknown> | undefined) => old ? { ...old, data: { ...(old as any).data, ...params.variables } } : old);
+        }
       }
       
-      if (updater?.list) {
-        queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => updater.list!(old, params.variables, targetId));
-      } else {
+      // Optimistic update: list queries
+      if (updater.list !== false) {
         queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => {
+          if (typeof updater.list === 'function') return updater.list!(old, params.variables, targetId);
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
           return { ...o, data: o.data.map((item) => String(item[pk]) === String(targetId) ? { ...item, ...params.variables } : item) };
         });
       }
 
-      return { _svadmin_ctx: true, userContext, previousDetail, previousList };
+      // Optimistic update: many queries (missing before — refine parity)
+      if (updater.many !== false) {
+        queryClient.setQueriesData({ queryKey: [resName, 'many'] }, (old: unknown) => {
+          if (typeof updater.many === 'function') return updater.many!(old, params.variables, targetId);
+          if (!old || typeof old !== 'object' || !('data' in old)) return old;
+          const o = old as { data: Record<string, unknown>[] };
+          return { ...o, data: o.data.map((item) => String(item[pk]) === String(targetId) ? { ...item, ...params.variables } : item) };
+        });
+      }
+
+      return { _svadmin_ctx: true, userContext, previousQueries };
     },
     onSuccess: (data, params, context) => {
       const extractedCtx = (context as any)?._svadmin_ctx ? (context as any).userContext : context;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      if (params.invalidates !== false) {
-        queryClient.invalidateQueries({ queryKey: [resName] });
-      }
       fireSuccessNotification(params.successNotification, 'Updated successfully', data.data, params.variables, resName);
       audit({ action: 'update', resource: resName, recordId: String(targetId) });
+      publishLiveEvent(resName, 'updated', targetId != null ? [targetId] : undefined);
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as Function)(data, params, extractedCtx);
       }
     },
-    onError: (error, params, context: unknown) => {
-      const extractedCtx = (context as any)?._svadmin_ctx ? (context as any).userContext : context;
+    // Invalidation in onSettled (refine pattern) — runs on BOTH success and error
+    onSettled: (_data, _error, params) => {
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      const ctx = context as { previousDetail?: unknown; previousList?: [unknown, unknown][] } | undefined;
-      if (ctx?.previousDetail) queryClient.setQueryData([resName, 'one', targetId], ctx.previousDetail);
-      if (ctx?.previousList) {
-        ctx.previousList.forEach(([qk, data]) => queryClient.setQueryData(qk as string[], data));
+      if (params.invalidates !== false) {
+        queryClient.invalidateQueries({ queryKey: [resName, 'list'] });
+        queryClient.invalidateQueries({ queryKey: [resName, 'many'] });
+        if (targetId != null) {
+          queryClient.invalidateQueries({ queryKey: [resName, 'one', targetId] });
+        }
+      }
+    },
+    onError: (error, params, context: unknown) => {
+      // Rollback ALL queries from snapshot (refine pattern — more robust than individual rollbacks)
+      const ctx = context as { _svadmin_ctx?: boolean; previousQueries?: [unknown, unknown][]; userContext?: unknown } | undefined;
+      if (ctx?.previousQueries) {
+        for (const [queryKey, data] of ctx.previousQueries) {
+          queryClient.setQueryData(queryKey as string[], data);
+        }
       }
       if (error instanceof UndoError) return;
+      const extractedCtx = ctx?._svadmin_ctx ? ctx.userContext : context;
       fireErrorNotification(params.errorNotification, 'Update failed', error);
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as Function)(error, params, extractedCtx);
@@ -295,39 +344,66 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       
+      // Cancel in-flight queries
       await queryClient.cancelQueries({ queryKey: [resName] });
-      const previousList = queryClient.getQueriesData({ queryKey: [resName, 'list'] });
+
+      // Snapshot ALL previous queries for rollback
+      const previousQueries = queryClient.getQueriesData({ queryKey: [resName] });
       
       const pk = getResource(resName).primaryKey ?? 'id';
       
+      // Optimistic remove from list queries
       queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => {
+        if (!old || typeof old !== 'object' || !('data' in old)) return old;
+        const o = old as { data: Record<string, unknown>[]; total?: number };
+        const filtered = o.data.filter((item) => String(item[pk]) !== String(targetId));
+        return { ...o, data: filtered, total: (o.total ?? o.data.length) - (o.data.length - filtered.length) };
+      });
+
+      // Optimistic remove from many queries (refine parity)
+      queryClient.setQueriesData({ queryKey: [resName, 'many'] }, (old: unknown) => {
         if (!old || typeof old !== 'object' || !('data' in old)) return old;
         const o = old as { data: Record<string, unknown>[] };
         return { ...o, data: o.data.filter((item) => String(item[pk]) !== String(targetId)) };
       });
 
-      return { _svadmin_ctx: true, userContext, previousList };
+      return { _svadmin_ctx: true, userContext, previousQueries };
     },
     onSuccess: (data, params, context) => {
       const extractedCtx = (context as any)?._svadmin_ctx ? (context as any).userContext : context;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      if (params.invalidates !== false) {
-        queryClient.invalidateQueries({ queryKey: [resName] });
+
+      // Remove detail cache entry (refine pattern — no stale show page)
+      if (targetId != null) {
+        queryClient.removeQueries({ queryKey: [resName, 'one', targetId] });
       }
+
       fireSuccessNotification(params.successNotification, 'Deleted successfully', data.data, params.variables, resName);
       audit({ action: 'delete', resource: resName, recordId: String(targetId) });
+      publishLiveEvent(resName, 'deleted', targetId != null ? [targetId] : undefined);
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as Function)(data, params, extractedCtx);
       }
     },
+    // Invalidation in onSettled (refine pattern)
+    onSettled: (_data, _error, params) => {
+      const resName = params.resource ?? defaultResource;
+      if (params.invalidates !== false) {
+        queryClient.invalidateQueries({ queryKey: [resName, 'list'] });
+        queryClient.invalidateQueries({ queryKey: [resName, 'many'] });
+      }
+    },
     onError: (error, params, context: unknown) => {
-      const extractedCtx = (context as any)?._svadmin_ctx ? (context as any).userContext : context;
-      const ctx = context as { previousList?: [unknown, unknown][] } | undefined;
-      if (ctx?.previousList) {
-        ctx.previousList.forEach(([qk, data]) => queryClient.setQueryData(qk as string[], data));
+      // Rollback ALL queries from snapshot
+      const ctx = context as { _svadmin_ctx?: boolean; previousQueries?: [unknown, unknown][]; userContext?: unknown } | undefined;
+      if (ctx?.previousQueries) {
+        for (const [queryKey, data] of ctx.previousQueries) {
+          queryClient.setQueryData(queryKey as string[], data);
+        }
       }
       if (error instanceof UndoError) return;
+      const extractedCtx = ctx?._svadmin_ctx ? ctx.userContext : context;
       fireErrorNotification(params.errorNotification, 'Delete failed', error);
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as Function)(error, params, extractedCtx);

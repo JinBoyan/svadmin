@@ -6,11 +6,24 @@ import { useParsed } from './useParsed.svelte';
 
 export function useGetToPath() {
   const routerProvider = getRouterProvider();
+  const parsed = useParsed();
 
   return (options: { resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number; meta?: Record<string, unknown> }) => {
-    const { resource, action, id } = options;
+    const { resource, action, id, meta } = options;
     if (!resource) return '/';
-    let path = `/${resource}`;
+
+    // Support nested resources: use meta.parentPath or auto-detect from current URL
+    let basePath: string;
+    if (meta?.parentPath) {
+      basePath = `${meta.parentPath}/${resource}`;
+    } else if (parsed.resourcePath && parsed.resource === resource) {
+      // Re-use the current nested path context (e.g., /teams/123/users)
+      basePath = `/${parsed.resourcePath}`;
+    } else {
+      basePath = `/${resource}`;
+    }
+
+    let path = basePath;
     if (action === 'create') path += '/create';
     else if (action === 'edit' && id) path += `/edit/${id}`;
     else if (action === 'show' && id) path += `/show/${id}`;
@@ -70,16 +83,28 @@ export function useLink() {
 
 export function useResource(resourceName?: string) {
   const parsed = useParsed();
-  const targetResource = resourceName ?? parsed.resource;
-  if (!targetResource) {
-    return { resource: undefined, resources: getResources() };
-  }
-  try {
-    const resource = getResource(targetResource);
-    return { resource, resources: getResources() };
-  } catch {
-    return { resource: undefined, resources: getResources() };
-  }
+
+  // Derived resource — re-evaluates when parsed.resource or resourceName changes
+  const resolvedResource = $derived.by(() => {
+    const target = resourceName ?? parsed.resource;
+    if (!target) return undefined;
+    try {
+      return getResource(target);
+    } catch {
+      return undefined;
+    }
+  });
+
+  return {
+    get resource() { return resolvedResource; },
+    get resources() { return getResources(); },
+    get identifier() { return resolvedResource?.identifier ?? resolvedResource?.name; },
+    /** Resolve a resource by name — useful for dynamic lookups inside callbacks */
+    select: (name: string) => {
+      const res = getResource(name);
+      return { resource: res, identifier: res.identifier ?? res.name };
+    },
+  };
 }
 
 export function useNavigation() {

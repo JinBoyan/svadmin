@@ -4,9 +4,11 @@
   
   const { menuItems } = useMenu();
 
+  let navigated = false;
   $effect(() => {
-    // Automatically navigate to the first defined resource
-    if (menuItems.length > 0) {
+    // Navigate to first resource ONCE — avoid infinite re-triggers
+    if (!navigated && menuItems.length > 0) {
+      navigated = true;
       navigate(menuItems[0].route);
     }
   });

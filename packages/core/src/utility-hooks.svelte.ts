@@ -56,7 +56,8 @@ export function useModalForm<
     visible = false;
     formState.reset();
     if (options.autoSave?.invalidateOnClose) {
-      queryClient.invalidateQueries({ queryKey: [formState.resource] });
+      queryClient.invalidateQueries({ queryKey: [formState.resource, 'list'] });
+      queryClient.invalidateQueries({ queryKey: [formState.resource, 'many'] });
     }
   }
 

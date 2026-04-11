@@ -141,30 +141,40 @@ export function useIsAuthenticated() {
   const provider = getAuthProvider();
   let isAuthenticated = $state(false);
   let isLoading = $state(true);
+  let checkResult = $state<CheckResult | null>(null);
 
-  if (provider) {
-    if (typeof window !== 'undefined') {
-      provider.check().then((result: CheckResult) => {
-        isAuthenticated = result.authenticated;
-        isLoading = false;
-      }).catch(() => {
-        isAuthenticated = false;
-        isLoading = false;
-      });
-    } else {
+  function check() {
+    if (!provider) {
+      isAuthenticated = true;
+      isLoading = false;
+      return;
+    }
+    if (typeof window === 'undefined') {
       // In SSR we assume false to prevent hydration mismatch before check
       isAuthenticated = false;
       isLoading = false;
+      return;
     }
-  } else {
-    // No auth provider — treat as authenticated
-    isAuthenticated = true;
-    isLoading = false;
+    isLoading = true;
+    provider.check().then((result: CheckResult) => {
+      isAuthenticated = result.authenticated;
+      checkResult = result;
+      isLoading = false;
+    }).catch(() => {
+      isAuthenticated = false;
+      checkResult = { authenticated: false };
+      isLoading = false;
+    });
   }
+
+  // Initial check
+  check();
 
   return {
     get isAuthenticated() { return isAuthenticated; },
     get isLoading() { return isLoading; },
+    get data() { return checkResult; },
+    refetch: check,
   };
 }
 

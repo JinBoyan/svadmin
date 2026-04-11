@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/svelte-query';
 import { useParsed } from './useParsed.svelte';
 import { getAdminOptions } from './options.svelte';
-import { getDataProviderForResource, getResource } from './context.svelte';
+import { getDataProviderForResource, getResource, getLiveProvider } from './context.svelte';
 import { createQuery, createMutation } from '@tanstack/svelte-query';
 import { notify } from './notification.svelte';
 import { t } from './i18n.svelte';
@@ -307,13 +307,22 @@ export function useForm<
     ...options.createMutationOptions,
     mutationFn: (variables: TVariables) => provider.create<TData, TVariables>({ resource, variables, meta: mutationMeta }),
     onSuccess: (data: { data: TData }) => {
-      if (invalidateScopes !== false) queryClient.invalidateQueries({ queryKey: [resource] });
+      // Targeted invalidation: list + many (like refine)
+      if (invalidateScopes !== false) {
+        queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
+        queryClient.invalidateQueries({ queryKey: [resource, 'many'] });
+      }
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.createSuccess') });
       const pk = getResource(resource).primaryKey ?? 'id';
-      audit({ action: 'create', resource, recordId: String((data.data as Record<string, unknown>)[pk]) });
+      const newId = (data.data as Record<string, unknown>)[pk];
+      audit({ action: 'create', resource, recordId: String(newId) });
+      // Publish live event
+      try {
+        const lp = getLiveProvider();
+        if (lp?.publish) lp.publish({ type: 'INSERT', resource, payload: { ids: newId != null ? [newId as string | number] : [] } });
+      } catch { /* no live provider */ }
       onMutationSuccess?.(data);
       if (redirectOverride !== false) {
-        const newId = (data.data as Record<string, unknown>)[pk];
         if (newId != null) currentId = newId as string | number;
         doRedirect(redirectOverride ?? redirectDefault);
       }
@@ -325,9 +334,19 @@ export function useForm<
     ...options.updateMutationOptions,
     mutationFn: (variables: TVariables) => provider.update<TData, TVariables>({ resource, id: currentId!, variables, meta: mutationMeta }),
     onSuccess: (data: { data: TData }) => {
-      if (invalidateScopes !== false) queryClient.invalidateQueries({ queryKey: [resource] });
+      // Targeted invalidation: list + many + specific detail (like refine)
+      if (invalidateScopes !== false) {
+        queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
+        queryClient.invalidateQueries({ queryKey: [resource, 'many'] });
+        if (currentId != null) queryClient.invalidateQueries({ queryKey: [resource, 'one', currentId] });
+      }
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.updateSuccess') });
       audit({ action: 'update', resource, recordId: String(currentId) });
+      // Publish live event
+      try {
+        const lp = getLiveProvider();
+        if (lp?.publish) lp.publish({ type: 'UPDATE', resource, payload: { ids: currentId != null ? [currentId] : [] } });
+      } catch { /* no live provider */ }
       onMutationSuccess?.(data);
       if (redirectOverride !== false) doRedirect(redirectOverride ?? redirectDefault);
     },
