@@ -3,13 +3,13 @@
   import { cn } from '../utils.js';
   import {
     createTable,
-    getCoreRowModel,
     type ColumnDef,
     type SortingState,
     type RowSelectionState,
     type VisibilityState,
     type ExpandedState,
   } from '@tanstack/svelte-table';
+  import { getCoreRowModel } from '@tanstack/table-core';
 
   import { useList, useDelete, getResource } from '@svadmin/core';
   import type { Pagination as PaginationState, Sort, Filter, FieldDefinition } from '@svadmin/core';
@@ -149,7 +149,7 @@
     get sorters() { return sorters; },
     get filters() { return activeFilters; },
   });
-  const query = listResult.query;
+  const query = listResult;
   const deleteResult = useDelete({ get resource() { return resourceName; } });
   const deleteMutation = deleteResult.mutation;
 
@@ -623,7 +623,7 @@
                                 recordId={id}
                                 {field}
                                 value={cell.getValue()}
-                                onSave={() => listResult.query.refetch()}
+                                onSave={() => listResult.refetch()}
                               />
                             {:else if field?.key === primaryKey}
                               <span class="font-mono text-xs">{cell.getValue() ?? '—'}</span>

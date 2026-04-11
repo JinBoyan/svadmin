@@ -1,5 +1,40 @@
 # Changelog
 
+## [0.20.4](https://github.com/zuohuadong/svadmin/compare/core-v0.20.3...core-v0.20.4) (2026-04-09)
+
+
+### 🐛 Bug Fixes
+
+* **quality:** address build warnings and test noise ([19a7637](https://github.com/zuohuadong/svadmin/commit/19a7637a6cd09bc660d71d058ca275124271254f))
+
+## [0.20.3](https://github.com/zuohuadong/svadmin/compare/core-v0.20.2...core-v0.20.3) (2026-04-09)
+
+
+### 🐛 Bug Fixes
+
+* **core:** add bun types to tsconfig.json to resolve test compilation errors ([ce6fb1e](https://github.com/zuohuadong/svadmin/commit/ce6fb1e5f0de00d844513f0d68c37ba81b2149d1))
+
+## [0.20.2](https://github.com/zuohuadong/svadmin/compare/core-v0.20.1...core-v0.20.2) (2026-04-08)
+
+
+### 🐛 Bug Fixes
+
+* **build:** resolve vite 8 rolldown and svelte-table compatibility ([#100](https://github.com/zuohuadong/svadmin/issues/100)) ([e6d26f3](https://github.com/zuohuadong/svadmin/commit/e6d26f300312684b3831c9f7b61f4886f8dae955))
+
+## [0.20.1](https://github.com/zuohuadong/svadmin/compare/core-v0.20.0...core-v0.20.1) (2026-04-07)
+
+
+### 🐛 Bug Fixes
+
+* **core,ui:** connect color theme switching to CSS variable overrides ([4a62936](https://github.com/zuohuadong/svadmin/commit/4a62936be2d2ab9b17d8ebb1b945cc8238d9d4f7))
+
+## [0.20.0](https://github.com/zuohuadong/svadmin/compare/core-v0.19.5...core-v0.20.0) (2026-04-06)
+
+
+### 🚀 Features
+
+* **ui:** add siteUrl prop to optionally render a Go To Site button in the header ([#97](https://github.com/zuohuadong/svadmin/issues/97)) ([abf5de0](https://github.com/zuohuadong/svadmin/commit/abf5de07d581b1b59a8deab4e01657591dc10025))
+
 ## [0.19.5](https://github.com/zuohuadong/svadmin/compare/core-v0.19.4...core-v0.19.5) (2026-04-05)
 
 

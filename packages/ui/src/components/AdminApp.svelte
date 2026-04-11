@@ -45,6 +45,10 @@
     components?: Partial<ComponentRegistry>;
     /** Custom multi-level menu configuration */
     menu?: MenuItem[];
+    /** External URL to the main application or workspace (renders a shortcut in the header) */
+    siteUrl?: string;
+    /** Routing strategy for Sidebar links ('hash' | 'path' | 'auto') */
+    routeMode?: 'hash' | 'path' | 'auto';
   }
 
   let {
@@ -60,6 +64,8 @@
     loginPage,
     components: userComponents,
     menu,
+    siteUrl,
+    routeMode,
   }: Props = $props();
 
   // Default component registry
@@ -73,10 +79,22 @@
   };
 
   // Merge user overrides and set context
-  setComponentRegistry({ ...defaultComponents, ...userComponents });
+  $effect(() => {
+    setComponentRegistry({ ...defaultComponents, ...userComponents });
+  });
 
   // Resolve router provider (default to hash)
   const resolvedRouter = $derived(routerProvider ?? createHashRouterProvider());
+  const resolvedRouteMode = $derived(routeMode ?? (routerProvider ? 'auto' : 'hash'));
+
+  // Set up initial context synchronously so children can access resources immediately during first render
+  setDataProvider(dataProvider);
+  if (authProvider) setAuthProvider(authProvider);
+  setResources(resources);
+  setRouterProvider(resolvedRouter);
+  if (locale) setLocale(locale);
+  if (userThemeConfig) configureTheme(userThemeConfig);
+  if (defaultTheme) setTheme(defaultTheme);
 
   // Set up context — use $effect so prop changes are tracked
   $effect.pre(() => {
@@ -95,7 +113,8 @@
     },
   });
 
-  // Initialize router with provider
+  // Initialize router with provider synchronously
+  initRouter(resolvedRouter);
   $effect.pre(() => {
     initRouter(resolvedRouter);
   });
@@ -148,7 +167,7 @@
   {:else if route === '/login' || route === '/register' || route === '/forgot-password' || route === '/update-password'}
     <ConfigErrorScreen title="{title} — {t('common.configRequired')}" />
   {:else if isAuthenticated || !authProvider}
-    <Layout {title} {menu}>
+    <Layout {title} {menu} {siteUrl} routeMode={resolvedRouteMode}>
       {#key route + (params.resource ?? '') + (params.id ?? '')}
       <div class="svadmin-page-enter">
       {#if currentPath().startsWith('/settings')}

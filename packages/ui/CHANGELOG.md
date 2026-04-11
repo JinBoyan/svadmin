@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.29.5](https://github.com/zuohuadong/svadmin/compare/ui-v0.29.4...ui-v0.29.5) (2026-04-09)
+
+
+### 🐛 Bug Fixes
+
+* **quality:** address build warnings and test noise ([19a7637](https://github.com/zuohuadong/svadmin/commit/19a7637a6cd09bc660d71d058ca275124271254f))
+
+## [0.29.4](https://github.com/zuohuadong/svadmin/compare/ui-v0.29.3...ui-v0.29.4) (2026-04-09)
+
+
+### 🐛 Bug Fixes
+
+* **ui:** build before publish to include dist ([ca25048](https://github.com/zuohuadong/svadmin/commit/ca250484a583968609e07b937ceadb1b4863249c))
+
+## [0.29.3](https://github.com/zuohuadong/svadmin/compare/ui-v0.29.2...ui-v0.29.3) (2026-04-09)
+
+
+### 🐛 Bug Fixes
+
+* **build:** ensure dist directory is included in published ui package ([9353d64](https://github.com/zuohuadong/svadmin/commit/9353d648fa7ef888669dd614e650fed8f9e52f5e))
+
+## [0.29.2](https://github.com/zuohuadong/svadmin/compare/ui-v0.29.1...ui-v0.29.2) (2026-04-08)
+
+
+### 🐛 Bug Fixes
+
+* **build:** resolve vite 8 rolldown and svelte-table compatibility ([#100](https://github.com/zuohuadong/svadmin/issues/100)) ([e6d26f3](https://github.com/zuohuadong/svadmin/commit/e6d26f300312684b3831c9f7b61f4886f8dae955))
+
+## [0.29.1](https://github.com/zuohuadong/svadmin/compare/ui-v0.29.0...ui-v0.29.1) (2026-04-07)
+
+
+### 🐛 Bug Fixes
+
+* **core,ui:** connect color theme switching to CSS variable overrides ([4a62936](https://github.com/zuohuadong/svadmin/commit/4a62936be2d2ab9b17d8ebb1b945cc8238d9d4f7))
+
+## [0.29.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.28.0...ui-v0.29.0) (2026-04-06)
+
+
+### 🚀 Features
+
+* **ui:** add siteUrl prop to optionally render a Go To Site button in the header ([#97](https://github.com/zuohuadong/svadmin/issues/97)) ([abf5de0](https://github.com/zuohuadong/svadmin/commit/abf5de07d581b1b59a8deab4e01657591dc10025))
+
 ## [0.28.0](https://github.com/zuohuadong/svadmin/compare/ui-v0.27.1...ui-v0.28.0) (2026-04-06)
 
 
