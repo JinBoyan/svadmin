@@ -10,7 +10,7 @@ interface PocketBaseLiveOptions {
 interface PBClientRealtime {
   collection: (name: string) => {
     subscribe: (topic: string, callback: (data: PBRealtimeEvent) => void) => Promise<void>;
-    unsubscribe: (topic?: string) => Promise<void>;
+    unsubscribe: (topic?: string, callback?: (data: PBRealtimeEvent) => void) => Promise<void>;
   };
 }
 
@@ -48,17 +48,18 @@ export function createPocketBaseLiveProvider(options: PocketBaseLiveOptions): Li
 
   return {
     subscribe({ resource, callback }) {
-      // PocketBase subscribe uses '*' for all events on a collection
-      pb.collection(resource).subscribe('*', (data) => {
+      const handler = (data: PBRealtimeEvent) => {
         callback({
           type: mapAction(data.action),
           resource,
           payload: data.record,
         });
-      });
+      };
+
+      pb.collection(resource).subscribe('*', handler);
 
       return () => {
-        pb.collection(resource).unsubscribe('*');
+        pb.collection(resource).unsubscribe('*', handler);
       };
     },
   };

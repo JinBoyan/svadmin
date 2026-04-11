@@ -51,12 +51,16 @@ export interface SessionManager {
 // ─── Base64url helpers ────────────────────────────────────────
 
 function base64urlEncode(data: string): string {
-  return btoa(data).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const bytes = new TextEncoder().encode(data);
+  const binString = Array.from(bytes, (bite) => String.fromCodePoint(bite)).join('');
+  return btoa(binString).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
 function base64urlDecode(str: string): string {
   const padded = str + '='.repeat((4 - (str.length % 4)) % 4);
-  return atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
+  const binString = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
+  const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0)!);
+  return new TextDecoder().decode(bytes);
 }
 
 // ─── Factory ──────────────────────────────────────────────────
