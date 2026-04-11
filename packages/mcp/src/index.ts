@@ -200,8 +200,14 @@ function generateTools(options: MCPServerOptions): MCPTool[] {
 async function handleToolCall(
   toolName: string,
   args: Record<string, unknown>,
-  dp: DataProvider,
+  options: MCPServerOptions,
 ): Promise<unknown> {
+  const resource = args.resource as string;
+  if (resource && !options.resources.includes(resource)) {
+    throw new Error(`Unauthorized resource access: ${resource} is not exposed.`);
+  }
+  const dp = options.dataProvider;
+
   switch (toolName) {
     case 'svadmin_getList': {
       const resource = args.resource as string;
@@ -341,7 +347,7 @@ export function createMCPServer(options: MCPServerOptions): MCPServer {
             };
           }
 
-          const result = await handleToolCall(toolName, toolArgs, options.dataProvider);
+          const result = await handleToolCall(toolName, toolArgs, options);
           return {
             jsonrpc: '2.0',
             id,

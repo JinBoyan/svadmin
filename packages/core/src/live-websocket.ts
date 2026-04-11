@@ -135,7 +135,12 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
         const callbacks = subscribers.get(resource);
         if (callbacks) {
           callbacks.delete(callback);
-          if (callbacks.size === 0) subscribers.delete(resource);
+          if (callbacks.size === 0) {
+            subscribers.delete(resource);
+            if (status === 'connected' && ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(JSON.stringify({ type: 'UNSUBSCRIBE', resource }));
+            }
+          }
         }
         // Auto-disconnect if no subscribers left
         if (subscribers.size === 0) disconnect();
