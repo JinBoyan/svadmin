@@ -43,6 +43,8 @@ function fieldToZod(field: FieldDefinition): z.ZodTypeAny {
       }
       break;
     case 'multiselect':
+      schema = z.array(z.string()).default([]);
+      break;
     case 'tags':
       schema = z.string().transform((v: string) => v ? v.split(',').map((s: string) => s.trim()) : []);
       break;

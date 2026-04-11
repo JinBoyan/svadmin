@@ -110,14 +110,16 @@ export interface UseFormReturn<
   /** Reset form to initial/query values. Clears tainted and errors. */
   reset: () => void;
 
-  // ─── State ────────────────────────────────────────────────────
+  // ─── State ──────────────────────────────────────────────────────
   readonly loading: boolean;
   readonly submitting: boolean;
-  readonly resource: string;
   readonly action: 'create' | 'edit' | 'clone';
+  readonly resource: string;
   readonly id: string | number | undefined;
-  setId: (newId: string | number) => void;
-  readonly mutationMode: MutationMode;
+  readonly isDirty: boolean;
+  setId: (id: string | number | undefined) => void;
+  setAction: (action: 'create' | 'edit' | 'clone') => void;
+  mutationMode: MutationMode;
   redirect: (to: 'list' | 'edit' | 'show' | false) => void;
 
   // ─── AutoSave ─────────────────────────────────────────────────
@@ -141,7 +143,7 @@ export function useForm<
   const adminOptions = getAdminOptions();
 
   const resource = options.resource ?? parsed.resource ?? '';
-  const action = options.action ?? (parsed.action === 'list' ? 'create' : parsed.action as 'create' | 'edit' | 'clone') ?? 'create';
+  let action = $state<'create' | 'edit' | 'clone'>(options.action ?? (parsed.action === 'list' ? 'create' : parsed.action as 'create' | 'edit' | 'clone') ?? 'create');
   let currentId = $state<string | number | undefined>(options.id ?? parsed.id);
 
   const defaultRedirectOpt = action === 'clone' ? adminOptions.redirect?.afterClone : action === 'edit' ? adminOptions.redirect?.afterEdit : adminOptions.redirect?.afterCreate;
@@ -165,7 +167,8 @@ export function useForm<
   const queryMeta = { ...parsedMeta, ...hookMeta, ...hookQueryMeta };
   const mutationMeta = { ...parsedMeta, ...hookMeta, ...hookMutationMeta };
 
-  function setId(newId: string | number) { currentId = newId; }
+  function setId(newId: string | number | undefined) { currentId = newId; }
+  function setAction(newAction: 'create' | 'edit' | 'clone') { action = newAction; }
 
   // ─── Form values (single source of truth) ───────────────────────
   let values = $state<TVariables>((options.defaultValues ?? {}) as TVariables);
@@ -428,9 +431,14 @@ export function useForm<
     // State
     get loading() { return query?.isLoading ?? false; },
     get submitting() { return createMut.isPending || updateMut.isPending; },
-    resource, action,
+    get action() { return action; },
+    resource,
     get id() { return currentId; },
-    setId, mutationMode, redirect: doRedirect,
+    get isDirty() { return Object.keys(tainted).length > 0; },
+    setId,
+    setAction,
+    mutationMode,
+    redirect: doRedirect,
 
     // AutoSave
     triggerAutoSave,

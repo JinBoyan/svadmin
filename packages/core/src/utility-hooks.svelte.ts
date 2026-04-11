@@ -42,7 +42,13 @@ export function useModalForm<
   let visible = $state(options.defaultVisible ?? false);
 
   function show(id?: string | number) {
-    if (id !== undefined) formState.setId(id);
+    if (id !== undefined) {
+      formState.setAction('edit');
+      formState.setId(id);
+    } else {
+      formState.setAction('create');
+      formState.setId(undefined);
+    }
     visible = true;
   }
 

@@ -16,7 +16,7 @@
 </script>
 
 <a
-  href="?"
+  href=""
   class="lite-btn {size === 'sm' ? 'lite-btn-sm' : ''} {className}"
   title={t('common.refresh') || 'Refresh'}
 >
