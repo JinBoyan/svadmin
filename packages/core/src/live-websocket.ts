@@ -27,6 +27,7 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
 
   type Callback = (event: LiveEvent) => void;
   const subscribers = new Map<string, Set<Callback>>();
+  const lastParams = new Map<string, Record<string, unknown> | undefined>();
   let ws: WebSocket | null = null;
   let reconnectAttempts = 0;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
@@ -51,6 +52,14 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
       status = 'connected';
       reconnectAttempts = 0;
       options.onOpen?.();
+      
+      // Resend subscriptions upon reconnects
+      for (const [res, callbacks] of subscribers.entries()) {
+        if (callbacks.size > 0) {
+          const liveParams = lastParams.get(res);
+          ws?.send(JSON.stringify({ type: 'SUBSCRIBE', resource: res, liveParams }));
+        }
+      }
     };
 
     ws.onmessage = (msgEvent) => {
@@ -107,15 +116,19 @@ export function createWebSocketLiveProvider(options: WebSocketLiveProviderOption
 
 
   return {
-    subscribe({ resource, callback }) {
+    subscribe({ resource, liveParams, callback }) {
       if (!subscribers.has(resource)) {
         subscribers.set(resource, new Set());
       }
       subscribers.get(resource)!.add(callback);
+      lastParams.set(resource, liveParams);
 
       // Ensure connection is open
       if (status === 'disconnected' && typeof WebSocket !== 'undefined') {
         connect();
+      } else if (status === 'connected' && ws && ws.readyState === WebSocket.OPEN) {
+        // If already connected, dispatch subscription payload dynamically
+        ws.send(JSON.stringify({ type: 'SUBSCRIBE', resource, liveParams }));
       }
 
       return () => {

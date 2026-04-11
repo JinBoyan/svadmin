@@ -26,6 +26,10 @@ export function createSvelteKitRouterProvider(): RouterProvider {
         history.back();
       }
     },
+    formatLink(path: string) {
+      // SvelteKit natively resolves absolute/relative paths directly using href
+      return path.startsWith('/') ? path : `/${path}`;
+    },
     parse() {
       let pathname = '/';
       let params: Record<string, string> = {};

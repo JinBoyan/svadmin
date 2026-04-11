@@ -26,9 +26,6 @@
        if (resourceNames.includes(seg)) {
           const res = resources.find(r => r.name === seg)!;
           result.push({ label: res.label, href: formatLink(currentPath) });
-       } else if (i > 0 && resourceNames.includes(segments[i-1])) {
-          // This is a parent ID (e.g. /teams/123/users)
-          result.push({ label: `#${seg}`, href: formatLink(currentPath) });
        } else if (seg === 'create') {
           result.push({ label: t('common.create') ?? 'Create', href: formatLink(currentPath) });
        } else if (['edit', 'show', 'clone'].includes(seg) && segments[i+1]) {
@@ -39,6 +36,9 @@
           currentPath += `/${id}`; // advance path by id
           result.push({ label: `${actionLabel} #${id}`, href: formatLink(currentPath) });
           i++; // skip next segment since we consumed the id
+       } else if (i > 0 && resourceNames.includes(segments[i-1])) {
+          // This is a parent ID (e.g. /teams/123/users) and we are not an action
+          result.push({ label: `#${seg}`, href: formatLink(currentPath) });
        }
     }
 

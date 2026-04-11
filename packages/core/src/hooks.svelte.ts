@@ -58,7 +58,7 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     const resource = options.resource ?? parsed.resource ?? '';
     const provider = getDataProviderForResource(resource, options.dataProviderName);
     return {
-    queryKey: [resource, 'infiniteList', options.sorters, options.filters, options.meta],
+    queryKey: [resource, 'infiniteList', options.pagination?.pageSize, options.sorters, options.filters, options.meta],
     queryFn: async ({ pageParam = 1 }) => {
       const result = await provider.getList<TData>({
         resource,
@@ -92,6 +92,14 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     },
     enabled: options.queryOptions?.enabled ?? true,
   }));
+
+  $effect(() => {
+    if (query.isSuccess && options.successNotification) {
+      fireSuccessNotification(options.successNotification, '', query.data, undefined, options.resource ?? parsed.resource ?? '');
+    } else if (query.isError) {
+      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error);
+    }
+  });
 
   return { query, get overtime() { return overtime; } };
 }
