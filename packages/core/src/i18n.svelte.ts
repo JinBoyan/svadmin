@@ -4,6 +4,15 @@
 
 const locales: Record<string, Record<string, string>> = {
   'zh-CN': {
+    'common.list': '列表',
+    'common.prev': '上一页',
+    'common.pageOf': '第 {page} 页，共 {total} 页',
+    'common.areYouSure': '确认操作？',
+    'common.backToList': '返回列表',
+    'common.refresh': '刷新',
+    'common.importData': '导入数据',
+    'common.upload': '上传',
+    'common.returnHome': '返回首页',
     // Common
     'common.save': '保存',
     'common.cancel': '取消',
@@ -242,6 +251,15 @@ const locales: Record<string, Record<string, string>> = {
     'profile.updatePassword': '更新密码',
   },
   'en': {
+    'common.list': 'List',
+    'common.prev': 'Prev',
+    'common.pageOf': 'Page {page} of {total}',
+    'common.areYouSure': 'Are you sure?',
+    'common.backToList': 'Back to List',
+    'common.refresh': 'Refresh',
+    'common.importData': 'Import data',
+    'common.upload': 'Upload',
+    'common.returnHome': 'Return to Home',
     // Common
     'common.save': 'Save',
     'common.cancel': 'Cancel',

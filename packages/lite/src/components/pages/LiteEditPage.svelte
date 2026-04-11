@@ -48,7 +48,7 @@
     {resource}
     {errors}
     values={record}
-    action="?/${resource.name}_update"
+    action="?/update"
     cancelUrl={`${basePath}/${resource.name}`}
   />
 </div>

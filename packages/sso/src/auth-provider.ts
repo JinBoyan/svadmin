@@ -16,6 +16,8 @@
  * ```ts
  * import { createSSOAuthProvider } from '@svadmin/sso';
  * import { setAuthProvider } from '@svadmin/core';
+
+
  *
  * const authProvider = createSSOAuthProvider({
  *   issuer: 'https://your-tenant.okta.com',
@@ -28,6 +30,19 @@
  */
 
 import type { AuthProvider, Identity } from '@svadmin/core';
+
+// Safe base64url decode for JWT payloads
+function decodeJwtPayload(token: string): any {
+  if (!token) return null;
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  const payloadStr = parts[1];
+  const padded = payloadStr + '='.repeat((4 - (payloadStr.length % 4)) % 4);
+  const binString = atob(padded.replace(/-/g, '+').replace(/_/g, '/'));
+  const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0)!);
+  return JSON.parse(new TextDecoder().decode(bytes));
+}
+
 
 // ─── Types ────────────────────────────────────────────────────
 
@@ -393,7 +408,7 @@ export function createSSOAuthProvider(config: SSOConfig): AuthProvider {
       // Try to extract roles/permissions from the ID token
       if (tokens.id_token) {
         try {
-          const payload = JSON.parse(atob(tokens.id_token.split('.')[1]));
+          const payload = decodeJwtPayload(tokens.id_token);
           return payload.roles ?? payload.groups ?? payload.permissions ?? null;
         } catch {
           return null;

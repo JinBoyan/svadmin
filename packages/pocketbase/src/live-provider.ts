@@ -56,10 +56,10 @@ export function createPocketBaseLiveProvider(options: PocketBaseLiveOptions): Li
         });
       };
 
-      pb.collection(resource).subscribe('*', handler);
+      pb.collection(resource).subscribe('*', handler).catch(console.error);
 
       return () => {
-        pb.collection(resource).unsubscribe('*', handler);
+        pb.collection(resource).unsubscribe('*', handler).catch(console.error);
       };
     },
   };

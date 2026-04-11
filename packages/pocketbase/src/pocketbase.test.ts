@@ -207,6 +207,6 @@ describe('PocketBase LiveProvider', () => {
     const lp = createPocketBaseLiveProvider({ pb });
     const unsub = lp.subscribe({ resource: 'posts', callback: () => {} });
     unsub();
-    expect(mockCollection.unsubscribe).toHaveBeenCalledWith('*');
+    expect(mockCollection.unsubscribe).toHaveBeenCalledWith('*', expect.any(Function));
   });
 });
