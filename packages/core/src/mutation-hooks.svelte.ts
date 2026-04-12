@@ -271,14 +271,13 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
         (options.mutationOptions.onSuccess as Function)(data, params, extractedCtx);
       }
     },
-    // Invalidation in onSettled (refine pattern) — runs on BOTH success and error
-    onSettled: (_data, _error, params) => {
+    onSettled: (_data, error, params) => {
+      if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many', 'detail'], targetId != null ? targetId : undefined);
     },
     onError: (error, params, context: unknown) => {
-      // Rollback ALL queries from snapshot (refine pattern — more robust than individual rollbacks)
       const ctx = context as MutationContext | undefined;
       if (ctx?.previousQueries) {
         for (const [queryKey, data] of ctx.previousQueries) {
@@ -413,13 +412,12 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
         (options.mutationOptions.onSuccess as Function)(data, params, extractedCtx);
       }
     },
-    // Invalidation in onSettled (refine pattern)
-    onSettled: (_data, _error, params) => {
+    onSettled: (_data, error, params) => {
+      if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many']);
     },
     onError: (error, params, context: unknown) => {
-      // Rollback ALL queries from snapshot
       const ctx = context as MutationContext | undefined;
       if (ctx?.previousQueries) {
         for (const [queryKey, data] of ctx.previousQueries) {

@@ -25,9 +25,23 @@
   const resolvedTitle = $derived(title ?? t('common.confirmAction'));
   const resolvedConfirmText = $derived(confirmText ?? t('common.confirm'));
   const resolvedCancelText = $derived(cancelText ?? t('common.cancel'));
+
+  let confirmed = $state(false);
+
+  function handleConfirm() {
+    confirmed = true;
+    onconfirm();
+  }
+
+  function handleOpenChange(v: boolean) {
+    if (!v && !confirmed) {
+      oncancel();
+    }
+    if (!v) confirmed = false;
+  }
 </script>
 
-<AlertDialog.Root bind:open onOpenChange={(v: boolean) => { if (!v) oncancel(); }}>
+<AlertDialog.Root bind:open onOpenChange={handleOpenChange}>
   <AlertDialog.Content>
     <AlertDialog.Header>
       <AlertDialog.Title>{resolvedTitle}</AlertDialog.Title>
@@ -43,7 +57,7 @@
       </AlertDialog.Cancel>
       <AlertDialog.Action>
         {#snippet child({ props })}
-          <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} onclick={onconfirm}>
+          <Button variant={variantMap[variant as keyof typeof variantMap]} {...props} onclick={handleConfirm}>
             {resolvedConfirmText}
           </Button>
         {/snippet}

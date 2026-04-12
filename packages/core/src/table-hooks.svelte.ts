@@ -93,7 +93,7 @@ export function useTable<
   const query = tableQueryInfo;
   const overtime = tableQueryInfo.overtime;
 
-  function setSorters(newSorters: Sort[]) { currentSorters = newSorters; }
+  function setSorters(newSorters: Sort[]) { currentSorters = newSorters; pagination = { ...pagination, current: 1 }; }
   function setFilters(newFilters: Filter[], mode?: FilterSetMode) {
     const behavior = mode ?? filterDefaultBehavior;
     if (behavior === 'merge') {
@@ -127,6 +127,29 @@ export function useTable<
         sortOrder: currentSorters[0]?.order,
         filters: currentFilters,
       });
+    });
+
+    $effect(() => {
+      const handler = () => {
+        const urlState = readURLState();
+        if (urlState.page && urlState.page !== pagination.current) {
+          pagination = { ...pagination, current: urlState.page };
+        }
+        if (urlState.pageSize && urlState.pageSize !== pagination.pageSize) {
+          pagination = { ...pagination, pageSize: urlState.pageSize };
+        }
+        if (urlState.sortField) {
+          const newSorter: Sort = { field: urlState.sortField, order: (urlState.sortOrder as 'asc' | 'desc') ?? 'asc' };
+          if (JSON.stringify([newSorter]) !== JSON.stringify(currentSorters)) {
+            currentSorters = [newSorter];
+          }
+        }
+        if (urlState.filters && JSON.stringify(urlState.filters) !== JSON.stringify(currentFilters)) {
+          currentFilters = urlState.filters;
+        }
+      };
+      window.addEventListener('popstate', handler);
+      return () => window.removeEventListener('popstate', handler);
     });
   }
 

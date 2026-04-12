@@ -19,10 +19,10 @@ export function readURLState(): URLState {
   const state: URLState = {};
 
   const page = params['page'];
-  if (page) state.page = parseInt(page, 10);
+  if (page) { const n = parseInt(page, 10); if (!isNaN(n) && n > 0) state.page = n; }
 
   const pageSize = params['pageSize'];
-  if (pageSize) state.pageSize = parseInt(pageSize, 10);
+  if (pageSize) { const n = parseInt(pageSize, 10); if (!isNaN(n) && n > 0) state.pageSize = n; }
 
   const sortField = params['sort'];
   if (sortField) state.sortField = sortField;
@@ -51,25 +51,37 @@ export function writeURLState(state: URLState): void {
   const current = rp.parse();
   const params: Record<string, string> = { ...current.params };
 
-  if (state.page && state.page > 1) params['page'] = String(state.page);
-  else delete params['page'];
+  if ('page' in state) {
+    if (state.page && state.page > 1) params['page'] = String(state.page);
+    else delete params['page'];
+  }
 
-  if (state.pageSize && state.pageSize !== 10) params['pageSize'] = String(state.pageSize);
-  else delete params['pageSize'];
+  if ('pageSize' in state) {
+    if (state.pageSize && state.pageSize !== 10) params['pageSize'] = String(state.pageSize);
+    else delete params['pageSize'];
+  }
 
-  if (state.sortField) params['sort'] = state.sortField;
-  else delete params['sort'];
+  if ('sortField' in state) {
+    if (state.sortField) params['sort'] = state.sortField;
+    else delete params['sort'];
+  }
 
-  if (state.sortOrder) params['order'] = state.sortOrder;
-  else delete params['order'];
+  if ('sortOrder' in state) {
+    if (state.sortOrder) params['order'] = state.sortOrder;
+    else delete params['order'];
+  }
 
-  if (state.search) params['q'] = state.search;
-  else delete params['q'];
+  if ('search' in state) {
+    if (state.search) params['q'] = state.search;
+    else delete params['q'];
+  }
 
-  if (state.filters && state.filters.length > 0) {
-    params['filters'] = JSON.stringify(state.filters);
-  } else {
-    delete params['filters'];
+  if ('filters' in state) {
+    if (state.filters && state.filters.length > 0) {
+      params['filters'] = JSON.stringify(state.filters);
+    } else {
+      delete params['filters'];
+    }
   }
 
   // Prevent redundant navigation if nothing actually changed

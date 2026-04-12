@@ -130,7 +130,13 @@
   const filterableFields = $derived(resource.fields.filter(f => f.filterable));
   let filterValues = $state<Record<string, string>>({});
   const activeFilterCount = $derived(Object.values(filterValues).filter(v => v.trim()).length);
+  let prevFilterValuesJson = $state('');
   const activeFilters = $derived.by(() => {
+    const currentJson = JSON.stringify(filterValues);
+    if (currentJson !== prevFilterValuesJson && prevFilterValuesJson !== '') {
+      pagination = { ...pagination, current: 1 };
+    }
+    prevFilterValuesJson = currentJson;
     const result: Filter[] = [...filters];
     if (searchText.trim() && searchableFields.length > 0) {
       if (searchableFields.length === 1) {
@@ -222,6 +228,14 @@
     }
   });
 
+  // Sync external sorters → TanStack sorting state
+  $effect(() => {
+    const newSorting = sorters.map(s => ({ id: s.field, desc: s.order === 'desc' }));
+    if (JSON.stringify(newSorting) !== JSON.stringify(sorting)) {
+      sorting = newSorting;
+    }
+  });
+
   // ─── Auto-generate columns from resource fields ──────────────
   const visibleFields = $derived(
     resource.fields.filter(f => f.showInList !== false)
@@ -229,7 +243,7 @@
 
   const columns = $derived<ColumnDef<any, Record<string, unknown>>[]>([
     // Selection column
-    ...(selectable && canDelete ? [{
+    ...(selectable && (canDelete || batchActions) ? [{
       id: '_select',
       header: () => '',
       cell: () => '',
@@ -291,7 +305,7 @@
     onColumnOrderChange: (updater: any) => {
       columnOrder = typeof updater === 'function' ? updater(columnOrder) : updater;
     },
-    get enableRowSelection() { return selectable && canDelete; },
+    get enableRowSelection() { return selectable && (canDelete || batchActions); },
     get enableExpanding() { return !!expandedRowRender; },
   });
 
@@ -507,7 +521,7 @@
   </div>
 
   <!-- Table (TanStack-powered) -->
-  <div class="rounded-xl bg-card shadow-sm overflow-hidden" role="region" aria-label="{resource.label} {t('common.list')}">
+  <div class="rounded-[24px] bg-card/80 backdrop-blur-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden ring-1 ring-border/30" role="region" aria-label="{resource.label} {t('common.list')}">
     {#if query.isLoading}
       <div class="p-4 space-y-3">
         <div class="flex gap-4 mb-2">
@@ -543,7 +557,7 @@
                   {@const header = col.header as typeof headerGroup.headers[0]}
                   <Table.Head
                     {...dragProps}
-                    class={cn("bg-muted/20 hover:bg-muted/30 border-b border-border/40 uppercase tracking-wide text-[0.7rem] text-muted-foreground font-semibold", dragProps.class)}
+                    class={cn("bg-transparent hover:bg-muted/10 border-b border-border/20 uppercase tracking-[0.12em] text-[10px] text-muted-foreground/70 font-semibold py-4", dragProps.class)}
                     style={header.getSize() !== 150 ? `width:${header.getSize()}px` : undefined}
                   >
                     {#if header.id === '_select'}
@@ -585,7 +599,7 @@
               <ContextMenu.Root>
                 <ContextMenu.Trigger>
                   {#snippet child({ props })}
-                    <Table.Row {...props} class="transition-colors border-b border-border/40 {row.getIsSelected() ? 'bg-accent/50' : 'hover:bg-muted/40'}">
+                    <Table.Row {...props} class="transition-all duration-300 border-b border-border/10 {row.getIsSelected() ? 'bg-primary/5' : 'hover:bg-muted/20'}">
                       {#each row.getVisibleCells() as cell}
                         <Table.Cell>
                           {#if cell.column.id === '_select'}
@@ -677,7 +691,7 @@
                 </ContextMenu.Content>
               </ContextMenu.Root>
               {#if expandedRowRender && row.getIsExpanded()}
-                <Table.Row class="bg-muted/30">
+                <Table.Row class="bg-muted/10 border-b border-border/10 transition-all">
                   <Table.Cell colspan={row.getVisibleCells().length}>
                     {@render expandedRowRender({ record })}
                   </Table.Cell>
@@ -716,7 +730,7 @@
             {@const record = row.original}
             {@const id = record[primaryKey] as string | number}
             <div
-              class="rounded-xl shadow-sm ring-1 ring-border/10 bg-card p-4 transition-colors {row.getIsSelected() ? 'ring-2 ring-primary bg-accent/30' : ''}"
+              class="rounded-[20px] shadow-[0_4px_20px_rgb(0,0,0,0.03)] ring-1 ring-border/20 bg-card p-5 transition-all {row.getIsSelected() ? 'ring-2 ring-primary/50 bg-primary/5' : ''}"
             >
               <!-- Card header: ID + select + actions -->
               <div class="flex items-center justify-between mb-3">

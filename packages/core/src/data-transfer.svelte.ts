@@ -61,8 +61,8 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
         const rows = mapped.map(record =>
           fields.map(f => {
             const val = record[f];
-            const str = val === null || val === undefined ? '' : String(val);
-            return str.includes(',') || str.includes('"') || str.includes('\n')
+            const str = val === null || val === undefined ? '' : typeof val === 'object' ? JSON.stringify(val) : String(val);
+            return str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')
               ? `"${str.replace(/"/g, '""')}"`
               : str;
           }).join(',')

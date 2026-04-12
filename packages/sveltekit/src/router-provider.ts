@@ -5,11 +5,14 @@ import type { RouterProvider } from '@svadmin/core';
 
 export function createSvelteKitRouterProvider(): RouterProvider {
   return {
-    go({ to, query, type = 'push' }) {
+    go({ to, query, hash, type = 'push' }) {
       let url = to;
       if (query) {
         const params = new URLSearchParams(query).toString();
         if (params) url += url.includes('?') ? `&${params}` : `?${params}`;
+      }
+      if (hash) {
+        url += url.includes('#') ? `&${hash}` : `#${hash}`;
       }
       
       if (type === 'replace') {

@@ -258,9 +258,9 @@
                 {@const active = isActive(item.path)}
                 <a
                   href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-                  class="flex items-center gap-3 rounded-lg px-3 {pyClassGroupItem} text-sm font-medium transition-all duration-200
+                  class="flex items-center gap-3 rounded-xl px-3 {pyClassGroupItem} text-sm font-medium transition-all duration-300
                   {active
-                    ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active shadow-[0_2px_12px_rgb(0,0,0,0.08)] ring-1 ring-border/20 translate-x-1'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
                 >
                   <item.Icon class="h-4 w-4 flex-shrink-0" />
@@ -281,10 +281,10 @@
                   <a
                     {...props}
                     href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-                    class="flex items-center justify-center gap-3 rounded-lg px-3 {pyClass} text-sm font-medium transition-all duration-200
+                    class="flex items-center justify-center gap-3 rounded-xl px-3 {pyClass} text-sm font-medium transition-all duration-300
                     {active
-                      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                      : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
+                      ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_2px_12px_rgb(0,0,0,0.08)] ring-1 ring-border/20'
+                      : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/40 hover:text-sidebar-foreground'}"
                   >
                     <item.Icon class="h-4 w-4 flex-shrink-0" />
                   </a>
@@ -297,9 +297,9 @@
           {:else}
             <a
               href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
-              class="flex items-center gap-3 rounded-lg px-3 {pyClass} text-sm font-medium transition-all duration-200
+              class="flex items-center gap-3 rounded-xl px-3 {pyClass} text-sm font-medium transition-all duration-300
               {active
-                ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active'
+                ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active shadow-[0_2px_12px_rgb(0,0,0,0.08)] ring-1 ring-border/20 translate-x-1'
                 : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'}"
             >
               <item.Icon class="h-4 w-4 flex-shrink-0" />

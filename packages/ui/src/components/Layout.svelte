@@ -2,7 +2,6 @@
   import type { Snippet } from 'svelte';
   import { fade, fly } from 'svelte/transition';
   import Sidebar from './Sidebar.svelte';
-  import Toast from './Toast.svelte';
   import Header from './Header.svelte';
   import CommandPalette from './CommandPalette.svelte';
   import KeyboardShortcuts from './KeyboardShortcuts.svelte';
@@ -168,5 +167,4 @@
   />
   <KeyboardShortcuts bind:open={shortcutsOpen} />
   <ChatDialog />
-  <Toast />
 {/if}

@@ -7,7 +7,7 @@
 
   let {
     tenants = [],
-    currentTenantId = $bindable(''),
+    currentTenantId = $bindable(undefined as string | undefined),
     collapsed = false,
     onSwitch,
     headerSnippet,
@@ -74,7 +74,7 @@
             {/if}
           </div>
           <span class="flex-1 truncate">{tenant.name}</span>
-          {#if tenant.id === currentTenantId}
+          {#if tenant.id === currentTenant?.id}
             <Check class="h-4 w-4 text-primary" />
           {/if}
         </DropdownMenu.Item>

@@ -11,18 +11,16 @@ export interface ToastItem {
 }
 
 let nextId = 0;
+const undoableTimers = new Map<number, ReturnType<typeof setTimeout>>();
 
-// Queue for simple toasts (consumed by UI Toast bridge)
 let queue = $state<ToastItem[]>([]);
 export function getToastQueue() { return queue; }
 export function consumeToastQueue() { queue = []; }
 
-// Promise Queue
 let promiseQueue = $state<{ id: number; promise: Promise<any>; opts: { loading: string; success: string; error: string } }[]>([]);
 export function getPromiseQueue() { return promiseQueue; }
 export function consumePromiseQueue() { promiseQueue = []; }
 
-// Legacy compatibility — kept for existing consumers (Undoable)
 let toasts = $state<ToastItem[]>([]);
 export function getToasts(): ToastItem[] { return toasts; }
 
@@ -41,19 +39,23 @@ export function addToast(
   }
   const id = nextId++;
   toasts = [...toasts, { id, type, message, duration, ...options }];
-  if (type === 'undoable') {
-    setTimeout(() => {
-      options?.onTimeout?.();
-      removeToast(id);
-    }, duration);
-  }
+  const timer = setTimeout(() => {
+    undoableTimers.delete(id);
+    options?.onTimeout?.();
+    removeToast(id);
+  }, duration);
+  undoableTimers.set(id, timer);
 }
 
 export function removeToast(id: number): void {
+  const timer = undoableTimers.get(id);
+  if (timer) {
+    clearTimeout(timer);
+    undoableTimers.delete(id);
+  }
   toasts = toasts.filter(t => t.id !== id);
 }
 
-// Convenience methods — backward compatible
 export const toast = {
   success: (msg: string, duration?: number, opts?: { key?: string }) => addToast('success', msg, duration, opts),
   error: (msg: string, duration?: number, opts?: { key?: string }) => addToast('error', msg, duration ?? 5000, opts),
@@ -61,7 +63,6 @@ export const toast = {
   warning: (msg: string, duration?: number, opts?: { key?: string }) => addToast('warning', msg, duration ?? 4000, opts),
   undoable: (msg: string, duration: number, onUndo: () => void, onTimeout: () => void) =>
     addToast('undoable', msg, duration, { onUndo, onTimeout }),
-  /** Promise toast — shows loading → success/error automatically */
   promise: <T>(promise: Promise<T>, opts: { loading: string; success: string; error: string }) => {
     promiseQueue.push({ id: nextId++, promise, opts });
     return promise;

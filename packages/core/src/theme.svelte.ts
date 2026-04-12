@@ -134,13 +134,13 @@ export const builtinPresets: Record<string, ColorPreset> = $state({
       '--chart-1': 'oklch(0.577 0.245 27.325)',
     },
     dark: {
-      '--primary': 'oklch(0.577 0.245 27.325)',
-      '--primary-foreground': 'oklch(0.985 0 0)',
-      '--ring': 'oklch(0.577 0.245 27.325)',
-      '--sidebar-primary': 'oklch(0.577 0.245 27.325)',
+      '--primary': 'oklch(0.685 0.22 27)',
+      '--primary-foreground': 'oklch(0.15 0.04 27)',
+      '--ring': 'oklch(0.55 0.18 27)',
+      '--sidebar-primary': 'oklch(0.685 0.22 27)',
       '--sidebar-primary-foreground': 'oklch(0.985 0 0)',
-      '--sidebar-ring': 'oklch(0.577 0.245 27.325)',
-      '--chart-1': 'oklch(0.577 0.245 27.325)',
+      '--sidebar-ring': 'oklch(0.55 0.18 27)',
+      '--chart-1': 'oklch(0.685 0.22 27)',
     },
   },
   orange: {
@@ -157,13 +157,13 @@ export const builtinPresets: Record<string, ColorPreset> = $state({
       '--chart-1': 'oklch(0.646 0.222 41.116)',
     },
     dark: {
-      '--primary': 'oklch(0.646 0.222 41.116)',
-      '--primary-foreground': 'oklch(0.985 0 0)',
-      '--ring': 'oklch(0.646 0.222 41.116)',
-      '--sidebar-primary': 'oklch(0.646 0.222 41.116)',
+      '--primary': 'oklch(0.73 0.195 41)',
+      '--primary-foreground': 'oklch(0.15 0.04 41)',
+      '--ring': 'oklch(0.6 0.18 41)',
+      '--sidebar-primary': 'oklch(0.73 0.195 41)',
       '--sidebar-primary-foreground': 'oklch(0.985 0 0)',
-      '--sidebar-ring': 'oklch(0.646 0.222 41.116)',
-      '--chart-1': 'oklch(0.646 0.222 41.116)',
+      '--sidebar-ring': 'oklch(0.6 0.18 41)',
+      '--chart-1': 'oklch(0.73 0.195 41)',
     },
   },
   violet: {
@@ -180,13 +180,13 @@ export const builtinPresets: Record<string, ColorPreset> = $state({
       '--chart-1': 'oklch(0.541 0.281 293.009)',
     },
     dark: {
-      '--primary': 'oklch(0.541 0.281 293.009)',
-      '--primary-foreground': 'oklch(0.985 0 0)',
-      '--ring': 'oklch(0.541 0.281 293.009)',
-      '--sidebar-primary': 'oklch(0.541 0.281 293.009)',
+      '--primary': 'oklch(0.65 0.25 293)',
+      '--primary-foreground': 'oklch(0.15 0.04 293)',
+      '--ring': 'oklch(0.52 0.2 293)',
+      '--sidebar-primary': 'oklch(0.65 0.25 293)',
       '--sidebar-primary-foreground': 'oklch(0.985 0 0)',
-      '--sidebar-ring': 'oklch(0.541 0.281 293.009)',
-      '--chart-1': 'oklch(0.541 0.281 293.009)',
+      '--sidebar-ring': 'oklch(0.52 0.2 293)',
+      '--chart-1': 'oklch(0.65 0.25 293)',
     },
   },
 });
@@ -203,14 +203,21 @@ function resolvePreset(preset: ColorPreset | string): ColorPreset | undefined {
 }
 
 /** Apply a color preset's CSS variables based on current resolved theme. */
+let activePresetVars: string[] = [];
+
 function applyColorPreset(preset: ColorPreset): void {
   if (typeof document === 'undefined') return;
   const resolved = mode === 'system' ? getSystemPreference() : mode;
   const vars = resolved === 'dark' ? preset.dark : preset.light;
   const root = document.documentElement;
+  for (const key of activePresetVars) {
+    root.style.removeProperty(key);
+  }
+  activePresetVars = [];
   for (const [key, value] of Object.entries(vars)) {
     const cssVar = key.startsWith('--') ? key : `--${key}`;
     root.style.setProperty(cssVar, value);
+    activePresetVars.push(cssVar);
   }
 }
 

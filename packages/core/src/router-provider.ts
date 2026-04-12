@@ -100,7 +100,9 @@ export function createHistoryRouterProvider(basePath = ''): RouterProvider {
       if (typeof window === 'undefined') {
         return { resource: undefined, action: undefined, id: undefined, params: {}, pathname: '/' };
       }
-      const pathname = window.location.pathname.replace(basePath, '') || '/';
+      const pathname = (basePath && window.location.pathname.startsWith(basePath)
+        ? window.location.pathname.slice(basePath.length) || '/'
+        : window.location.pathname);
       const params: Record<string, string> = {};
       for (const [k, v] of new URLSearchParams(window.location.search).entries()) {
         params[k] = v;

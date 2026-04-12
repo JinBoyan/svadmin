@@ -382,12 +382,9 @@ export function useForm<
     try {
       if (action === 'create' || action === 'clone') await createMut.mutateAsync(values);
       else await updateMut.mutateAsync(values);
-      // Untaint on success
       tainted = {};
-    } catch (error) {
-      // Errors are already handled by the mutation's onError callback.
-      // We catch here to prevent unhandled promise rejections.
-      throw error;
+    } catch {
+      // Errors already handled by mutation's onError callback
     }
   }
 
@@ -421,7 +418,7 @@ export function useForm<
           else if (scope === 'list') queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
         }
         autoSaveStatus = 'saved';
-        lastAutoSaveData = undefined;
+        lastAutoSaveData = finalValues;
         lastAutoSaveError = null;
         setTimeout(() => { autoSaveStatus = 'idle'; }, 2000);
       } catch (e) {

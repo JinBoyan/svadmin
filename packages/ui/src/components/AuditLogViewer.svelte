@@ -23,6 +23,8 @@
   let drawerOpen = $state(false);
   let drawerLog = $state<AuditLog | null>(null);
 
+  let cancelled = $state(false);
+
   async function loadLogs() {
     if (!authProvider?.getAuditLogs) {
       error = t('settings.auditNotSupported') ?? 'Audit logs are not supported by the current AuthProvider';
@@ -30,21 +32,26 @@
       return;
     }
     loading = true;
+    error = null;
     try {
       const result = await authProvider.getAuditLogs({ page, pageSize });
+      if (cancelled) return;
       logs = result.data;
       total = result.total;
     } catch (e) {
+      if (cancelled) return;
       toast.error((e as Error).message);
     } finally {
-      loading = false;
+      if (!cancelled) loading = false;
     }
   }
 
   $effect(() => {
-    // Track `page` to re-fetch on pagination — this is the single trigger
     void page;
+    cancelled = true;
+    cancelled = false;
     loadLogs();
+    return () => { cancelled = true; };
   });
 
   let totalPages = $derived(Math.ceil(total / pageSize) || 1);

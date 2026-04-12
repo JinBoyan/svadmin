@@ -509,15 +509,14 @@ let locales = $state<Record<string, Record<string, string>>>({
 
 /** Detect best locale from browser language */
 function detectLocale(): string {
-  if (typeof navigator === 'undefined') return 'en'; // Safe default for SSR
+  if (typeof navigator === 'undefined') return 'en';
   const browserLang = navigator.language || navigator.languages?.[0] || 'zh-CN';
-  // Exact match
   if (locales[browserLang]) return browserLang;
-  // Prefix match (e.g., 'zh' → 'zh-CN', 'en-US' → 'en')
   const prefix = browserLang.split('-')[0];
   for (const key of Object.keys(locales)) {
-    if (key.startsWith(prefix)) return key;
+    if (key === browserLang || key.startsWith(prefix + '-')) return key;
   }
+  if (locales[prefix]) return prefix;
   return 'en';
 }
 
@@ -536,8 +535,8 @@ export function getAvailableLocales(): string[] {
 }
 
 export function t(key: string, params?: Record<string, string | number>): string {
-  const locale = locales[currentLocale] ?? locales['en'];
-  let text = locale[key] ?? key;
+  const locale = locales[currentLocale];
+  let text = locale?.[key] ?? locales['en']?.[key] ?? key;
 
   if (params) {
     for (const [k, v] of Object.entries(params)) {
@@ -560,7 +559,6 @@ export function resetI18n(): void {
  * Tracks locale changes natively.
  */
 export function useTranslation() {
-  const _ = $derived(currentLocale);
   const translate = (key: string, params?: Record<string, string | number>): string => {
     return t(key, params);
   };

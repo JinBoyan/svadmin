@@ -224,15 +224,19 @@
 
   {:else if field.type === 'select'}
     {#if (field.options?.length ?? 0) > 8}
-      <!-- Many options → use ComboboxField-style search -->
-      <ComboboxField
+      <select
         id={field.key}
-        resource=""
-        value={value as string | number | null}
-        onchange={(v) => onchange(v)}
-        searchable={false}
-        {disabled}
-      />
+        class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        value={strVal}
+        onchange={(e) => onchange((e.target as HTMLSelectElement).value)}
+        required={field.required}
+        disabled={disabled}
+      >
+        <option value="">{t('field.selectPlaceholder')}</option>
+        {#each field.options ?? [] as opt}
+          <option value={opt.value}>{opt.label}</option>
+        {/each}
+      </select>
     {:else}
       <Select
         id={field.key}

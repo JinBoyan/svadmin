@@ -16,7 +16,7 @@
   let { open = $bindable(false), onAskAI }: Props = $props();
   let searchValue = $state('');
 
-  const resources = getResources();
+  const resources = $derived(getResources());
   const hasAI = $derived(!!(getAgentProvider() || getChatProvider()));
 
   function close() {
