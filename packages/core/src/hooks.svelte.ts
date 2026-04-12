@@ -25,7 +25,8 @@ import { createQuery, createInfiniteQuery, createMutation, useQueryClient } from
 import { getAdminOptions } from './options.svelte';
 import { getDataProviderForResource, getDataProvider, getLiveProvider } from './context.svelte';
 import { useParsed } from './useParsed.svelte';
-import { createOvertimeTracker, createLiveSubscription, fireSuccessNotification, fireErrorNotification } from './hook-utils.svelte';
+import { createOvertimeTracker, createLiveSubscription, fireSuccessNotification, fireErrorNotification, checkError } from './hook-utils.svelte';
+import { invalidateByScopes } from './mutation-hooks.svelte';
 import type { NotificationConfig, OvertimeOptions, LiveSubscriptionParams } from './hook-utils.svelte';
 import type { BaseRecord, HttpError, Pagination, Sort, Filter, DataProvider, KnownResources } from './types';
 import type { LiveMode, LiveEvent } from './live.svelte';
@@ -58,7 +59,7 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     const resource = options.resource ?? parsed.resource ?? '';
     const provider = getDataProviderForResource(resource, options.dataProviderName);
     return {
-    queryKey: [resource, 'infiniteList', options.pagination?.pageSize, options.sorters, options.filters, options.meta],
+    queryKey: [options.dataProviderName, resource, 'infiniteList', options.pagination?.pageSize, options.sorters, options.filters, options.meta],
     queryFn: async ({ pageParam = 1 }) => {
       const result = await provider.getList<TData>({
         resource,
@@ -101,6 +102,7 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
       fireSuccessNotification(options.successNotification, '', query.data, undefined, options.resource ?? parsed.resource ?? '');
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
+      checkError(query.error);
       fireErrorNotification(options.errorNotification, 'Fetch failed', query.error);
     }
   });
@@ -149,7 +151,7 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
   const query = createQuery<{ data: TData[]; total: number }>(() => {
     const provider = getDataProviderForResource(resource, dataProviderName);
     return {
-    queryKey: [resource, 'select', allFilters, sorters, pagination, meta],
+    queryKey: [dataProviderName, resource, 'select', allFilters, sorters, pagination, meta],
     queryFn: () => provider.getList<TData>({ resource, sorters, filters: allFilters, pagination: { current: 1, pageSize: effectivePageSize }, meta }),
     enabled: options.queryOptions?.enabled ?? true,
     staleTime: options.queryOptions?.staleTime ?? adminOptions.reactQuery?.staleTime,
@@ -162,7 +164,7 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
     ? createQuery<{ data: TData[] }>(() => {
         const provider = getDataProviderForResource(resource, dataProviderName);
         return {
-          queryKey: [resource, 'select-defaults', defaultValueIds],
+          queryKey: [dataProviderName, resource, 'select-defaults', defaultValueIds],
           queryFn: async () => {
             if (provider.getMany) return provider.getMany<TData>({ resource, ids: defaultValueIds, meta });
             const results = await Promise.all(defaultValueIds.map(id => provider.getOne<TData>({ resource, id, meta })));
@@ -194,6 +196,19 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
   });
 
   const overtime = createOvertimeTracker(() => query.isLoading, options.overtimeOptions ?? adminOptions.overtime);
+
+  let lastSuccessAt = 0;
+  let lastErrorAt = 0;
+  $effect(() => {
+    if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && options.successNotification) {
+      lastSuccessAt = query.dataUpdatedAt;
+      fireSuccessNotification(options.successNotification, '', query.data, undefined, resource);
+    } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
+      lastErrorAt = query.errorUpdatedAt;
+      checkError(query.error);
+      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error);
+    }
+  });
 
   function onSearchChange(value: string) {
     if (debounceTimer) clearTimeout(debounceTimer);
@@ -233,7 +248,7 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
   const query = createQuery<{ data: TData }, TError>(() => {
     const provider = getDataProvider(options.dataProviderName);
     return {
-    queryKey: ['custom', options.url, options.method, options.config, options.meta],
+    queryKey: [options.dataProviderName, 'custom', options.url, options.method, options.config, options.meta],
     queryFn: async () => {
       if (!provider.custom) throw new Error('DataProvider does not support custom method');
       return provider.custom<TData>({
@@ -254,6 +269,19 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
 
   const overtime = createOvertimeTracker(() => query.isLoading, options.overtimeOptions ?? adminOptions.overtime);
 
+  let lastSuccessAt = 0;
+  let lastErrorAt = 0;
+  $effect(() => {
+    if (query.isSuccess && query.dataUpdatedAt > lastSuccessAt && options.successNotification) {
+      lastSuccessAt = query.dataUpdatedAt;
+      fireSuccessNotification(options.successNotification, '', query.data);
+    } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
+      lastErrorAt = query.errorUpdatedAt;
+      checkError(query.error);
+      fireErrorNotification(options.errorNotification, 'Custom request failed', query.error);
+    }
+  });
+
   return { query, get overtime() { return overtime; } };
 }
 
@@ -262,11 +290,19 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
 export function useCustomMutation<TData = unknown, TError = HttpError, TVariables = unknown>(dataProviderName?: string) {
   const queryClient = useQueryClient();
 
-  const mutation = createMutation<{ data: TData }, TError, { url: string; method: 'get' | 'post' | 'put' | 'patch' | 'delete'; values?: TVariables; meta?: Record<string, unknown> }>(() => ({
+  const mutation = createMutation<{ data: TData }, TError, { url: string; method: 'get' | 'post' | 'put' | 'patch' | 'delete'; values?: TVariables; query?: Record<string, unknown>; headers?: Record<string, string>; sorters?: Sort[]; filters?: Filter[]; meta?: Record<string, unknown>; invalidates?: string[] | false; resource?: string }>(() => ({
     mutationFn: async (params) => {
       const provider = getDataProvider(dataProviderName);
       if (!provider.custom) throw new Error('DataProvider does not support custom method');
-      return provider.custom<TData>({ url: params.url, method: params.method, payload: params.values, meta: params.meta });
+      return provider.custom<TData>({ url: params.url, method: params.method, payload: params.values, query: params.query, headers: params.headers, sorters: params.sorters, filters: params.filters, meta: params.meta });
+    },
+    onSuccess: (data, params) => {
+      if (params.resource && params.invalidates !== false) {
+        invalidateByScopes(queryClient, params.resource, params.invalidates, ['list', 'many']);
+      }
+    },
+    onError: (error) => {
+      checkError(error);
     },
   }));
 
@@ -294,9 +330,18 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
         return { data: results.map(r => r.data) };
       } finally { isMutating = false; }
     },
+    onSuccess: (data, params) => {
+      const resName = params.resource ?? resource;
+      fireSuccessNotification(undefined, 'Created successfully', data.data, params.variables, resName);
+      audit({ action: 'create', resource: resName });
+    },
+    onError: (error, params) => {
+      checkError(error);
+      fireErrorNotification(undefined, 'Create many failed', error);
+    },
     onSettled: (_d, _e, params) => {
-      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'list'] });
-      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'many'] });
+      const resName = params.resource ?? resource;
+      invalidateByScopes(queryClient, resName, undefined, ['list', 'many']);
     },
   }));
 
@@ -322,10 +367,21 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
         return { data: results.map(r => r.data) };
       } finally { isMutating = false; }
     },
+    onSuccess: (data, params) => {
+      const resName = params.resource ?? resource;
+      fireSuccessNotification(undefined, 'Updated successfully', data.data, params.variables, resName);
+      audit({ action: 'update', resource: resName });
+    },
+    onError: (error, params) => {
+      checkError(error);
+      fireErrorNotification(undefined, 'Update many failed', error);
+    },
     onSettled: (_d, _e, params) => {
-      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'list'] });
-      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'many'] });
-      for (const id of params.ids) queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'one', id] });
+      const resName = params.resource ?? resource;
+      invalidateByScopes(queryClient, resName, undefined, ['list', 'many', 'detail'], undefined);
+      for (const id of params.ids) {
+        queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === id });
+      }
     },
   }));
 
@@ -351,10 +407,21 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
         return { data: results.map(r => r.data) };
       } finally { isMutating = false; }
     },
+    onSuccess: (data, params) => {
+      const resName = params.resource ?? resource;
+      fireSuccessNotification(undefined, 'Deleted successfully', data.data, undefined, resName);
+      audit({ action: 'delete', resource: resName });
+    },
+    onError: (error, params) => {
+      checkError(error);
+      fireErrorNotification(undefined, 'Delete many failed', error);
+    },
     onSettled: (_d, _e, params) => {
-      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'list'] });
-      queryClient.invalidateQueries({ queryKey: [params.resource ?? resource, 'many'] });
-      for (const id of params.ids) queryClient.removeQueries({ queryKey: [params.resource ?? resource, 'one', id] });
+      const resName = params.resource ?? resource;
+      invalidateByScopes(queryClient, resName, undefined, ['list', 'many']);
+      for (const id of params.ids) {
+        queryClient.removeQueries({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === id });
+      }
     },
   }));
 
@@ -372,12 +439,13 @@ export function useInvalidate() {
       return;
     }
     const scopes = params.invalidates || ['resourceAll'];
+    const res = params.resource;
     for (const scope of scopes) {
-      if (scope === 'resourceAll') queryClient.invalidateQueries({ queryKey: [params.resource] });
-      else if ((scope === 'detail' || scope === 'one') && params.id) queryClient.invalidateQueries({ queryKey: [params.resource, 'one', params.id] });
-      else if (scope === 'one') queryClient.invalidateQueries({ queryKey: [params.resource, 'one'] });
-      else if (scope === 'list') queryClient.invalidateQueries({ queryKey: [params.resource, 'list'] });
-      else if (scope === 'many') queryClient.invalidateQueries({ queryKey: [params.resource, 'many'] });
+      if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res });
+      else if ((scope === 'detail' || scope === 'one') && params.id) queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'one' && q.queryKey[3] === params.id });
+      else if (scope === 'one') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'one' });
+      else if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
+      else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'many' });
     }
   };
 }

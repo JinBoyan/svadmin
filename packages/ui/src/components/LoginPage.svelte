@@ -38,7 +38,7 @@
     socialProviders?: SocialProvider[];
   }>();
 
-  const login = useLogin();
+  const login = useLogin({ errorMessage: false });
   const authProvider = getAuthProvider();
 
   let identifier = $state('');

@@ -4,7 +4,7 @@
 import { useQueryClient } from '@tanstack/svelte-query';
 import type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
 import { getAuthProvider } from './context.svelte';
-import { toast } from './toast.svelte';
+import { notify } from './notification.svelte';
 
 // ─── Auth Error Delegate ────────────────────────────────────────
 // Delegate auth errors (401/403) to authProvider.onError() — refine pattern
@@ -91,7 +91,7 @@ export function createLiveSubscription(paramsFn: () => LiveSubscriptionParams): 
       callback: (event: LiveEvent) => {
         params.onLiveEvent?.(event);
         if (liveMode === 'auto') {
-          queryClient.invalidateQueries({ queryKey: [params.resource] });
+          queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === params.resource });
         }
       },
     });
@@ -118,10 +118,10 @@ export function fireSuccessNotification(
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
     const result = config(data, values, resource);
-    toast.success(result.message);
+    notify({ type: 'success', message: result.message, description: result.description });
     return;
   }
-  toast.success(config || defaultMessage);
+  notify({ type: 'success', message: config || defaultMessage });
 }
 
 export function fireErrorNotification(
@@ -133,9 +133,9 @@ export function fireErrorNotification(
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
     const result = config(error);
-    toast.error(result.message);
+    notify({ type: 'error', message: result.message, description: result.description });
     return;
   }
   const errMsg = error instanceof Error ? error.message : String(error ?? '');
-  toast.error(config || `${defaultMessage}${errMsg ? ': ' + errMsg : ''}`);
+  notify({ type: 'error', message: config || `${defaultMessage}${errMsg ? ': ' + errMsg : ''}` });
 }

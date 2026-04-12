@@ -1,6 +1,7 @@
 import { useParsed } from './useParsed.svelte';
 import { useList } from './query-hooks.svelte';
 import { readURLState, writeURLState } from './url-sync';
+import { getAdminOptions } from './options.svelte';
 import type { Pagination, Sort, Filter, BaseRecord, HttpError, KnownResources, GetListResult } from './types';
 import type { UseListOptions, MaybeGetter } from './query-hooks.svelte';
 
@@ -34,6 +35,7 @@ export function useTable<
   // Use a local derived to compute these since they are used to initialize state
   // Even if options change, init values are only used once, which makes sense for initial state
   const initialOpts = getOptions();
+  const syncWithLocation = initialOpts.syncWithLocation ?? getAdminOptions().syncWithLocation;
   
   const paginationMode = $derived(getOptions().pagination?.mode ?? 'server');
   const sortersMode = $derived(getOptions().sorters?.mode ?? 'server');
@@ -47,7 +49,7 @@ export function useTable<
   let initSorters = initialOpts.sorters?.initial ?? [];
   let initFilters = initialOpts.filters?.initial ?? [];
 
-  if (initialOpts.syncWithLocation && typeof window !== 'undefined') {
+  if (syncWithLocation && typeof window !== 'undefined') {
     const urlState = readURLState();
     if (urlState.page || urlState.pageSize) {
       initPagination = {
@@ -118,7 +120,7 @@ export function useTable<
   function setPage(page: number) { pagination = { ...pagination, current: page }; }
   function setPageSize(size: number) { pagination = { ...pagination, pageSize: size, current: 1 }; }
 
-  if (initialOpts.syncWithLocation && typeof window !== 'undefined') {
+  if (syncWithLocation && typeof window !== 'undefined') {
     $effect(() => {
       writeURLState({
         page: pagination.current,
@@ -132,24 +134,34 @@ export function useTable<
     $effect(() => {
       const handler = () => {
         const urlState = readURLState();
-        if (urlState.page && urlState.page !== pagination.current) {
-          pagination = { ...pagination, current: urlState.page };
+        const newPage = urlState.page ?? 1;
+        if (newPage !== pagination.current) {
+          pagination = { ...pagination, current: newPage };
         }
-        if (urlState.pageSize && urlState.pageSize !== pagination.pageSize) {
-          pagination = { ...pagination, pageSize: urlState.pageSize };
+        const newPageSize = urlState.pageSize ?? initialOpts.pagination?.pageSize ?? getAdminOptions().defaultPageSize ?? 10;
+        if (newPageSize !== pagination.pageSize) {
+          pagination = { ...pagination, pageSize: newPageSize };
         }
         if (urlState.sortField) {
           const newSorter: Sort = { field: urlState.sortField, order: (urlState.sortOrder as 'asc' | 'desc') ?? 'asc' };
           if (JSON.stringify([newSorter]) !== JSON.stringify(currentSorters)) {
             currentSorters = [newSorter];
           }
+        } else if (currentSorters.length > 0) {
+          currentSorters = [];
         }
         if (urlState.filters && JSON.stringify(urlState.filters) !== JSON.stringify(currentFilters)) {
           currentFilters = urlState.filters;
+        } else if (!urlState.filters && currentFilters.length > 0) {
+          currentFilters = [];
         }
       };
       window.addEventListener('popstate', handler);
-      return () => window.removeEventListener('popstate', handler);
+      window.addEventListener('hashchange', handler);
+      return () => {
+        window.removeEventListener('popstate', handler);
+        window.removeEventListener('hashchange', handler);
+      };
     });
   }
 
@@ -184,10 +196,8 @@ export function useTable<
     get pageSize() { return pagination.pageSize ?? 10; },
     get pageCount() { return Math.ceil(((query.data as GetListResult<TQueryFnData> | undefined)?.total ?? 0) / (pagination.pageSize ?? 10)); },
     get clientData(): TQueryFnData[] {
-      if (paginationMode !== 'client') return [];
+      if (paginationMode === 'server') return [];
       const allData = ((query.data as GetListResult<TQueryFnData> | undefined)?.data ?? []) as TQueryFnData[];
-      const start = ((pagination.current ?? 1) - 1) * (pagination.pageSize ?? 10);
-      const end = start + (pagination.pageSize ?? 10);
       let sorted = [...allData];
       const activeSorters = sortersMode === 'off' ? effectiveSorters : [];
       if (activeSorters.length > 0) {
@@ -210,6 +220,9 @@ export function useTable<
           return 0;
         });
       }
+      if (paginationMode === 'off') return sorted;
+      const start = ((pagination.current ?? 1) - 1) * (pagination.pageSize ?? 10);
+      const end = start + (pagination.pageSize ?? 10);
       return sorted.slice(start, end);
     },
   };

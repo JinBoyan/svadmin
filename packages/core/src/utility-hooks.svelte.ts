@@ -56,8 +56,8 @@ export function useModalForm<
     visible = false;
     formState.reset();
     if (options.autoSave?.invalidateOnClose) {
-      queryClient.invalidateQueries({ queryKey: [formState.resource, 'list'] });
-      queryClient.invalidateQueries({ queryKey: [formState.resource, 'many'] });
+      queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === formState.resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
+      queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === formState.resource && q.queryKey[2] === 'many' });
     }
   }
 
@@ -128,7 +128,16 @@ export function useBreadcrumb() {
 
     try {
       const res = getResource(parsed.resource);
-      list.push({ label: res.label || res.name, link: `/${res.name}`, icon: res.icon });
+      const chain: { label: string; link: string; icon?: string }[] = [];
+      let current: typeof res | undefined = res;
+      const visited = new Set<string>();
+      while (current) {
+        if (visited.has(current.name)) break;
+        visited.add(current.name);
+        chain.unshift({ label: current.label || current.name, link: `/${current.name}`, icon: current.icon });
+        current = current.parentName ? getResource(current.parentName) : undefined;
+      }
+      list.push(...chain);
 
       if (parsed.action === 'create') {
         list.push({ label: t('common.create') });

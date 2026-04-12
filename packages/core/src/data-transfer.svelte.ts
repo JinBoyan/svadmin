@@ -57,14 +57,13 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
 
       if (options.download !== false && typeof document !== 'undefined') {
         const fields = Object.keys(mapped[0]);
-        const header = fields.join(',');
+        const escapeCsvField = (s: string) => s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r') ? `"${s.replace(/"/g, '""')}"` : s;
+        const header = fields.map(escapeCsvField).join(',');
         const rows = mapped.map(record =>
           fields.map(f => {
             const val = record[f];
             const str = val === null || val === undefined ? '' : typeof val === 'object' ? JSON.stringify(val) : String(val);
-            return str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')
-              ? `"${str.replace(/"/g, '""')}"`
-              : str;
+            return escapeCsvField(str);
           }).join(',')
         );
 

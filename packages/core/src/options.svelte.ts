@@ -54,20 +54,22 @@ const defaultTextTransformers: TextTransformers = {
   singular: (text: string) => text.endsWith('s') ? text.slice(0, -1) : text,
 };
 
-const defaultOptions: AdminOptions = {
-  mutationMode: 'pessimistic',
-  warnWhenUnsavedChanges: false,
-  syncWithLocation: false,
-  liveMode: 'auto',
-  disableServerSideValidation: false,
-  undoableTimeout: 5000,
-  textTransformers: defaultTextTransformers,
-  redirect: { afterCreate: 'list', afterEdit: 'list', afterClone: 'list' },
-  breadcrumb: 'default',
-  disableRouteChangeHandler: false,
-};
+function createDefaultOptions(): AdminOptions {
+  return {
+    mutationMode: 'pessimistic',
+    warnWhenUnsavedChanges: false,
+    syncWithLocation: false,
+    liveMode: 'auto',
+    disableServerSideValidation: false,
+    undoableTimeout: 5000,
+    textTransformers: defaultTextTransformers,
+    redirect: { afterCreate: 'list', afterEdit: 'list', afterClone: 'list' },
+    breadcrumb: 'default',
+    disableRouteChangeHandler: false,
+  };
+}
 
-let adminOptions = $state<AdminOptions>(defaultOptions);
+let adminOptions = $state<AdminOptions>(createDefaultOptions());
 
 export function setAdminOptions(options: AdminOptions, merge?: boolean): void {
   if (merge) {
@@ -81,14 +83,15 @@ export function setAdminOptions(options: AdminOptions, merge?: boolean): void {
       overtime: { ...adminOptions.overtime, ...options.overtime },
     };
   } else {
+    const defaults = createDefaultOptions();
     adminOptions = {
-      ...defaultOptions,
+      ...defaults,
       ...options,
       textTransformers: { ...defaultTextTransformers, ...options.textTransformers },
-      redirect: { ...defaultOptions.redirect, ...options.redirect },
-      reactQuery: { ...defaultOptions.reactQuery, ...options.reactQuery },
-      title: { ...defaultOptions.title, ...options.title },
-      overtime: { ...defaultOptions.overtime, ...options.overtime },
+      redirect: { ...defaults.redirect, ...options.redirect },
+      reactQuery: { ...defaults.reactQuery, ...options.reactQuery },
+      title: { ...defaults.title, ...options.title },
+      overtime: { ...defaults.overtime, ...options.overtime },
     };
   }
 }
@@ -98,7 +101,7 @@ export function getAdminOptions(): AdminOptions {
 }
 
 export function resetAdminOptions(): void {
-  adminOptions = defaultOptions;
+  adminOptions = createDefaultOptions();
 }
 
 /** Get the resolved text transformers (always returns full set) */

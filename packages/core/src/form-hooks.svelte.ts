@@ -268,10 +268,10 @@ export function useForm<
   // Always create the query — use `enabled` to conditionally activate.
   // This ensures setAction('edit') at runtime will trigger a fetch.
   const query = createQuery(() => ({
-    queryKey: [resource, 'one', currentId],
+    queryKey: [options.dataProviderName, resource, 'one', currentId, queryMeta],
     queryFn: async () => {
       const result = await provider.getOne<BaseRecord>({ resource, id: currentId!, meta: queryMeta });
-      return result.data;
+      return result;
     },
     enabled: (queryOptions?.enabled ?? true) && (action === 'edit' || action === 'clone' || action === 'show') && currentId != null,
     staleTime: queryOptions?.staleTime,
@@ -292,14 +292,13 @@ export function useForm<
         return;
       }
       if (queryInitializedId === currentId) return;
-      const data = query.data as Record<string, unknown> | undefined;
+      const record = (query.data as { data: Record<string, unknown> } | undefined)?.data;
       const pk = getResource(resource).primaryKey ?? 'id';
-      if (data && (currentId == null || String(data[pk]) === String(currentId) || !data[pk])) {
-        // In clone mode, strip out identifiers
+      if (record && String(record[pk]) === String(currentId)) {
         const cloneStripKeys = new Set(['id', '_id', pk, 'createdAt', 'updatedAt', 'created_at', 'updated_at', 'createdBy', 'updated_by', 'created_by', 'updatedBy']);
         const targetData = action === 'clone' 
-          ? Object.fromEntries(Object.entries(data).filter(([k]) => !cloneStripKeys.has(k)))
-          : data;
+          ? Object.fromEntries(Object.entries(record).filter(([k]) => !cloneStripKeys.has(k)))
+          : record;
         // Merge: defaultValues < query data
         const merged = { ...(options.defaultValues ?? {}), ...targetData } as TVariables;
         values = merged;
@@ -316,11 +315,7 @@ export function useForm<
     ...options.createMutationOptions,
     mutationFn: (variables: TVariables) => provider.create<TData, TVariables>({ resource, variables, meta: mutationMeta }),
     onSuccess: (data: { data: TData }) => {
-      // Targeted invalidation: list + many (like refine)
-      if (invalidateScopes !== false) {
-        queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
-        queryClient.invalidateQueries({ queryKey: [resource, 'many'] });
-      }
+      invalidateByScopes(queryClient, resource, invalidateScopes, ['list', 'many']);
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.createSuccess') });
       const pk = getResource(resource).primaryKey ?? 'id';
       const newId = (data.data as Record<string, unknown>)[pk];
@@ -353,10 +348,10 @@ export function useForm<
     },
     onMutate: async (variables: TVariables) => {
       if (mutationMode === 'pessimistic') return;
-      await queryClient.cancelQueries({ queryKey: [resource] });
-      const previousQueries = queryClient.getQueriesData({ queryKey: [resource] });
+      await queryClient.cancelQueries({ predicate: (q) => q.queryKey[1] === resource });
+      const previousQueries = queryClient.getQueriesData({ predicate: (q) => q.queryKey[1] === resource });
       if (optimisticUpdateMap?.list !== false) {
-        queryClient.setQueriesData({ queryKey: [resource, 'list'] }, (old: unknown) => {
+        queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resource && q.queryKey[2] === 'list' }, (old: unknown) => {
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
           const pk = getResource(resource).primaryKey ?? 'id';
@@ -364,12 +359,11 @@ export function useForm<
         });
       }
       if (optimisticUpdateMap?.detail !== false && currentId != null) {
-        queryClient.setQueryData([resource, 'one', currentId], (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, variables) } : old);
+        queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === currentId }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, variables) } : old);
       }
       return { previousQueries };
     },
     onSuccess: (data: unknown) => {
-      invalidateByScopes(queryClient, resource, invalidateScopes, ['list', 'many', 'detail'], currentId ?? undefined);
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.updateSuccess') });
       audit({ action: 'update', resource, recordId: String(currentId) });
       try {
@@ -409,7 +403,7 @@ export function useForm<
 
   // ─── Submit ─────────────────────────────────────────────────────
   async function submit(overrides?: { redirect?: 'list' | 'edit' | 'show' | false }) {
-    // onSubmit pre-hook
+    if (autoSaveTimer) { clearTimeout(autoSaveTimer); autoSaveTimer = null; }
     if (onSubmitFn) {
       let cancelled = false;
       const result = onSubmitFn({ values, action, cancel: () => { cancelled = true; } });
@@ -440,8 +434,9 @@ export function useForm<
   });
 
   function triggerAutoSave() {
-    const currentAction = action; // read $state reactively at call time
+    const currentAction = action;
     if (!autoSaveOpts?.enabled || currentAction === 'create' || currentAction === 'clone' || currentId == null) return;
+    if (createMut.isPending || updateMut.isPending) return;
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
     const safeId = currentId;
@@ -451,11 +446,7 @@ export function useForm<
       try {
         await provider.update<TData, TVariables>({ resource, id: safeId as string | number, variables: finalValues, meta: mutationMeta });
         const scopes = autoSaveOpts.invalidates ?? ['resourceAll'];
-        for (const scope of scopes) {
-          if (scope === 'resourceAll') queryClient.invalidateQueries({ queryKey: [resource] });
-          else if (scope === 'detail' && safeId != null) queryClient.invalidateQueries({ queryKey: [resource, 'one', safeId!] });
-          else if (scope === 'list') queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
-        }
+        invalidateByScopes(queryClient, resource, scopes, ['resourceAll'], safeId ?? undefined);
         autoSaveStatus = 'saved';
         lastAutoSaveData = finalValues;
         lastAutoSaveError = null;
@@ -463,13 +454,14 @@ export function useForm<
       } catch (e) {
         autoSaveStatus = 'error';
         lastAutoSaveError = e;
+        checkError(e);
       }
     }, autoSaveOpts.debounce ?? 1000);
   }
 
   if (autoSaveOpts?.invalidateOnUnmount) {
     $effect(() => {
-      return () => queryClient.invalidateQueries({ queryKey: [resource] });
+      return () => queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource });
     });
   }
 

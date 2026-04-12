@@ -15,7 +15,7 @@
     isGranted,
     
     // Interactive states
-    selectedRole = $bindable(roles[0]?.code || ''),
+    selectedRole = $bindable(''),
     loading = false,
     
     // Feedback and alerts (passed down from upper business logic)
@@ -44,6 +44,11 @@
     onToggle: (role: string, resource: string, action: string, grant: boolean) => void;
   } = $props();
 
+  $effect(() => {
+    if (!selectedRole && roles.length > 0) {
+      selectedRole = roles[0].code;
+    }
+  });
 </script>
 
 <div class="h-full flex flex-col pt-2">

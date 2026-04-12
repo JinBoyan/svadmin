@@ -48,7 +48,7 @@ export function useLive(
       callback: (event) => {
         options?.onLiveEvent?.(event);
         if (liveMode === 'auto') {
-          queryClient.invalidateQueries({ queryKey: [res] });
+          queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res });
         }
       },
     });

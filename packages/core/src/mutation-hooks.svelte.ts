@@ -41,10 +41,10 @@ export function invalidateByScopes(
   if (scopes === false) return;
   const effectiveScopes = (scopes && scopes.length > 0) ? scopes : defaults;
   for (const scope of effectiveScopes) {
-    if (scope === 'list') queryClient.invalidateQueries({ queryKey: [resource, 'list'] });
-    else if (scope === 'many') queryClient.invalidateQueries({ queryKey: [resource, 'many'] });
-    else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ queryKey: [resource, 'one', id] });
-    else if (scope === 'resourceAll') queryClient.invalidateQueries({ queryKey: [resource] });
+    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
+    else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource && q.queryKey[2] === 'many' });
+    else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === id });
+    else if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource });
   }
 }
 
@@ -219,28 +219,24 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       
-      // Cancel in-flight queries for this resource
-      await queryClient.cancelQueries({ queryKey: [resName] });
+      await queryClient.cancelQueries({ predicate: (q) => q.queryKey[1] === resName });
 
-      // Snapshot ALL previous queries for rollback (matches refine pattern)
-      const previousQueries = queryClient.getQueriesData({ queryKey: [resName] });
+      const previousQueries = queryClient.getQueriesData({ predicate: (q) => q.queryKey[1] === resName });
       
       const pk = getResource(resName).primaryKey ?? 'id';
       const updater = params.optimisticUpdateMap ?? { list: true, many: true, detail: true };
       
-      // Optimistic update: detail queries
       if (updater.detail !== false) {
         const detailFn = updater.detail;
         if (typeof detailFn === 'function') {
-          queryClient.setQueryData([resName, 'one', targetId], (old: unknown) => detailFn(old, params.variables, targetId));
+          queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId }, (old: unknown) => detailFn(old, params.variables, targetId));
         } else {
-          queryClient.setQueryData([resName, 'one', targetId], (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, params.variables) } : old);
+          queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, params.variables) } : old);
         }
       }
       
-      // Optimistic update: list queries
       if (updater.list !== false) {
-        queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => {
+        queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'list' }, (old: unknown) => {
           if (typeof updater.list === 'function') return updater.list!(old, params.variables, targetId);
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
@@ -248,9 +244,8 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
         });
       }
 
-      // Optimistic update: many queries (missing before — refine parity)
       if (updater.many !== false) {
-        queryClient.setQueriesData({ queryKey: [resName, 'many'] }, (old: unknown) => {
+        queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'many' }, (old: unknown) => {
           if (typeof updater.many === 'function') return updater.many!(old, params.variables, targetId);
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
@@ -367,27 +362,22 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
       
-      // Cancel in-flight queries
-      await queryClient.cancelQueries({ queryKey: [resName] });
+      await queryClient.cancelQueries({ predicate: (q) => q.queryKey[1] === resName });
 
-      // Snapshot ALL previous queries for rollback
-      const previousQueries = queryClient.getQueriesData({ queryKey: [resName] });
+      const previousQueries = queryClient.getQueriesData({ predicate: (q) => q.queryKey[1] === resName });
       
       const pk = getResource(resName).primaryKey ?? 'id';
       
-      // Optimistic scrub from detail queries
-      if (targetId != null) queryClient.removeQueries({ queryKey: [resName, 'one', targetId] });
+      if (targetId != null) queryClient.removeQueries({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId });
 
-      // Optimistic remove from list queries
-      queryClient.setQueriesData({ queryKey: [resName, 'list'] }, (old: unknown) => {
+      queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'list' }, (old: unknown) => {
         if (!old || typeof old !== 'object' || !('data' in old)) return old;
         const o = old as { data: Record<string, unknown>[]; total?: number };
         const filtered = o.data.filter((item) => String(item[pk]) !== String(targetId));
         return { ...o, data: filtered, total: (o.total ?? o.data.length) - (o.data.length - filtered.length) };
       });
 
-      // Optimistic remove from many queries (refine parity)
-      queryClient.setQueriesData({ queryKey: [resName, 'many'] }, (old: unknown) => {
+      queryClient.setQueriesData({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'many' }, (old: unknown) => {
         if (!old || typeof old !== 'object' || !('data' in old)) return old;
         const o = old as { data: Record<string, unknown>[] };
         return { ...o, data: o.data.filter((item) => String(item[pk]) !== String(targetId)) };
@@ -402,7 +392,7 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
 
       // Remove detail cache entry (refine pattern — no stale show page)
       if (targetId != null) {
-        queryClient.removeQueries({ queryKey: [resName, 'one', targetId] });
+        queryClient.removeQueries({ predicate: (q) => q.queryKey[1] === resName && q.queryKey[2] === 'one' && q.queryKey[3] === targetId });
       }
 
       fireSuccessNotification(params.successNotification, 'Deleted successfully', data.data, params.variables, resName);

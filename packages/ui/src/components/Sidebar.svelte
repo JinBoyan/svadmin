@@ -258,6 +258,7 @@
                 {@const active = isActive(item.path)}
                 <a
                   href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
+                  onclick={(e) => { e.preventDefault(); navigate(item.path); }}
                   class="flex items-center gap-3 rounded-xl px-3 {pyClassGroupItem} text-sm font-medium transition-all duration-300
                   {active
                     ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active shadow-[0_2px_12px_rgb(0,0,0,0.08)] ring-1 ring-border/20 translate-x-1'
@@ -281,6 +282,7 @@
                   <a
                     {...props}
                     href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
+                    onclick={(e) => { e.preventDefault(); navigate(item.path); }}
                     class="flex items-center justify-center gap-3 rounded-xl px-3 {pyClass} text-sm font-medium transition-all duration-300
                     {active
                       ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-[0_2px_12px_rgb(0,0,0,0.08)] ring-1 ring-border/20'
@@ -297,6 +299,7 @@
           {:else}
             <a
               href={effectiveRouteMode === 'hash' ? `#${item.path}` : item.path}
+              onclick={(e) => { e.preventDefault(); navigate(item.path); }}
               class="flex items-center gap-3 rounded-xl px-3 {pyClass} text-sm font-medium transition-all duration-300
               {active
                 ? 'bg-sidebar-accent text-sidebar-accent-foreground sidebar-nav-active shadow-[0_2px_12px_rgb(0,0,0,0.08)] ring-1 ring-border/20 translate-x-1'

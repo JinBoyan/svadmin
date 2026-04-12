@@ -13,7 +13,7 @@ import type { AuthActionResult, CheckResult, Identity, AuthProvider } from './ty
 interface CreateAuthMutationOptions {
   method: keyof AuthProvider;
   successMessage?: string | null;
-  errorMessage?: string;
+  errorMessage?: string | false;
   onSuccess?: (result: AuthActionResult) => void;
 }
 
@@ -33,13 +33,13 @@ function createAuthMutation(options: CreateAuthMutationOptions) {
         if (options.successMessage) notify({ type: 'success', message: options.successMessage });
         if (options.onSuccess) options.onSuccess(result);
       } else {
-        const msg = result.error?.message ?? options.errorMessage ?? t('common.operationFailed');
-        notify({ type: 'error', message: msg });
+        const msg = result.error?.message ?? (typeof options.errorMessage === 'string' ? options.errorMessage : t('common.operationFailed'));
+        if (options.errorMessage !== false) notify({ type: 'error', message: msg });
       }
       return result;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : (options.errorMessage ?? t('common.operationFailed'));
-      notify({ type: 'error', message: msg });
+      const msg = err instanceof Error ? err.message : (typeof options.errorMessage === 'string' ? options.errorMessage : t('common.operationFailed'));
+      if (options.errorMessage !== false) notify({ type: 'error', message: msg });
       return { success: false, error: { message: msg } };
     } finally {
       isLoading = false;
@@ -54,11 +54,11 @@ function createAuthMutation(options: CreateAuthMutationOptions) {
 
 // ─── useLogin ─────────────────────────────────────────────────
 
-export function useLogin() {
+export function useLogin(opts?: { errorMessage?: string | false }) {
   return createAuthMutation({
     method: 'login',
     successMessage: t('common.operationSuccess'),
-    errorMessage: t('common.loginFailed'),
+    errorMessage: opts?.errorMessage ?? t('common.loginFailed'),
     onSuccess: (result) => { if (result.redirectTo) navigate(result.redirectTo); }
   });
 }
@@ -186,7 +186,7 @@ export function useIsAuthenticated() {
  * If it returns { redirectTo }, navigates there.
  */
 export function useOnError() {
-  const provider = getAuthProvider();
+  const provider = getAuthProvider({ optional: true });
 
   async function mutate(error: unknown) {
     if (!provider?.onError) {

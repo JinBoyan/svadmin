@@ -130,13 +130,7 @@
   const filterableFields = $derived(resource.fields.filter(f => f.filterable));
   let filterValues = $state<Record<string, string>>({});
   const activeFilterCount = $derived(Object.values(filterValues).filter(v => v.trim()).length);
-  let prevFilterValuesJson = $state('');
   const activeFilters = $derived.by(() => {
-    const currentJson = JSON.stringify(filterValues);
-    if (currentJson !== prevFilterValuesJson && prevFilterValuesJson !== '') {
-      pagination = { ...pagination, current: 1 };
-    }
-    prevFilterValuesJson = currentJson;
     const result: Filter[] = [...filters];
     if (searchText.trim() && searchableFields.length > 0) {
       if (searchableFields.length === 1) {
@@ -152,13 +146,18 @@
         } as any);
       }
     }
-    // Add popover filters
     for (const [key, value] of Object.entries(filterValues)) {
       if (value.trim()) {
         result.push({ field: key, operator: 'contains', value: value.trim() });
       }
     }
     return result;
+  });
+
+  $effect(() => {
+    if (Object.values(filterValues).some(v => v.trim())) {
+      pagination = { ...pagination, current: 1 };
+    }
   });
 
   // ─── Data fetching ────────────────────────────────────────────
