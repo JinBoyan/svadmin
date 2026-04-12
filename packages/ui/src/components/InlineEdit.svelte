@@ -17,6 +17,7 @@
   let editValue = $state('');
   let inputRef = $state<HTMLInputElement | null>(null);
   let saving = $state(false);
+  let savePending = false;
   const displayValue = $derived(String(value ?? ''));
 
   const { mutation } = useUpdate({ get resource() { return resourceName; } });
@@ -31,12 +32,13 @@
   }
 
   async function save() {
-    if (!editing || saving) return;
-    const newValue = field.type === 'number' ? Number(editValue) : editValue;
+    if (!editing || saving || savePending) return;
+    const newValue = field.type === 'number' ? (editValue.trim() === '' ? null : Number(editValue)) : editValue;
     if (newValue === value) {
       editing = false;
       return;
     }
+    savePending = true;
     saving = true;
     try {
       await mutation.mutateAsync({
@@ -50,6 +52,7 @@
       // Keep editing on error
     } finally {
       saving = false;
+      savePending = false;
     }
   }
 
@@ -59,8 +62,15 @@
   }
 
   function handleKeydown(e: KeyboardEvent) {
-    if (e.key === 'Enter') save();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      save();
+    }
     if (e.key === 'Escape') cancel();
+  }
+
+  function handleBlur() {
+    if (!savePending) save();
   }
 </script>
 
@@ -70,7 +80,7 @@
     type={field.type === 'number' ? 'number' : 'text'}
     bind:value={editValue}
     onkeydown={handleKeydown}
-    onblur={save}
+    onblur={handleBlur}
     disabled={saving}
     class="h-7 w-full rounded border bg-background px-2 text-sm outline-none ring-1 ring-primary/50 focus:ring-2 focus:ring-primary transition-all"
   />

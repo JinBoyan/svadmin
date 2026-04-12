@@ -102,3 +102,9 @@ export function currentPath(): string {
   if (typeof window === 'undefined') return '/';
   return window.location.hash.replace(/^#/, '') || '/';
 }
+
+export function resetRouter(): void {
+  _routerProvider = undefined;
+  _beforeGuards = [];
+  _afterGuards = [];
+}

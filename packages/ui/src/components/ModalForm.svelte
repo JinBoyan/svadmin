@@ -18,7 +18,7 @@
   const fieldCount = $derived(resource.fields.filter(f => f.showInForm !== false).length);
   const dialogWidth = $derived(fieldCount > 8 ? 'sm:max-w-3xl' : fieldCount > 5 ? 'sm:max-w-2xl' : 'sm:max-w-lg');
 
-  function handleClose() {
+  function handleSuccess() {
     open = false;
     onSuccess?.();
   }
@@ -32,7 +32,7 @@
           {mode === 'create' ? `${t('common.create')}${resource.label}` : `${t('common.edit')}${resource.label}`}
         </Dialog.DialogTitle>
       </Dialog.DialogHeader>
-      <AutoForm {resourceName} {mode} {id} />
+      <AutoForm {resourceName} {mode} {id} onSuccess={handleSuccess} />
     </Dialog.DialogContent>
   </Dialog.Dialog>
 {/if}

@@ -1,6 +1,7 @@
 /// <reference types="@sveltejs/kit" />
 import { goto } from '$app/navigation';
 import { page } from '$app/state';
+import { base } from '$app/paths';
 import type { RouterProvider } from '@svadmin/core';
 
 export function createSvelteKitRouterProvider(): RouterProvider {
@@ -12,17 +13,20 @@ export function createSvelteKitRouterProvider(): RouterProvider {
         if (params) url += url.includes('?') ? `&${params}` : `?${params}`;
       }
       if (hash) {
-        url += url.includes('#') ? `&${hash}` : `#${hash}`;
+        url += `#${hash}`;
       }
       
-      if (type === 'replace') {
-        goto(url, { replaceState: true });
-      } else {
-        goto(url);
-      }
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }
+      const gotoPromise = type === 'replace'
+        ? goto(url, { replaceState: true })
+        : goto(url);
+      
+      gotoPromise.then(() => {
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }
+      }).catch((e) => {
+        console.error('[svadmin] SvelteKit navigation failed:', e);
+      });
     },
     back() {
       if (typeof window !== 'undefined') {
@@ -30,7 +34,8 @@ export function createSvelteKitRouterProvider(): RouterProvider {
       }
     },
     formatLink(path: string) {
-      return path.startsWith('/') ? path : `/${path}`;
+      const p = path.startsWith('/') ? path : `/${path}`;
+      return base + p;
     },
     parse() {
       let pathname = '/';

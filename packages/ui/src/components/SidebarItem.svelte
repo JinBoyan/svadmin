@@ -39,8 +39,7 @@
   function isActive(itemHref: string | undefined): boolean {
     if (!itemHref) return false;
     if (itemHref === '/') return currentPath === '/';
-    // Remove hash/leading slash for comparison if necessary, but currentPath usually starts with /
-    return currentPath.startsWith(itemHref);
+    return currentPath.startsWith(itemHref) && (currentPath.length === itemHref.length || currentPath[itemHref.length] === '/');
   }
 
   /** Check if any child (recursively) is active — used to auto-open parent groups */

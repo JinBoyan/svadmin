@@ -56,6 +56,14 @@ export function removeToast(id: number): void {
   toasts = toasts.filter(t => t.id !== id);
 }
 
+export function resetToast(): void {
+  for (const timer of undoableTimers.values()) clearTimeout(timer);
+  undoableTimers.clear();
+  queue = [];
+  promiseQueue = [];
+  toasts = [];
+}
+
 export const toast = {
   success: (msg: string, duration?: number, opts?: { key?: string }) => addToast('success', msg, duration, opts),
   error: (msg: string, duration?: number, opts?: { key?: string }) => addToast('error', msg, duration ?? 5000, opts),

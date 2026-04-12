@@ -51,7 +51,7 @@ export interface AccessControlProvider {
 
 // ─── State ────────────────────────────────────────────────────
 
-let provider: AccessControlProvider | null = null;
+let provider: AccessControlProvider | null = $state(null);
 
 // ─── API ──────────────────────────────────────────────────────
 

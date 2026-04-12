@@ -22,9 +22,10 @@
     fieldRenderer?: Snippet<[{ field: FieldDefinition; value: unknown; onchange: (v: unknown) => void }]>;
     formActions?: Snippet<[{ isLoading: boolean; onSubmit: () => void }]>;
     headerContent?: Snippet;
+    onSuccess?: () => void;
   }
 
-  let { resourceName, id, mode = 'create', fieldRenderer, formActions, headerContent }: Props = $props();
+  let { resourceName, id, mode = 'create', fieldRenderer, formActions, headerContent, onSuccess }: Props = $props();
   const isReadonly = $derived(mode === 'show');
 
   // ─── Resource metadata ────────────────────────────────────────────
@@ -104,6 +105,7 @@
     submitError = null;
     try {
       await form.submit();
+      onSuccess?.();
     } catch (e) {
       submitError = e instanceof Error ? e.message : t('common.operationFailed');
     }

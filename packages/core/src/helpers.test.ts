@@ -123,12 +123,12 @@ describe('unionSorters', () => {
     expect(result[0].field).toBe('name');
   });
 
-  test('permanent sorters are not duplicated', () => {
+  test('permanent sorters override new sorters on same field', () => {
     const permanent: Sort[] = [{ field: 'name', order: 'asc' }];
     const newSorters: Sort[] = [{ field: 'name', order: 'desc' }];
     const result = unionSorters(permanent, newSorters);
     expect(result).toHaveLength(1);
-    expect(result[0].order).toBe('desc');
+    expect(result[0].order).toBe('asc');
   });
 
   test('empty arrays', () => {

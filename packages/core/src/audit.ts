@@ -53,19 +53,20 @@ export function resetAuditLogProvider(): void {
 export function audit(entry: Omit<AuditEntry, 'timestamp'>): void {
   const fullEntry: AuditEntry = { ...entry, timestamp: new Date().toISOString() };
   try {
-    handler(fullEntry);
-
-    // Also log via provider if set
-    if (auditLogProvider) {
-      auditLogProvider.create({
-        resource: entry.resource ?? '',
-        action: entry.action,
-        data: entry.data ?? entry.details,
-        previousData: entry.previousData,
-        meta: entry.meta,
-      }).catch(e => console.error('[audit] provider create error:', e));
+    const result = handler(fullEntry);
+    if (result && typeof result === 'object' && 'then' in result) {
+      (result as Promise<void>).catch(e => console.error('[audit] handler error:', e));
     }
   } catch (e) {
     console.error('[audit] handler error:', e);
+  }
+  if (auditLogProvider) {
+    auditLogProvider.create({
+      resource: entry.resource ?? '',
+      action: entry.action,
+      data: entry.data ?? entry.details,
+      previousData: entry.previousData,
+      meta: entry.meta,
+    }).catch(e => console.error('[audit] provider create error:', e));
   }
 }

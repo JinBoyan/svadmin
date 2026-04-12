@@ -19,7 +19,7 @@
  * ```
  */
 
-import type { AccessControlProvider, CanParams, CanResult } from '../permissions';
+import type { AccessControlProvider, CanParams, CanResult } from '../permissions.svelte';
 
 /** CASL Ability interface (minimal, to avoid hard dependency on @casl/ability) */
 interface CaslAbility {

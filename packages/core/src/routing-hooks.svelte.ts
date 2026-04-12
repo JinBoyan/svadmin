@@ -39,7 +39,6 @@ export function useGetToPath() {
 
 export function useGo() {
   const getToPath = useGetToPath();
-  const routerProvider = getRouterProvider();
 
   return (options: { to?: string; query?: Record<string, unknown>; type?: 'push' | 'replace'; resource?: string; action?: 'list' | 'create' | 'edit' | 'show' | 'clone'; id?: string | number }) => {
     let targetUrl = options.to;
@@ -50,9 +49,12 @@ export function useGo() {
 
     if (options.query && Object.keys(options.query).length > 0) {
       const qs = new URLSearchParams(options.query as Record<string, string>).toString();
-      targetUrl += `?${qs}`;
+      if (qs) {
+        targetUrl += targetUrl.includes('?') ? `&${qs}` : `?${qs}`;
+      }
     }
 
+    const routerProvider = getRouterProvider();
     if (routerProvider?.go) {
       routerProvider.go({ to: targetUrl, type: options.type });
     } else {
@@ -62,8 +64,8 @@ export function useGo() {
 }
 
 export function useBack() {
-  const routerProvider = getRouterProvider();
   return () => {
+    const routerProvider = getRouterProvider();
     if (routerProvider?.back) {
       routerProvider.back();
     } else if (typeof window !== 'undefined') {
@@ -77,8 +79,10 @@ export function useBack() {
  * (to avoid full page reloads in SSR apps)
  */
 export function useLink() {
-  const routerProvider = getRouterProvider() as Record<string, unknown> | undefined;
-  return (routerProvider?.Link as string) ?? 'a';
+  return () => {
+    const routerProvider = getRouterProvider() as Record<string, unknown> | undefined;
+    return (routerProvider?.Link as string) ?? 'a';
+  };
 }
 
 export function useResource(resourceName?: string) {

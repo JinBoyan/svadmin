@@ -5,9 +5,13 @@ import type { DataProvider, AuthProvider, ResourceDefinition } from './types';
 import type { RouterProvider } from './router-provider';
 import { resetNotificationProvider } from './notification.svelte';
 import { resetAuditLogProvider } from './audit';
-import { resetAccessControlProvider } from './permissions';
+import { resetAccessControlProvider } from './permissions.svelte';
 import { resetAdminOptions } from './options.svelte';
 import { resetI18n } from './i18n.svelte';
+import { resetChatProvider } from './chatProvider.svelte';
+import { resetToast } from './toast.svelte';
+import { resetTheme } from './theme.svelte';
+import { resetRouter } from './router';
 
 // ─── DataProvider (supports single or multiple) ─────────────────
 
@@ -141,4 +145,8 @@ export function resetContext(): void {
   resetAccessControlProvider();
   resetAdminOptions();
   resetI18n();
+  resetChatProvider();
+  resetToast();
+  resetTheme();
+  resetRouter();
 }

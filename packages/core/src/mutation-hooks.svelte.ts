@@ -36,15 +36,18 @@ export function invalidateByScopes(
   resource: string,
   scopes: string[] | false | undefined,
   defaults: string[],
-  id?: string | number
+  id?: string | number,
+  dataProviderName?: string
 ): void {
   if (scopes === false) return;
   const effectiveScopes = (scopes && scopes.length > 0) ? scopes : defaults;
+  const dpMatch = dataProviderName ? (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dataProviderName : () => true;
   for (const scope of effectiveScopes) {
-    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
-    else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource && q.queryKey[2] === 'many' });
-    else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === id });
-    else if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === resource });
+    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
+    else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'many' });
+    else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === id });
+    else if (scope === 'detail' || scope === 'one') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' });
+    else if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource });
   }
 }
 
@@ -127,14 +130,14 @@ export function useCreate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       audit({ action: 'create', resource: resName, recordId: String(newId) });
       publishLiveEvent(resName, 'created', newId != null ? [newId as string | number] : undefined);
       // Invalidation in onSuccess for create (refine pattern — no optimistic data to reconcile on error)
-      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many']);
+      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many'], undefined, params.dataProviderName);
       if (typeof options.mutationOptions?.onSuccess === 'function') {
         (options.mutationOptions.onSuccess as Function)(data, params, context);
       }
     },
     onError: (error, params, context) => {
       checkError(error);
-      fireErrorNotification(params.errorNotification, 'Create failed', error);
+      fireErrorNotification(params.errorNotification, 'Create failed', error, params.resource ?? defaultResource);
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as Function)(error, params, context);
       }
@@ -270,7 +273,10 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
       const targetId = params.id ?? defaultId;
-      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many', 'detail'], targetId != null ? targetId : undefined);
+      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many', 'detail'], targetId != null ? targetId : undefined, params.dataProviderName);
+      if (typeof options.mutationOptions?.onSettled === 'function') {
+        (options.mutationOptions.onSettled as Function)(_data, error, params, undefined);
+      }
     },
     onError: (error, params, context: unknown) => {
       const ctx = context as MutationContext | undefined;
@@ -282,7 +288,7 @@ export function useUpdate<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       checkError(error);
       const extractedCtx = ctx?._svadmin_ctx ? ctx.userContext : context;
-      fireErrorNotification(params.errorNotification, 'Update failed', error);
+      fireErrorNotification(params.errorNotification, 'Update failed', error, params.resource ?? defaultResource);
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as Function)(error, params, extractedCtx);
       }
@@ -405,7 +411,10 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
     onSettled: (_data, error, params) => {
       if (error instanceof UndoError) return;
       const resName = params.resource ?? defaultResource;
-      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many']);
+      invalidateByScopes(queryClient, resName, params.invalidates, ['list', 'many'], undefined, params.dataProviderName);
+      if (typeof options.mutationOptions?.onSettled === 'function') {
+        (options.mutationOptions.onSettled as Function)(_data, error, params, undefined);
+      }
     },
     onError: (error, params, context: unknown) => {
       const ctx = context as MutationContext | undefined;
@@ -417,7 +426,7 @@ export function useDelete<TData extends BaseRecord = BaseRecord, TError = HttpEr
       if (error instanceof UndoError) return;
       checkError(error);
       const extractedCtx = ctx?._svadmin_ctx ? ctx.userContext : context;
-      fireErrorNotification(params.errorNotification, 'Delete failed', error);
+      fireErrorNotification(params.errorNotification, 'Delete failed', error, params.resource ?? defaultResource);
       if (typeof options.mutationOptions?.onError === 'function') {
         (options.mutationOptions.onError as Function)(error, params, extractedCtx);
       }

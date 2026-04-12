@@ -116,7 +116,7 @@ export function useList<TData extends BaseRecord = BaseRecord, TError = HttpErro
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error);
-      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
+      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error, getResource());
     }
   });
 
@@ -200,7 +200,7 @@ export function useOne<TData extends BaseRecord = BaseRecord, TError = HttpError
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error);
-      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
+      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error, getResource());
     }
   });
 
@@ -299,7 +299,7 @@ export function useMany<TData extends BaseRecord = BaseRecord, TError = HttpErro
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error);
-      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error);
+      fireErrorNotification(opts.errorNotification, 'Fetch failed', query.error, opts.resource);
     }
   });
 

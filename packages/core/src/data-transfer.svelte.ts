@@ -57,7 +57,11 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
 
       if (options.download !== false && typeof document !== 'undefined') {
         const fields = Object.keys(mapped[0]);
-        const escapeCsvField = (s: string) => s.includes(',') || s.includes('"') || s.includes('\n') || s.includes('\r') ? `"${s.replace(/"/g, '""')}"` : s;
+        const escapeCsvField = (s: string) => {
+          let val = s;
+          if (/^[=+\-@\t\r]/.test(val)) val = "'" + val;
+          return val.includes(',') || val.includes('"') || val.includes('\n') || val.includes('\r') ? `"${val.replace(/"/g, '""')}"` : val;
+        };
         const header = fields.map(escapeCsvField).join(',');
         const rows = mapped.map(record =>
           fields.map(f => {
@@ -74,7 +78,7 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
         a.href = url;
         a.download = `${resource}_export.csv`;
         a.click();
-        URL.revokeObjectURL(url);
+        setTimeout(() => URL.revokeObjectURL(url), 10000);
       }
 
       return allRecords;
@@ -126,7 +130,11 @@ export function useImport<TData = Record<string, unknown>>(options: UseImportOpt
       }
 
       const rows = parseCSV(text);
-      if (rows.length < 2) return;
+      if (rows.length < 2) {
+        mutationResult = { succeeded: [], errored: [] };
+        options.onFinish?.({ succeeded: [], errored: [] });
+        return;
+      }
 
       const headers = rows[0];
       const records: Record<string, unknown>[] = [];

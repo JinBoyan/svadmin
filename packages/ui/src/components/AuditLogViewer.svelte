@@ -23,7 +23,7 @@
   let drawerOpen = $state(false);
   let drawerLog = $state<AuditLog | null>(null);
 
-  let cancelled = $state(false);
+  let cancelled = false;
 
   async function loadLogs() {
     if (!authProvider?.getAuditLogs) {

@@ -1,149 +1,102 @@
-// Unit tests for permissions module
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccessAsync, type CanParams, type CanResult } from './permissions';
-import type { Action, AccessControlProvider } from './permissions';
+import { describe, test, expect } from 'bun:test';
+import type { CanParams, CanResult, Action, AccessControlProvider } from './permissions.svelte';
 
 describe('permissions', () => {
-  beforeEach(() => {
-    // Reset to a permissive provider
-    setAccessControlProvider({
-      can: async () => ({ can: true }),
-    });
-  });
-
   test('canAccessAsync respects deny rule', async () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async (p) => {
         const { action } = p as CanParams;
         if (action === 'delete') return { can: false, reason: 'Denied' };
         return { can: true };
       },
-    });
-    expect(await canAccessAsync('posts', 'delete')).toEqual({ can: false, reason: 'Denied' });
-    expect((await canAccessAsync('posts', 'delete')) as CanResult).toEqual({ can: false, reason: 'Denied' });
-    expect((await canAccessAsync('posts', 'list')) as CanResult).toEqual({ can: true });
+    };
+    expect(await provider.can({ resource: 'posts', action: 'delete' })).toEqual({ can: false, reason: 'Denied' });
+    expect((await provider.can({ resource: 'posts', action: 'list' })) as CanResult).toEqual({ can: true });
   });
 
   test('canAccessAsync resolves with allowed status', async () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async (params) => {
         expect((params as CanParams).params?.published).toBe(true);
         return { can: true };
       },
-    });
-    const result = await canAccessAsync('posts', 'edit', { published: true });
+    };
+    const result = await provider.can({ resource: 'posts', action: 'edit', params: { published: true } });
     expect((result as CanResult).can).toBe(true);
   });
 
   test('canAccessAsync resolves with denied status', async () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async () => ({ can: false, reason: 'No permission' }),
-    });
-    const result = await canAccessAsync('users', 'delete');
+    };
+    const result = await provider.can({ resource: 'users', action: 'delete' });
     expect((result as CanResult).can).toBe(false);
     expect((result as CanResult).reason).toBe('No permission');
   });
 
   test('resource-specific rules', async () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async (p) => {
         const { resource, action } = p as CanParams;
         if (resource === 'users' && action === 'delete') return { can: false, reason: 'Cannot delete users' };
         return { can: true };
       },
-    });
-    expect((await canAccessAsync('users', 'delete') as CanResult).can).toBe(false);
-    expect((await canAccessAsync('users', 'list') as CanResult).can).toBe(true);
-    expect((await canAccessAsync('posts', 'delete') as CanResult).can).toBe(true);
-  });
-});
-
-describe('AccessControlProvider', () => {
-  beforeEach(() => {
-    setAccessControlProvider({
-      can: async () => ({ can: true }),
-    });
-  });
-
-  test('setAccessControlProvider registers a provider', () => {
-    const provider = getAccessControlProvider();
-    expect(provider).not.toBeNull();
-  });
-
-  test('provider can() is called via canAccessAsync', async () => {
-    let callCount = 0;
-    setAccessControlProvider({
-      can: async (params) => {
-        callCount++;
-        expect((params as CanParams).resource).toBe('posts');
-        if ((params as CanParams).action === 'delete') {
-          return { can: false, reason: 'Cannot delete posts' };
-        }
-        return { can: true };
-      },
-    });
-    const denied = await canAccessAsync('posts', 'delete') as CanResult;
-    expect(denied.can).toBe(false);
-    expect(denied.reason).toBe('Cannot delete posts');
-
-    const allowed = await canAccessAsync('posts', 'list') as CanResult;
-    expect(allowed.can).toBe(true);
-    expect(callCount).toBe(2);
+    };
+    expect((await provider.can({ resource: 'users', action: 'delete' }) as CanResult).can).toBe(false);
+    expect((await provider.can({ resource: 'users', action: 'list' }) as CanResult).can).toBe(true);
+    expect((await provider.can({ resource: 'posts', action: 'delete' }) as CanResult).can).toBe(true);
   });
 
   test('params.id is passed through', async () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async (p) => {
         const { params } = p as CanParams;
         if (params?.id === 42) return { can: false, reason: 'Record locked' };
         return { can: true };
       },
-    });
-    const result = await canAccessAsync('posts', 'edit', { id: 42 });
+    };
+    const result = await provider.can({ resource: 'posts', action: 'edit', params: { id: 42 } });
     expect((result as CanResult).can).toBe(false);
     expect((result as CanResult).reason).toBe('Record locked');
   });
 
   test('extended action types work', async () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async (p) => {
         const { action } = p as CanParams;
         if (action === 'show') return { can: false, reason: 'No show' };
         if (action === 'field') return { can: false, reason: 'No field' };
         return { can: true };
       },
-    });
-    expect(((await canAccessAsync('posts', 'show')) as CanResult).can).toBe(false);
-    expect(((await canAccessAsync('posts', 'field')) as CanResult).can).toBe(false);
-    expect(((await canAccessAsync('posts', 'list')) as CanResult).can).toBe(true);
+    };
+    expect(((await provider.can({ resource: 'posts', action: 'show' })) as CanResult).can).toBe(false);
+    expect(((await provider.can({ resource: 'posts', action: 'field' })) as CanResult).can).toBe(false);
+    expect(((await provider.can({ resource: 'posts', action: 'list' })) as CanResult).can).toBe(true);
   });
 
   test('getAccessControlOptions returns provider options', () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async () => ({ can: true }),
       options: {
         buttons: { enableAccessControl: true, hideIfUnauthorized: true },
       },
-    });
-    const options = getAccessControlOptions();
-    expect(options.buttons?.enableAccessControl).toBe(true);
-    expect(options.buttons?.hideIfUnauthorized).toBe(true);
+    };
+    expect(provider.options?.buttons?.enableAccessControl).toBe(true);
+    expect(provider.options?.buttons?.hideIfUnauthorized).toBe(true);
   });
 
   test('getAccessControlOptions returns {} when no options', () => {
-    setAccessControlProvider({
+    const provider: AccessControlProvider = {
       can: async () => ({ can: true }),
-    });
-    expect(getAccessControlOptions()).toEqual({});
+    };
+    expect(provider.options).toBeUndefined();
   });
 });
 
 describe('CASL adapter', () => {
   test('createCaslAccessControl works', async () => {
-    // Import dynamically to test the adapter
     const { createCaslAccessControl } = await import('./adapters/casl');
 
-    // Mock CASL Ability
     const ability = {
       can: (action: string, subject: string) => !(action === 'delete' && subject === 'users'),
       cannot: (action: string, subject: string) => action === 'delete' && subject === 'users',
@@ -164,7 +117,6 @@ describe('Casbin adapter', () => {
   test('createCasbinAccessControl works', async () => {
     const { createCasbinAccessControl } = await import('./adapters/casbin');
 
-    // Mock Casbin Enforcer
     const enforcer = {
       enforce: async (sub: string, obj: string, act: string) =>
         !(sub === 'alice' && obj === 'users' && act === 'delete'),

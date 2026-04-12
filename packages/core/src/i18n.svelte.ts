@@ -507,6 +507,8 @@ let locales = $state<Record<string, Record<string, string>>>({
   },
 });
 
+const initialLocales = locales;
+
 /** Detect best locale from browser language */
 function detectLocale(): string {
   if (typeof navigator === 'undefined') return 'en';
@@ -552,6 +554,7 @@ export function addTranslations(locale: string, translations: Record<string, str
 
 export function resetI18n(): void {
   currentLocale = detectLocale();
+  locales = initialLocales;
 }
 
 /**

@@ -125,6 +125,10 @@ export function deriveValidator(
         case 'number': {
           if (typeof value === 'string' && isNaN(Number(value))) {
             errors[field.key] = t('validation.invalidNumber');
+          } else if (typeof value === 'number' && isNaN(value)) {
+            errors[field.key] = t('validation.invalidNumber');
+          } else if (typeof value !== 'string' && typeof value !== 'number') {
+            errors[field.key] = t('validation.invalidNumber');
           }
           break;
         }

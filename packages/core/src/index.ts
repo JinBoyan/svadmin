@@ -27,19 +27,19 @@ export {
   useNotification, useDataProvider,
   useMenu, useBreadcrumb, useThemedLayoutContext,
 } from './hooks.svelte';
-export { matchRoute, navigate, currentPath, setActiveRouterProvider, beforeEach, afterEach } from './router';
+export { matchRoute, navigate, currentPath, setActiveRouterProvider, beforeEach, afterEach, resetRouter } from './router';
 export type { RouteGuard } from './router';
 export { readURLState, writeURLState } from './url-sync';
-export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccessAsync } from './permissions';
+export { setAccessControlProvider, getAccessControlProvider, getAccessControlOptions, canAccessAsync } from './permissions.svelte';
 export { useLive, useSubscription, usePublish } from './live.svelte';
-export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue } from './toast.svelte';
+export { toast, getToastQueue, consumeToastQueue, getPromiseQueue, consumePromiseQueue, resetToast } from './toast.svelte';
 export { notify, closeNotification, setNotificationProvider, getNotificationProvider } from './notification.svelte';
 export { t, setLocale, getLocale, getAvailableLocales, addTranslations, useTranslation } from './i18n.svelte';
 export { audit, setAuditHandler, setAuditLogProvider, getAuditLogProvider } from './audit';
 export type { AuditLogProvider } from './audit';
-export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals } from './chatProvider.svelte';
+export { setChatProvider, getChatProvider, setChatContext, getChatContext, setAgentProvider, getAgentProvider, registerApproval, resolveApproval, hasPendingApprovals, resetChatProvider } from './chatProvider.svelte';
 export type { ChatProvider, ChatMessage, ChatContext, ChatAction, AgentProvider, AgentEvent, AgentOptions, AdminTool, AdminToolParameter, ToolResult } from './chatProvider.svelte';
-export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets } from './theme.svelte';
+export { getTheme, setTheme, toggleTheme, getResolvedTheme, getColorTheme, setColorTheme, getColorThemes, configureTheme, getThemeConfig, clearCssOverrides, builtinPresets, registerColorPreset, getColorPresets, resetTheme } from './theme.svelte';
 export type { ThemeMode, ColorTheme, ThemeStrategy, ThemeConfig, ColorPreset } from './theme.svelte';
 export { setUnsavedChanges, getUnsavedChanges, initUnsavedChangesNotifier } from './unsaved-changes.svelte';
 export { setAdminOptions, getAdminOptions, getTextTransformers } from './options.svelte';
@@ -70,7 +70,7 @@ export type {
 } from './types';
 export type { InvalidateScope } from './options.svelte';
 export type { LiveProvider, LiveEvent, LiveMode } from './live.svelte';
-export type { Action, CanParams, CanResult, AccessControlProvider } from './permissions';
+export type { Action, CanParams, CanResult, AccessControlProvider } from './permissions.svelte';
 export type { AuditEntry, AuditHandler } from './audit';
 export { useCan } from './useCan';
 export type { UseCanOptions, UseCanResult } from './useCan';

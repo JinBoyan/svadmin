@@ -15,7 +15,7 @@
 
   const resource = $derived(getResource(resourceName));
 
-  function handleClose() {
+  function handleSuccess() {
     open = false;
     onSuccess?.();
   }
@@ -29,7 +29,7 @@
       </Sheet.Title>
     </Sheet.Header>
     <div class="flex-1 overflow-y-auto">
-      <AutoForm {resourceName} {mode} {id} />
+      <AutoForm {resourceName} {mode} {id} onSuccess={handleSuccess} />
     </div>
   </Sheet.Content>
 </Sheet.Root>

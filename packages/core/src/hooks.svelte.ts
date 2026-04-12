@@ -103,7 +103,7 @@ export function useInfiniteList<TData extends BaseRecord = BaseRecord, TError = 
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error);
-      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error);
+      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error, options.resource ?? parsed.resource ?? '');
     }
   });
 
@@ -206,7 +206,7 @@ export function useSelect<TData extends BaseRecord = BaseRecord, TOption = { lab
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error);
-      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error);
+      fireErrorNotification(options.errorNotification, 'Fetch failed', query.error, resource);
     }
   });
 
@@ -278,7 +278,7 @@ export function useCustom<TData = unknown, TError = HttpError>(options: UseCusto
     } else if (query.isError && query.errorUpdatedAt > lastErrorAt) {
       lastErrorAt = query.errorUpdatedAt;
       checkError(query.error);
-      fireErrorNotification(options.errorNotification, 'Custom request failed', query.error);
+      fireErrorNotification(options.errorNotification, 'Custom request failed', query.error, '');
     }
   });
 
@@ -337,7 +337,7 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onError: (error, params) => {
       checkError(error);
-      fireErrorNotification(undefined, 'Create many failed', error);
+      fireErrorNotification(undefined, 'Create many failed', error, params.resource ?? resource);
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
@@ -374,7 +374,7 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onError: (error, params) => {
       checkError(error);
-      fireErrorNotification(undefined, 'Update many failed', error);
+      fireErrorNotification(undefined, 'Update many failed', error, params.resource ?? resource);
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
@@ -414,7 +414,7 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
     onError: (error, params) => {
       checkError(error);
-      fireErrorNotification(undefined, 'Delete many failed', error);
+      fireErrorNotification(undefined, 'Delete many failed', error, params.resource ?? resource);
     },
     onSettled: (_d, _e, params) => {
       const resName = params.resource ?? resource;
@@ -443,7 +443,7 @@ export function useInvalidate() {
     for (const scope of scopes) {
       if (scope === 'resourceAll') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res });
       else if ((scope === 'detail' || scope === 'one') && params.id) queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'one' && q.queryKey[3] === params.id });
-      else if (scope === 'one') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'one' });
+      else if (scope === 'detail' || scope === 'one') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'one' });
       else if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
       else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => q.queryKey[1] === res && q.queryKey[2] === 'many' });
     }

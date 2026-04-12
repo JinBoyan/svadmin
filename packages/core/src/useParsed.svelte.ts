@@ -12,12 +12,14 @@ interface ParsedRoute {
 }
 
 let globalPath = $state('/');
+let _listenersInitialized = false;
 if (typeof window !== 'undefined') {
-  // Initialize
   globalPath = currentPath();
-  // Listen to navigation events
-  window.addEventListener('hashchange', () => { globalPath = currentPath(); });
-  window.addEventListener('popstate', () => { globalPath = currentPath(); });
+  if (!_listenersInitialized) {
+    _listenersInitialized = true;
+    window.addEventListener('hashchange', () => { globalPath = currentPath(); });
+    window.addEventListener('popstate', () => { globalPath = currentPath(); });
+  }
 }
 
 /**

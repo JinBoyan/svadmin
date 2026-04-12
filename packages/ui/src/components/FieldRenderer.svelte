@@ -30,11 +30,16 @@
 
   // Typed accessors
   const strVal = $derived((value as string) ?? '');
-  const numVal = $derived((value as number) ?? 0);
+  const numVal = $derived(value as number | null | undefined);
   const boolVal = $derived((value as boolean) ?? false);
   const tagsVal = $derived((value as string[]) ?? []);
   const multiVal = $derived((value as (string | number)[]) ?? []);
   const imagesVal = $derived((value as string[]) ?? []);
+  let jsonEditText = $state('');
+
+  $effect(() => {
+    jsonEditText = typeof value === 'string' ? String(value) : JSON.stringify(value, null, 2);
+  });
 
   function handleTagKeydown(e: KeyboardEvent) {
     if (e.key === 'Enter') {
@@ -165,7 +170,7 @@
     <Input
       id={field.key}
       type="number"
-      value={String(numVal)}
+      value={numVal == null ? '' : String(numVal)}
       oninput={(e) => {
         const v = (e.target as HTMLInputElement).value;
         onchange(v === '' ? null : Number(v));
@@ -359,10 +364,12 @@
   {:else if field.type === 'json'}
     <Textarea
       id={field.key}
-      value={typeof value === 'string' ? strVal : JSON.stringify(value, null, 2)}
+      value={jsonEditText}
       oninput={(e) => {
+        const raw = (e.target as HTMLTextAreaElement).value;
+        jsonEditText = raw;
         try {
-          onchange(JSON.parse((e.target as HTMLTextAreaElement).value));
+          onchange(JSON.parse(raw));
         } catch {
           // keep raw text until valid JSON
         }

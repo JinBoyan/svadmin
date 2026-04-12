@@ -12,7 +12,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const URL_RE = /^https?:\/\//;
 const IMAGE_RE = /\.(png|jpe?g|gif|svg|webp|avif|ico)(\?.*)?$/i;
 const PHONE_RE = /^\+?[\d\s\-()]{7,}$/;
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})/;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2})?/;
 const COLOR_RE = /^#([0-9a-fA-F]{3,8})$/;
 
 type InferredType = FieldDefinition['type'];
@@ -31,7 +31,8 @@ export function inferFieldType(key: string, value: unknown): InferredType {
       if (value.every(v => typeof v === 'string' && IMAGE_RE.test(v))) return 'images';
       return 'tags';
     }
-    return 'tags';
+    if (value.length > 0 && typeof value[0] === 'number') return 'tags';
+    return 'json';
   }
 
   if (typeof value === 'object') return 'json';
@@ -53,7 +54,7 @@ export function inferFieldType(key: string, value: unknown): InferredType {
     if (lk.includes('avatar') || lk.includes('image') || lk.includes('photo') || lk.includes('thumbnail') || lk.includes('logo')) return 'image';
     if (lk.includes('color') || lk.includes('colour')) return 'color';
     if (lk.includes('description') || lk.includes('content') || lk.includes('body') || lk.includes('bio') || lk.includes('summary')) return 'textarea';
-    if (lk === 'created_at' || lk === 'updated_at' || lk.endsWith('_at') || lk.endsWith('_date') || lk.includes('date')) return 'date';
+    if (lk === 'created_at' || lk === 'updated_at' || lk.endsWith('_at') || lk.endsWith('_date') || /\bdate\b/.test(lk)) return 'date';
 
     return 'text';
   }
@@ -196,9 +197,10 @@ export function inferResource(
 // ─── Code Generation ─────────────────────────────────────────
 
 function generateCode(resource: ResourceDefinition): string {
+  const esc = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
   const fieldsCode = resource.fields.map(f => {
     const lines = [
-      `    { key: '${f.key}', label: '${f.label}', type: '${f.type}'`,
+      `    { key: '${esc(f.key)}', label: '${esc(f.label)}', type: '${f.type}'`,
     ];
     if (f.sortable) lines.push(`      sortable: true`);
     if (f.searchable) lines.push(`      searchable: true`);

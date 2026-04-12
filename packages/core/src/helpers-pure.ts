@@ -83,7 +83,10 @@ export function unionSorters(
   const result = [...newSorters];
 
   for (const perm of permanentSorters) {
-    if (!result.some((s) => s.field === perm.field)) {
+    const idx = result.findIndex((s) => s.field === perm.field);
+    if (idx >= 0) {
+      result[idx] = perm;
+    } else {
       result.push(perm);
     }
   }

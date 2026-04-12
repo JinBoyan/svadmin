@@ -424,6 +424,7 @@ export function useForm<
   // ─── AutoSave ───────────────────────────────────────────────────
   let autoSaveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
   let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  let autoSaveInProgress = $state(false);
   let lastAutoSaveData = $state<unknown>(null);
   let lastAutoSaveError = $state<unknown>(null);
 
@@ -441,8 +442,10 @@ export function useForm<
 
     const safeId = currentId;
     autoSaveTimer = setTimeout(async () => {
+      if (autoSaveInProgress || createMut.isPending || updateMut.isPending) return;
       const finalValues = autoSaveOpts.onFinish ? autoSaveOpts.onFinish(values) : values;
       autoSaveStatus = 'saving';
+      autoSaveInProgress = true;
       try {
         await provider.update<TData, TVariables>({ resource, id: safeId as string | number, variables: finalValues, meta: mutationMeta });
         const scopes = autoSaveOpts.invalidates ?? ['resourceAll'];
@@ -455,6 +458,8 @@ export function useForm<
         autoSaveStatus = 'error';
         lastAutoSaveError = e;
         checkError(e);
+      } finally {
+        autoSaveInProgress = false;
       }
     }, autoSaveOpts.debounce ?? 1000);
   }

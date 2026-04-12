@@ -248,15 +248,19 @@ let themeConfig: ThemeConfig = {};
  * automatically via AdminApp's themeConfig prop.
  */
 export function configureTheme(config: ThemeConfig): void {
-  themeConfig = { ...config };
-  // Re-apply the current theme with new strategy
+  themeConfig = { ...themeConfig, ...config };
   applyTheme(mode);
-  // Apply color preset first (lower priority)
   if (config.colorPreset) {
     const preset = resolvePreset(config.colorPreset);
-    if (preset) applyColorPreset(preset);
+    if (preset) {
+      colorTheme = preset.name as ColorTheme;
+      if (typeof window !== 'undefined') {
+        try { localStorage.setItem(COLOR_STORAGE_KEY, preset.name); } catch {}
+      }
+      applyColorTheme(preset.name as ColorTheme);
+      applyColorPreset(preset);
+    }
   }
-  // Then apply manual CSS overrides (higher priority)
   if (config.cssOverrides) {
     applyCssOverrides(config.cssOverrides);
   }
@@ -415,7 +419,22 @@ export function setColorTheme(ct: ColorTheme): void {
     try { localStorage.setItem(COLOR_STORAGE_KEY, ct); } catch {}
   }
   applyColorTheme(ct);
-  // Apply the preset's CSS variable overrides for the current resolved theme
   const preset = builtinPresets[ct];
+  if (preset) applyColorPreset(preset);
+}
+
+export function resetTheme(): void {
+  mode = getStoredTheme();
+  colorTheme = getStoredColorTheme();
+  themeConfig = {};
+  if (typeof document !== 'undefined') {
+    for (const key of activePresetVars) {
+      document.documentElement.style.removeProperty(key);
+    }
+  }
+  activePresetVars = [];
+  applyTheme(mode);
+  applyColorTheme(colorTheme);
+  const preset = builtinPresets[colorTheme];
   if (preset) applyColorPreset(preset);
 }

@@ -148,13 +148,12 @@ export interface AgentOptions {
  * ```
  */
 export interface AgentProvider {
-  /** Available tools the agent can invoke */
   tools?: AdminTool[];
-  /** Send messages and receive a stream of typed agent events */
   chat(
     messages: ChatMessage[],
     options?: AgentOptions,
   ): AsyncGenerator<AgentEvent, void, unknown>;
+  approveToolCall?(id: string, approved: boolean): void;
 }
 
 // ─── Chat Provider singleton ───────────────────────────────────
@@ -190,14 +189,22 @@ interface ApprovalEntry { id: string; callback: ApprovalCallback }
 let pendingApprovals = $state<ApprovalEntry[]>([]);
 
 export function registerApproval(id: string, callback: ApprovalCallback): void {
+  if (pendingApprovals.some(e => e.id === id)) return;
   pendingApprovals = [...pendingApprovals, { id, callback }];
 }
 
 export function resolveApproval(id: string, approved: boolean): boolean {
   const entry = pendingApprovals.find(e => e.id === id);
   if (!entry) return false;
-  entry.callback(approved);
   pendingApprovals = pendingApprovals.filter(e => e.id !== id);
+  try {
+    const result: unknown = entry.callback(approved);
+    if (result && typeof result === 'object' && 'then' in result) {
+      (result as Promise<unknown>).catch((err) => console.error('[svadmin] Approval callback error:', err));
+    }
+  } catch (err) {
+    console.error('[svadmin] Approval callback error:', err);
+  }
   return true;
 }
 
@@ -215,4 +222,14 @@ export function setChatContext(ctx: ChatContext): void {
 
 export function getChatContext(): ChatContext {
   return chatContext;
+}
+
+export function resetChatProvider(): void {
+  chatProvider = null;
+  agentProvider = null;
+  for (const entry of pendingApprovals) {
+    try { entry.callback(false); } catch { /* noop */ }
+  }
+  pendingApprovals = [];
+  chatContext = {};
 }

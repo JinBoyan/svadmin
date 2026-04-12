@@ -182,6 +182,7 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
 
   setSorters(newSorters: Sort[]) {
     this.currentSorters = newSorters;
+    this.pagination = { ...this.pagination, current: 1 };
   }
 
   toggleSort(field: string) {
@@ -193,6 +194,7 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
     } else {
       this.currentSorters = [];
     }
+    this.pagination = { ...this.pagination, current: 1 };
   }
 
   setFilters(newFilters: Filter[], mode?: FilterSetMode) {
@@ -221,25 +223,28 @@ export class TableState<TData extends BaseRecord = BaseRecord, TError = HttpErro
     this.pagination = { ...this.pagination, current: 1 };
   }
 
-  /** For client-side pagination mode */
   get clientData(): TData[] {
-    if (this.paginationMode !== 'client') return [];
+    if (this.paginationMode === 'server') return [];
     const allData = this.data;
-    const start = (this.current - 1) * this.pageSize;
-    const end = start + this.pageSize;
     let sorted = [...allData];
-    const activeSorters = this.sortersMode === 'off' ? this.effectiveSorters : this.currentSorters;
+    const activeSorters = this.sortersMode === 'off' ? this.effectiveSorters : [];
     if (activeSorters.length > 0) {
-      const { field, order } = activeSorters[0];
       sorted.sort((a, b) => {
-        const va = (a as Record<string, unknown>)[field];
-        const vb = (b as Record<string, unknown>)[field];
-        if (va == null) return 1;
-        if (vb == null) return -1;
-        const cmp = va < vb ? -1 : va > vb ? 1 : 0;
-        return order === 'desc' ? -cmp : cmp;
+        for (const { field, order } of activeSorters) {
+          const va = (a as Record<string, unknown>)[field];
+          const vb = (b as Record<string, unknown>)[field];
+          if (va == null && vb == null) continue;
+          if (va == null) return 1;
+          if (vb == null) return -1;
+          const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+          if (cmp !== 0) return order === 'desc' ? -cmp : cmp;
+        }
+        return 0;
       });
     }
+    if (this.paginationMode === 'off') return sorted;
+    const start = (this.current - 1) * this.pageSize;
+    const end = start + this.pageSize;
     return sorted.slice(start, end);
   }
 }

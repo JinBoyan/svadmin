@@ -52,9 +52,13 @@
 
   async function handleLogout() {
     if (!auth) return;
-    const result = await auth.logout();
-    if (result.success) {
-      navigate(result.redirectTo ?? '/login');
+    try {
+      const result = await auth.logout();
+      if (result.success) {
+        navigate(result.redirectTo ?? '/login');
+      }
+    } catch {
+      navigate('/login');
     }
   }
 

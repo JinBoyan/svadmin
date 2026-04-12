@@ -18,7 +18,7 @@
  * ```
  */
 
-import type { AccessControlProvider, CanParams, CanResult } from '../permissions';
+import type { AccessControlProvider, CanParams, CanResult } from '../permissions.svelte';
 
 /** Casbin Enforcer interface (minimal, to avoid hard dependency on casbin) */
 interface CasbinEnforcer {

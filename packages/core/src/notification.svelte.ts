@@ -26,13 +26,13 @@ export function notify(params: {
   if (notificationProvider) {
     notificationProvider.open(params);
   } else {
-    // Fallback to built-in toast
-    const { type, message } = params;
+    const { type, message, description } = params;
+    const fullMessage = description ? `${message}: ${description}` : message;
     switch (type) {
-      case 'success': toast.success(message, undefined, { key: params.key }); break;
-      case 'error': toast.error(message, undefined, { key: params.key }); break;
-      case 'warning': toast.warning(message, undefined, { key: params.key }); break;
-      case 'info': toast.info(message, undefined, { key: params.key }); break;
+      case 'success': toast.success(fullMessage, undefined, { key: params.key }); break;
+      case 'error': toast.error(fullMessage, undefined, { key: params.key }); break;
+      case 'warning': toast.warning(fullMessage, undefined, { key: params.key }); break;
+      case 'info': toast.info(fullMessage, undefined, { key: params.key }); break;
     }
   }
 }

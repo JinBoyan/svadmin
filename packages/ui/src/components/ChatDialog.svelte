@@ -91,7 +91,6 @@
   let persistTimer: ReturnType<typeof setTimeout> | null = null;
 
   $effect(() => {
-    // Access `messages` to subscribe to changes
     const snapshot = messages;
     if (!initialized) return;
 
@@ -108,7 +107,20 @@
       }
     }, 300);
 
-    return () => { if (persistTimer) clearTimeout(persistTimer); };
+    return () => {
+      if (persistTimer) {
+        clearTimeout(persistTimer);
+        if (onPersist) {
+          onPersist(snapshot);
+        } else if (persistKey) {
+          try {
+            localStorage.setItem(persistKey, JSON.stringify(snapshot));
+          } catch {
+            // storage full or unavailable
+          }
+        }
+      }
+    };
   });
 
   function genId(): string {
@@ -216,7 +228,6 @@
               break;
 
             case 'approval_request': {
-              // Register in the core approval system
               const reqId = event.id;
               pendingApprovalIds = [...pendingApprovalIds, reqId];
               
@@ -227,7 +238,9 @@
                   content: approved ? `User approved execution of tool '${event.tool}'` : `User rejected execution of tool '${event.tool}'`,
                   timestamp: Date.now()
                 }];
-                doSend();
+                if (agent?.approveToolCall) {
+                  agent.approveToolCall(reqId, approved);
+                }
               });
 
               collectedActions.push(
@@ -359,12 +372,22 @@
 
   /** Simple markdown→html: bold, italic, code blocks, inline code, line breaks */
   function renderMarkdown(text: string): string {
-    return escapeHtml(text)
-      .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="chat-code-block"><code>$2</code></pre>')
+    const escaped = escapeHtml(text);
+    const codeBlocks: string[] = [];
+    let processed = escaped.replace(/```(\w*)\n([\s\S]*?)```/g, (_, lang, code) => {
+      const idx = codeBlocks.length;
+      codeBlocks.push(`<pre class="chat-code-block"><code>${code}</code></pre>`);
+      return `\x00CODEBLOCK${idx}\x00`;
+    });
+    processed = processed
       .replace(/`([^`]+)`/g, '<code class="chat-inline-code">$1</code>')
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
       .replace(/\n/g, '<br>');
+    for (let i = 0; i < codeBlocks.length; i++) {
+      processed = processed.replace(`\x00CODEBLOCK${i}\x00`, codeBlocks[i]);
+    }
+    return processed;
   }
 
   const suggestions = $derived([

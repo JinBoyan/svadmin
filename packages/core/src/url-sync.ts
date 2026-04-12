@@ -1,5 +1,6 @@
 import type { Filter } from './types';
 import { getRouterProvider } from './context.svelte';
+import { getAdminOptions } from './options.svelte';
 
 export interface URLState {
   page?: number;
@@ -57,7 +58,7 @@ export function writeURLState(state: URLState): void {
   }
 
   if ('pageSize' in state) {
-    if (state.pageSize && state.pageSize !== 10) params['pageSize'] = String(state.pageSize);
+    if (state.pageSize && state.pageSize !== (getAdminOptions().defaultPageSize ?? 10)) params['pageSize'] = String(state.pageSize);
     else delete params['pageSize'];
   }
 

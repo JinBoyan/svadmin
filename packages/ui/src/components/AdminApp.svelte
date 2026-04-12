@@ -91,8 +91,8 @@
 
   setComponentRegistry({ ...defaultComponents, ...userComponents });
 
-  // Resolve router provider (default to hash)
-  const resolvedRouter = $derived(routerProvider ?? createHashRouterProvider());
+  const defaultRouter = createHashRouterProvider();
+  const resolvedRouter = $derived(routerProvider ?? defaultRouter);
   const resolvedRouteMode = $derived(routeMode ?? (routerProvider ? 'auto' : 'hash'));
 
   // Set up context — use $effect.pre so prop changes are tracked and children can access during first render

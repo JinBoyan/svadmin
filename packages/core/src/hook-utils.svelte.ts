@@ -14,8 +14,9 @@ export async function checkError(error: unknown): Promise<void> {
     const authProvider = getAuthProvider({ optional: true });
     if (!authProvider?.onError) return;
     const result = await authProvider.onError(error);
+    if (!result) return;
     if (result.logout) {
-      await authProvider.logout?.();
+      try { await authProvider.logout?.(); } catch { /* logout failure should not block redirect */ }
       const { navigate } = await import('./router');
       navigate(result.redirectTo ?? '/login');
     } else if (result.redirectTo) {
@@ -128,11 +129,12 @@ export function fireErrorNotification(
   config: NotificationConfig,
   defaultMessage: string,
   error?: unknown,
+  resource?: string,
 ): void {
   if (config === false) return;
   if (!config && !defaultMessage) return;
   if (typeof config === 'function') {
-    const result = config(error);
+    const result = config(error, undefined, resource);
     notify({ type: 'error', message: result.message, description: result.description });
     return;
   }

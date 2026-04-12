@@ -229,11 +229,13 @@ export function inferFromOpenAPI(
     });
 
     // Check path-based CRUD capabilities
-    const pathInfo = resourcePaths.get(schemaName.toLowerCase()) ??
-                     resourcePaths.get(schemaName.toLowerCase() + 's');
+    const baseName = schemaName.toLowerCase();
+    const resourceName = baseName.endsWith('s') ? baseName : baseName + 's';
+    const pathInfo = resourcePaths.get(baseName) ??
+                     resourcePaths.get(resourceName);
 
     resources.push({
-      name: schemaName.toLowerCase() + 's',
+      name: resourceName,
       label: schemaName,
       primaryKey,
       fields,
