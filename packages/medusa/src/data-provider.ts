@@ -1,5 +1,5 @@
 import type { DataProvider } from '@svadmin/core';
-// Dynamic import used for createRefineAdapter to avoid Vite plugin errors
+import { createRefineAdapter } from '@svadmin/refine-adapter';
 
 
 /**
@@ -15,6 +15,5 @@ export async function createMedusaDataProvider(...args: any[]): Promise<DataProv
   const pkg = await import('@refinedev/medusa');
   const init = (pkg as any).default || (pkg as any).dataProvider || (pkg as any).DataProvider;
   const refineProvider = init(...args);
-  const { createRefineAdapter } = await import('@svadmin/refine-adapter');
   return createRefineAdapter(refineProvider);
 }
