@@ -76,7 +76,7 @@ describe('useForm - Headless Svelte 5 Compatibility', () => {
     flushSync();
 
     expect(form!.mutation).toBeDefined();
-    expect(form!.mutation.isPending).toBeDefined();
+    expect((form!.mutation as any).isPending).toBeDefined();
 
     cleanup();
   });

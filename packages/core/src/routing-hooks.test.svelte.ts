@@ -21,7 +21,7 @@ vi.mock('./useParsed.svelte', () => ({
 describe('routing-hooks - Headless Svelte 5 Compatibility', () => {
 
   it('safely extracts parses from url and binds to runes Context', () => {
-    let parsedParams: ReturnType<typeof useParsed>;
+    let parsedParams!: ReturnType<typeof useParsed>;
 
     const cleanup = $effect.root(() => {
         parsedParams = useParsed();
@@ -37,8 +37,8 @@ describe('routing-hooks - Headless Svelte 5 Compatibility', () => {
   });
 
   it('useGo and useBack return functional closures out of Context', () => {
-    let go: ReturnType<typeof useGo>;
-    let back: ReturnType<typeof useBack>;
+    let go!: ReturnType<typeof useGo>;
+    let back!: ReturnType<typeof useBack>;
     
     const cleanup = $effect.root(() => {
         go = useGo();

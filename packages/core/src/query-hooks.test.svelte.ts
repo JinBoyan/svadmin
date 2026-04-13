@@ -58,7 +58,7 @@ describe('useList & useOne - Headless Svelte 5 Compatibility', () => {
     flushSync();
     
     expect(oneQuery!.data).toBeDefined();
-    expect(oneQuery!.data!.title).toBe('One');
+    expect((oneQuery!.data!.data as any).title).toBe('One');
 
     cleanup();
   });
