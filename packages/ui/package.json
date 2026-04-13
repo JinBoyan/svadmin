@@ -7,7 +7,8 @@
     "./src/app.css"
   ],
   "files": [
-    "dist"
+    "dist",
+    "src/app.css"
   ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,7 +20,7 @@
     },
     "./app.css": {
       "svelte": "./src/app.css",
-      "style": "./dist/app.css",
+      "style": "./src/app.css",
       "default": "./dist/app.css"
     },
     "./components/*": "./dist/components/*"
