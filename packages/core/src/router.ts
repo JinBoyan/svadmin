@@ -1,8 +1,11 @@
 // Router — path matching + navigation (supports hash & history via RouterProvider)
 
 import type { RouterProvider } from './router-provider';
-import { syncGlobalPath } from './useParsed.svelte';
 
+let _syncGlobalPath: () => void = () => {};
+export function registerRouterSync(fn: () => void) {
+  _syncGlobalPath = fn;
+}
 interface RouteMatch {
   route: string;
   params: Record<string, string>;
@@ -75,7 +78,7 @@ export async function navigate(path: string, options?: { replaceState?: boolean 
   } else if (typeof window !== 'undefined') {
     window.location.hash = '#' + path.replace(/^#/, '');
   }
-  syncGlobalPath();
+  _syncGlobalPath();
   for (const guard of _afterGuards) {
     guard(path, from);
   }

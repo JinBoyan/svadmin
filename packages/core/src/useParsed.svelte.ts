@@ -1,6 +1,6 @@
 // useParsed — parse current URL hash into structured route info
 
-import { currentPath } from './router';
+import { currentPath, registerRouterSync } from './router';
 import { getResources } from './context.svelte';
 
 interface ParsedRoute {
@@ -19,6 +19,8 @@ export function resetGlobalPath(): void {
 export function syncGlobalPath(): void {
   if (typeof window !== 'undefined') globalPath = currentPath();
 }
+registerRouterSync(syncGlobalPath);
+
 if (typeof window !== 'undefined') {
   globalPath = currentPath();
   if (!(window as any).__svadminParsedInit) {
