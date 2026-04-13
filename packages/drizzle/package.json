@@ -32,5 +32,13 @@
   },
   "devDependencies": {
     "drizzle-orm": "^0.45.2"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "refine-sqlx": {
+      "optional": true
+    }
   }
 }

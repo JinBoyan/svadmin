@@ -25,5 +25,16 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/strapi"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@refinedev/strapi-v4": {
+      "optional": true
+    },
+    "@svadmin/refine-adapter": {
+      "optional": true
+    }
   }
 }

@@ -36,5 +36,13 @@
   "homepage": "https://github.com/zuohuadong/svadmin#readme",
   "bugs": {
     "url": "https://github.com/zuohuadong/svadmin/issues"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "pocketbase": {
+      "optional": true
+    }
   }
 }

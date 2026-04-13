@@ -35,5 +35,10 @@
   },
   "devDependencies": {
     "typescript": "^5.7.0"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    }
   }
 }

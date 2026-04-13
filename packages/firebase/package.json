@@ -24,5 +24,13 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/firebase"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@svadmin/refine-adapter": {
+      "optional": true
+    }
   }
 }

@@ -26,5 +26,19 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/hasura"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@svadmin/refine-adapter": {
+      "optional": true
+    },
+    "@refinedev/hasura": {
+      "optional": true
+    },
+    "graphql-request": {
+      "optional": true
+    }
   }
 }

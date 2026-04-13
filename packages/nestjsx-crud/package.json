@@ -25,5 +25,16 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/nestjsx-crud"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@refinedev/nestjsx-crud": {
+      "optional": true
+    },
+    "@svadmin/refine-adapter": {
+      "optional": true
+    }
   }
 }

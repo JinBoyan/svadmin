@@ -26,5 +26,16 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/elysia"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "elysia": {
+      "optional": true
+    },
+    "@elysiajs/eden": {
+      "optional": true
+    }
   }
 }

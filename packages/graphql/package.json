@@ -28,5 +28,16 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/graphql"
+  },
+  "peerDependenciesMeta": {
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@refinedev/graphql": {
+      "optional": true
+    },
+    "@svadmin/refine-adapter": {
+      "optional": true
+    }
   }
 }

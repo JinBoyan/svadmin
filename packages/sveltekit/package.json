@@ -25,5 +25,16 @@
     "type": "git",
     "url": "https://github.com/zuohuadong/svadmin.git",
     "directory": "packages/sveltekit"
+  },
+  "peerDependenciesMeta": {
+    "@sveltejs/kit": {
+      "optional": true
+    },
+    "@svadmin/core": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    }
   }
 }

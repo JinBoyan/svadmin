@@ -48,6 +48,15 @@
     },
     "@svadmin/editor": {
       "optional": true
+    },
+    "@svadmin/core": {
+      "optional": true
+    },
+    "@tanstack/svelte-query": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
     }
   },
   "dependencies": {
