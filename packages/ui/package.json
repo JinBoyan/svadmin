@@ -14,13 +14,13 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/index.js",
-      "svelte": "./src/index.ts"
+      "svelte": "./src/index.ts",
+      "default": "./dist/index.js"
     },
     "./app.css": {
+      "svelte": "./src/app.css",
       "style": "./dist/app.css",
-      "default": "./dist/app.css",
-      "svelte": "./src/app.css"
+      "default": "./dist/app.css"
     },
     "./components/*": "./dist/components/*"
   },
