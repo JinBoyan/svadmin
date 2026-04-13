@@ -3,6 +3,9 @@
 // Skip if window is not available (CI without happy-dom).
 import { describe, test, expect } from 'bun:test';
 import { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
+import { GlobalRegistrator } from '@happy-dom/global-registrator';
+
+GlobalRegistrator.register();
 
 const hasWindow = typeof globalThis.window !== 'undefined';
 
