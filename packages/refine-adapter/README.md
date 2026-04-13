@@ -16,6 +16,14 @@ Since Refine's `DataProvider` interface closely mirrors svadmin's `DataProvider`
 bun add @svadmin/refine-adapter @svadmin/core
 ```
 
+If your app is powered by Vite and also uses `@svadmin/ui` or `@svadmin/supabase`, exclude svadmin packages from `optimizeDeps` to avoid dev-time pre-bundling issues:
+
+```ts
+optimizeDeps: {
+  exclude: ['@svadmin/core', '@svadmin/ui', '@svadmin/supabase'],
+}
+```
+
 Then install the Refine data provider you want to use, e.g.:
 
 ```bash

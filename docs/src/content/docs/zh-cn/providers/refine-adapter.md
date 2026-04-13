@@ -17,6 +17,14 @@ bun add @svadmin/refine-adapter @svadmin/core
 bun add @refinedev/supabase
 ```
 
+如果你的项目运行在 Vite 上，并且同时用了 `@svadmin/ui` 或 `@svadmin/supabase`，请把 svadmin 相关包加入 `optimizeDeps.exclude`，避免开发环境预打包后出现导出缺失之类的问题：
+
+```ts
+optimizeDeps: {
+  exclude: ['@svadmin/core', '@svadmin/ui', '@svadmin/supabase'],
+}
+```
+
 ## 使用
 
 ```typescript

@@ -11,7 +11,7 @@ export default defineConfig({
     port: 5174,
   },
   optimizeDeps: {
-    exclude: ['@svadmin/core', '@svadmin/ui'],
+    exclude: ['@svadmin/core', '@svadmin/ui', '@svadmin/supabase'],
     include: ['highlight.js'],
   },
 });

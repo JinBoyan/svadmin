@@ -218,9 +218,9 @@ const dataProvider = createElysiaDataProvider<App>("http://localhost:3000");
 
 **2. Configure Vite `optimizeDeps` / 配置 Vite `optimizeDeps`:**
 
-Since `@svadmin/ui` ships raw `.svelte` source files (not pre-built), exclude the svadmin packages from pre-bundling and explicitly include their CJS peer dependencies:
+Since `@svadmin/ui` ships raw `.svelte` source files (not pre-built), exclude the svadmin packages from pre-bundling and explicitly include their CJS peer dependencies. If you use `@svadmin/supabase` in a Vite app, make sure it is also listed in `optimizeDeps.exclude`, otherwise Vite may pre-bundle it and throw dev-time optional-peer/export errors such as `createRefineAdapter` not being found:
 
-由于 `@svadmin/ui` 提供的是原始 `.svelte` 源码文件（非预构建），需要将 svadmin 包排除在预打包之外，并显式包含其 CJS 对等依赖：
+由于 `@svadmin/ui` 提供的是原始 `.svelte` 源码文件（非预构建），需要将 svadmin 包排除在预打包之外，并显式包含其 CJS 对等依赖。如果你的 Vite 项目使用了 `@svadmin/supabase`，也必须把它加入 `optimizeDeps.exclude`；否则 Vite 可能错误预打包它，并在开发环境里抛出 `createRefineAdapter` 找不到之类的 optional-peer/export 异常：
 
 ```typescript
 // vite.config.ts

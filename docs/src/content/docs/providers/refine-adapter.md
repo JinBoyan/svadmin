@@ -17,6 +17,14 @@ bun add @svadmin/refine-adapter @svadmin/core
 bun add @refinedev/supabase
 ```
 
+If your app runs on Vite and also uses `@svadmin/ui` or `@svadmin/supabase`, exclude svadmin packages from `optimizeDeps` to avoid dev-time pre-bundling errors:
+
+```ts
+optimizeDeps: {
+  exclude: ['@svadmin/core', '@svadmin/ui', '@svadmin/supabase'],
+}
+```
+
 ## Usage
 
 ```typescript
