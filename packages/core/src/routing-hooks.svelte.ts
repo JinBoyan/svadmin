@@ -54,12 +54,7 @@ export function useGo() {
       }
     }
 
-    const routerProvider = getRouterProvider();
-    if (routerProvider?.go) {
-      routerProvider.go({ to: targetUrl, type: options.type });
-    } else {
-      navigate(targetUrl, options.type === 'replace' ? { replaceState: true } : undefined);
-    }
+    navigate(targetUrl, options.type === 'replace' ? { replaceState: true } : undefined);
   };
 }
 

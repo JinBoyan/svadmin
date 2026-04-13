@@ -25,10 +25,11 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
   let isLoading = $state(false);
 
   async function triggerExport() {
-    const provider = getDataProviderForResource(resource, options.dataProviderName);
+    const exportResource = resource;
     isLoading = true;
 
     try {
+      const provider = getDataProviderForResource(exportResource, options.dataProviderName);
       const batchSize = options.pageSize ?? 20;
       const maxItems = options.maxItemCount ?? Infinity;
       let allRecords: TData[] = [];
@@ -36,7 +37,7 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
 
       while (allRecords.length < maxItems) {
         const result = await provider.getList<TData>({
-          resource,
+          resource: exportResource,
           pagination: { current: page, pageSize: batchSize },
           sorters: options.sorters,
           filters: options.filters,
@@ -76,7 +77,7 @@ export function useExport<TData extends BaseRecord = BaseRecord>(options: UseExp
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${resource}_export.csv`;
+        a.download = `${exportResource}_export.csv`;
         a.click();
         setTimeout(() => URL.revokeObjectURL(url), 10000);
       }
@@ -117,12 +118,13 @@ export function useImport<TData = Record<string, unknown>>(options: UseImportOpt
   let mutationResult = $state<{ succeeded: unknown[]; errored: { request: unknown; error: unknown }[] } | null>(null);
 
   async function handleChange(info: { file: File }) {
-    const provider = getDataProviderForResource(resource, options.dataProviderName);
+    const importResource = resource;
     isLoading = true;
     const succeeded: unknown[] = [];
     const errored: { request: unknown; error: unknown }[] = [];
 
     try {
+      const provider = getDataProviderForResource(importResource, options.dataProviderName);
       let text = await info.file.text();
       // Strip BOM
       if (text.charCodeAt(0) === 0xFEFF) {
@@ -152,7 +154,7 @@ export function useImport<TData = Record<string, unknown>>(options: UseImportOpt
       if (batchSize === 1) {
         for (const record of records) {
           try {
-            const res = await provider.create({ resource, variables: record, meta: options.meta });
+            const res = await provider.create({ resource: importResource, variables: record, meta: options.meta });
             succeeded.push(res);
           } catch (error) {
             errored.push({ request: record, error });
@@ -165,16 +167,15 @@ export function useImport<TData = Record<string, unknown>>(options: UseImportOpt
           const batch = records.slice(i, i + batchSize);
           if (provider.createMany) {
             try {
-              const res = await provider.createMany({ resource, variables: batch, meta: options.meta });
+              const res = await provider.createMany({ resource: importResource, variables: batch, meta: options.meta });
               succeeded.push(res);
             } catch (error) {
               errored.push({ request: batch, error });
             }
           } else {
-            // Fallback: loop internal items inside batch securely instead of breaking whole batch
             for (const record of batch) {
               try {
-                const res = await provider.create({ resource, variables: record, meta: options.meta });
+                const res = await provider.create({ resource: importResource, variables: record, meta: options.meta });
                 succeeded.push(res);
               } catch (error) {
                 errored.push({ request: record, error });
@@ -188,6 +189,9 @@ export function useImport<TData = Record<string, unknown>>(options: UseImportOpt
 
       mutationResult = { succeeded, errored };
       options.onFinish?.({ succeeded, errored });
+    } catch (error) {
+      mutationResult = { succeeded, errored: [...errored, { request: null, error }] };
+      options.onFinish?.({ succeeded, errored: mutationResult.errored });
     } finally {
       isLoading = false;
     }

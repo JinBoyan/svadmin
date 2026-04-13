@@ -313,17 +313,25 @@ export function useForm<
 
   const createMut = createMutation(() => ({
     ...options.createMutationOptions,
-    mutationFn: (variables: TVariables) => provider.create<TData, TVariables>({ resource, variables, meta: mutationMeta }),
-    onSuccess: (data: { data: TData }) => {
-      invalidateByScopes(queryClient, resource, invalidateScopes, ['list', 'many'], undefined, options.dataProviderName);
+    mutationFn: (variables: unknown) => {
+      const targetResource = resource;
+      const targetMeta = mutationMeta;
+      return provider.create<TData, TVariables>({ resource: targetResource, variables: variables as TVariables, meta: targetMeta });
+    },
+    onMutate: async () => {
+      return { targetResource: resource };
+    },
+    onSuccess: (data: { data: TData }, _vars: unknown, context: unknown) => {
+      const ctx = context as { targetResource?: string } | undefined;
+      const res = ctx?.targetResource ?? resource;
+      invalidateByScopes(queryClient, res, invalidateScopes, ['list', 'many'], undefined, options.dataProviderName);
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.createSuccess') });
-      const pk = getResource(resource).primaryKey ?? 'id';
+      const pk = getResource(res).primaryKey ?? 'id';
       const newId = (data.data as Record<string, unknown>)[pk];
-      audit({ action: 'create', resource, recordId: String(newId) });
-      // Publish live event
+      audit({ action: 'create', resource: res, recordId: String(newId) });
       try {
         const lp = getLiveProvider();
-        if (lp?.publish) lp.publish({ type: 'INSERT', resource, payload: { ids: newId != null ? [newId as string | number] : [] } });
+        if (lp?.publish) lp.publish({ type: 'INSERT', resource: res, payload: { ids: newId != null ? [newId as string | number] : [] } });
       } catch { /* no live provider */ }
       onMutationSuccess?.(data);
       if (redirectOverride !== false) {
@@ -337,6 +345,9 @@ export function useForm<
   const updateMut = createMutation<{ data: TData }, unknown, TVariables>(() => ({
     ...options.updateMutationOptions,
     mutationFn: async (variables: TVariables) => {
+      const targetId = currentId!;
+      const targetResource = resource;
+      const targetMeta = mutationMeta;
       if (mutationMode === 'undoable') {
         await new Promise<void>((resolve, reject) => {
           toast.undoable(t('common.actionCanBeUndone'), undoableTimeout, () => {
@@ -344,10 +355,12 @@ export function useForm<
           }, resolve);
         });
       }
-      return provider.update<TData, TVariables>({ resource, id: currentId!, variables, meta: mutationMeta });
+      return provider.update<TData, TVariables>({ resource: targetResource, id: targetId, variables, meta: targetMeta });
     },
     onMutate: async (variables: TVariables) => {
-      if (mutationMode === 'pessimistic') return;
+      if (mutationMode === 'pessimistic') return { targetId: currentId, targetResource: resource };
+      const targetId = currentId;
+      const targetResource = resource;
       const dpN = options.dataProviderName;
       const dp = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
       await queryClient.cancelQueries({ predicate: (q) => dp(q) && q.queryKey[1] === resource });
@@ -357,27 +370,33 @@ export function useForm<
           if (!old || typeof old !== 'object' || !('data' in old)) return old;
           const o = old as { data: Record<string, unknown>[] };
           const pk = getResource(resource).primaryKey ?? 'id';
-          return { ...o, data: o.data.map((item) => String(item[pk]) === String(currentId) ? deepMerge(item, variables) : item) };
+          return { ...o, data: o.data.map((item) => String(item[pk]) === String(targetId) ? deepMerge(item, variables) : item) };
         });
       }
-      if (optimisticUpdateMap?.detail !== false && currentId != null) {
-        queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === currentId }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, variables) } : old);
+      if (optimisticUpdateMap?.detail !== false && targetId != null) {
+        queryClient.setQueriesData({ predicate: (q) => dp(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === targetId }, (old: Record<string, unknown> | undefined) => old ? { ...old, data: deepMerge((old as Record<string, unknown>).data || {}, variables) } : old);
       }
-      return { previousQueries };
+      return { previousQueries, targetId, targetResource };
     },
-    onSuccess: (data: unknown) => {
+    onSuccess: (data: unknown, _vars: unknown, context: unknown) => {
+      const ctx = context as { targetId?: string | number; targetResource?: string } | undefined;
+      const targetId = ctx?.targetId ?? currentId;
+      const res = ctx?.targetResource ?? resource;
       if (successNotification !== false) notify({ type: 'success', message: typeof successNotification === 'string' ? successNotification : t('common.updateSuccess') });
-      audit({ action: 'update', resource, recordId: String(currentId) });
+      audit({ action: 'update', resource: res, recordId: String(targetId) });
       try {
         const lp = getLiveProvider();
-        if (lp?.publish) lp.publish({ type: 'UPDATE', resource, payload: { ids: currentId != null ? [currentId] : [] } });
+        if (lp?.publish) lp.publish({ type: 'UPDATE', resource: res, payload: { ids: targetId != null ? [targetId] : [] } });
       } catch { /* no live provider */ }
       onMutationSuccess?.(data);
       if (redirectOverride !== false) doRedirect(redirectOverride ?? redirectDefault);
     },
-    onSettled: (_data: unknown, error: unknown) => {
+    onSettled: (_data: unknown, error: unknown, _vars: unknown, context: unknown) => {
       if (error instanceof UndoError) return;
-      invalidateByScopes(queryClient, resource, invalidateScopes, ['list', 'many', 'detail'], currentId ?? undefined, options.dataProviderName);
+      const ctx = context as { targetId?: string | number; targetResource?: string } | undefined;
+      const targetId = ctx?.targetId ?? currentId;
+      const res = ctx?.targetResource ?? resource;
+      invalidateByScopes(queryClient, res, invalidateScopes, ['list', 'many', 'detail'], targetId ?? undefined, options.dataProviderName);
     },
     onError: (error: unknown, _vars: unknown, context: unknown) => {
       const ctx = context as { previousQueries?: [unknown, unknown][] } | undefined;
@@ -431,6 +450,7 @@ export function useForm<
   // ─── AutoSave ───────────────────────────────────────────────────
   let autoSaveStatus = $state<'idle' | 'saving' | 'saved' | 'error'>('idle');
   let autoSaveTimer: ReturnType<typeof setTimeout> | null = null;
+  let autoSaveStatusTimer: ReturnType<typeof setTimeout> | null = null;
   let autoSaveInProgress = $state(false);
   let autoSaveDirty = false;
   let lastAutoSaveData = $state<unknown>(null);
@@ -439,6 +459,7 @@ export function useForm<
   $effect(() => {
     return () => {
       if (autoSaveTimer) clearTimeout(autoSaveTimer);
+      if (autoSaveStatusTimer) clearTimeout(autoSaveStatusTimer);
     };
   });
 
@@ -449,6 +470,8 @@ export function useForm<
     if (autoSaveTimer) clearTimeout(autoSaveTimer);
 
     const safeId = currentId;
+    const safeResource = resource;
+    const safeMeta = mutationMeta;
     autoSaveTimer = setTimeout(async () => {
       if (autoSaveInProgress || createMut.isPending || updateMut.isPending) {
         autoSaveDirty = true;
@@ -459,15 +482,16 @@ export function useForm<
       autoSaveInProgress = true;
       autoSaveDirty = false;
       try {
-        await provider.update<TData, TVariables>({ resource, id: safeId as string | number, variables: finalValues, meta: mutationMeta });
+        await provider.update<TData, TVariables>({ resource: safeResource, id: safeId as string | number, variables: finalValues, meta: safeMeta });
         const scopes = autoSaveOpts.invalidates ?? ['resourceAll'];
-        invalidateByScopes(queryClient, resource, scopes, ['resourceAll'], safeId ?? undefined, options.dataProviderName);
+        invalidateByScopes(queryClient, safeResource, scopes, ['resourceAll'], safeId ?? undefined, options.dataProviderName);
         autoSaveStatus = 'saved';
         lastAutoSaveData = finalValues;
         lastAutoSaveError = null;
         initialValues = { ...finalValues } as TVariables;
         tainted = {};
-        setTimeout(() => { autoSaveStatus = 'idle'; }, 2000);
+        if (autoSaveStatusTimer) clearTimeout(autoSaveStatusTimer);
+        autoSaveStatusTimer = setTimeout(() => { autoSaveStatus = 'idle'; autoSaveStatusTimer = null; }, 2000);
       } catch (e) {
         autoSaveStatus = 'error';
         lastAutoSaveError = e;

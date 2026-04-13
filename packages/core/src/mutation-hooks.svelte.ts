@@ -43,7 +43,7 @@ export function invalidateByScopes(
   const effectiveScopes = (scopes && scopes.length > 0) ? scopes : defaults;
   const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dataProviderName;
   for (const scope of effectiveScopes) {
-    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select') });
+    if (scope === 'list') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && (q.queryKey[2] === 'list' || q.queryKey[2] === 'infiniteList' || q.queryKey[2] === 'select' || q.queryKey[2] === 'select-defaults') });
     else if (scope === 'many') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'many' });
     else if ((scope === 'detail' || scope === 'one') && id != null) queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' && q.queryKey[3] === id });
     else if (scope === 'detail' || scope === 'one') queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === resource && q.queryKey[2] === 'one' });

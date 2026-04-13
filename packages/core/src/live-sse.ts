@@ -12,13 +12,9 @@
 import type { LiveProvider, LiveEvent } from './live.svelte';
 
 export interface SSELiveProviderOptions {
-  /** SSE endpoint URL, e.g. "https://api.example.com/events" */
   url: string;
-  /** Optional EventSource init options (e.g. withCredentials) */
   eventSourceInit?: EventSourceInit;
-  /** Optional callback when connection opens */
   onOpen?: () => void;
-  /** Optional callback for connection errors */
   onError?: (event: Event) => void;
 }
 
@@ -29,7 +25,7 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
   const subscribers = new Map<string, Set<Callback>>();
   let eventSource: EventSource | null = null;
   let status: 'connecting' | 'connected' | 'disconnected' = 'disconnected';
-  const registeredListeners = new Set<string>();
+  const namedListeners = new Map<string, EventListener>();
 
   function connect() {
     if (eventSource) return;
@@ -43,20 +39,17 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
       options.onOpen?.();
     };
 
-    // Listen for generic "message" events
     eventSource.onmessage = (msgEvent) => {
       dispatchEvent(msgEvent.data);
     };
 
     eventSource.onerror = (event) => {
-      // EventSource auto-reconnects by default
       if (eventSource?.readyState === EventSource.CLOSED) {
         status = 'disconnected';
       }
       options.onError?.(event);
     };
 
-    // Also listen for resource-specific named events
     for (const resource of subscribers.keys()) {
       if (resource !== '*') {
         addNamedListener(resource);
@@ -65,9 +58,8 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
   }
 
   function addNamedListener(resource: string) {
-    if (!eventSource || registeredListeners.has(resource)) return;
-    registeredListeners.add(resource);
-    eventSource.addEventListener(resource, ((event: MessageEvent) => {
+    if (!eventSource || namedListeners.has(resource)) return;
+    const listener = ((event: MessageEvent) => {
       try {
         const parsed = JSON.parse(event.data);
         const liveEvent: LiveEvent = {
@@ -79,7 +71,18 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
       } catch {
         // ignore non-JSON
       }
-    }) as EventListener);
+    }) as EventListener;
+    namedListeners.set(resource, listener);
+    eventSource.addEventListener(resource, listener);
+  }
+
+  function removeNamedListener(resource: string) {
+    const listener = namedListeners.get(resource);
+    if (!listener) return;
+    if (eventSource) {
+      eventSource.removeEventListener(resource, listener);
+    }
+    namedListeners.delete(resource);
   }
 
   function dispatchEvent(data: string) {
@@ -98,7 +101,6 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
     if (callbacks) {
       for (const cb of callbacks) cb(event);
     }
-    // Wildcard subscribers
     const wildcardCallbacks = subscribers.get('*');
     if (wildcardCallbacks) {
       for (const cb of wildcardCallbacks) cb(event);
@@ -111,7 +113,7 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
       eventSource = null;
     }
     status = 'disconnected';
-    registeredListeners.clear();
+    namedListeners.clear();
   }
 
   return {
@@ -123,11 +125,9 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
       }
       subscribers.get(resource)!.add(callback);
 
-      // Connect if not already
       if (!eventSource && typeof EventSource !== 'undefined') {
         connect();
       }
-      // Add named listener for this resource if connected
       if (eventSource && resource !== '*' && isNewResource) {
         addNamedListener(resource);
       }
@@ -136,7 +136,10 @@ export function createSSELiveProvider(options: SSELiveProviderOptions): LiveProv
         const callbacks = subscribers.get(resource);
         if (callbacks) {
           callbacks.delete(callback);
-          if (callbacks.size === 0) subscribers.delete(resource);
+          if (callbacks.size === 0) {
+            subscribers.delete(resource);
+            removeNamedListener(resource);
+          }
         }
         if (subscribers.size === 0) disconnect();
       };

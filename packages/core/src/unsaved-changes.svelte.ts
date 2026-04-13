@@ -14,6 +14,7 @@ export function resetUnsavedChanges(): void {
   dirty = false;
   _unsavedChangesCleanup?.();
   _unsavedChangesCleanup = null;
+  _navigationGuard = null;
 }
 
 export function getUnsavedChanges(): boolean {

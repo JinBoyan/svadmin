@@ -61,6 +61,7 @@
     get action() { return mode; },
     get id() { return id; },
     get defaultValues() { return defaults; },
+    stepsCount: steps.length,
     redirect: 'list',
     warnWhenUnsavedChanges: true,
     get validate() { return validator; },

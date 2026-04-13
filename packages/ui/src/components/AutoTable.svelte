@@ -380,7 +380,7 @@
     link.href = URL.createObjectURL(blob);
     link.download = `${resourceName}_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
-    URL.revokeObjectURL(link.href);
+    setTimeout(() => URL.revokeObjectURL(link.href), 1000);
   }
 
   function goToPage(page: number) {

@@ -42,18 +42,24 @@ export function useLive(
     const liveParams = typeof options?.liveParams === 'function' ? options.liveParams() : options?.liveParams;
     if (liveMode === 'off') return;
 
-    const unsubscribe = lp.subscribe({
-      resource: res,
-      liveParams,
-      callback: (event) => {
-        options?.onLiveEvent?.(event);
-        if (liveMode === 'auto') {
-          const dpName = options?.dataProviderName;
-          const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpName;
-          queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res });
-        }
-      },
-    });
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = lp.subscribe({
+        resource: res,
+        liveParams,
+        callback: (event) => {
+          options?.onLiveEvent?.(event);
+          if (liveMode === 'auto') {
+            const dpName = options?.dataProviderName;
+            const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpName;
+            queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === res });
+          }
+        },
+      });
+    } catch (e) {
+      console.warn('[svadmin] LiveProvider.subscribe failed:', e);
+      return;
+    }
     return unsubscribe;
   });
 }

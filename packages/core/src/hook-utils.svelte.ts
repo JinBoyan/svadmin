@@ -96,18 +96,24 @@ export function createLiveSubscription(paramsFn: () => LiveSubscriptionParams): 
 
     if (!liveProvider || liveMode === 'off' || !enabled) return;
 
-    const unsubscribe = liveProvider.subscribe({
-      resource: params.resource,
-      liveParams: params.liveParams,
-      callback: (event: LiveEvent) => {
-        params.onLiveEvent?.(event);
-        if (liveMode === 'auto') {
-          const dpN = params.dataProviderName;
-          const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
-          queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === params.resource });
-        }
-      },
-    });
+    let unsubscribe: (() => void) | undefined;
+    try {
+      unsubscribe = liveProvider.subscribe({
+        resource: params.resource,
+        liveParams: params.liveParams,
+        callback: (event: LiveEvent) => {
+          params.onLiveEvent?.(event);
+          if (liveMode === 'auto') {
+            const dpN = params.dataProviderName;
+            const dpMatch = (q: { queryKey: readonly unknown[] }) => q.queryKey[0] === dpN;
+            queryClient.invalidateQueries({ predicate: (q) => dpMatch(q) && q.queryKey[1] === params.resource });
+          }
+        },
+      });
+    } catch (e) {
+      console.warn('[svadmin] LiveProvider.subscribe failed:', e);
+      return;
+    }
     return unsubscribe;
   });
 }

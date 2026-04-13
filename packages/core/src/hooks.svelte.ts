@@ -317,19 +317,14 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
   const resource = options.resource ?? parsed.resource ?? '';
   const adminOptions = getAdminOptions();
   const queryClient = useQueryClient();
-  let isMutating = $state(false);
-  const overtime = createOvertimeTracker(() => isMutating, options.overtimeOptions ?? adminOptions.overtime);
 
   const mutation = createMutation<{ data: TData[] }, TError, { resource?: KnownResources; variables: TVariables[]; meta?: Record<string, unknown>; dataProviderName?: string }>(() => ({
     mutationFn: async (params) => {
-      isMutating = true;
       const resName = params.resource ?? resource;
       const provider = getDataProviderForResource(resName, params.dataProviderName);
-      try {
-        if (provider.createMany) return await provider.createMany<TData, TVariables>({ resource: resName, variables: params.variables, meta: params.meta });
-        const results = await Promise.all(params.variables.map(v => provider.create<TData, TVariables>({ resource: resName, variables: v, meta: params.meta })));
-        return { data: results.map(r => r.data) };
-      } finally { isMutating = false; }
+      if (provider.createMany) return await provider.createMany<TData, TVariables>({ resource: resName, variables: params.variables, meta: params.meta });
+      const results = await Promise.all(params.variables.map(v => provider.create<TData, TVariables>({ resource: resName, variables: v, meta: params.meta })));
+      return { data: results.map(r => r.data) };
     },
     onSuccess: (data, params) => {
       const resName = params.resource ?? resource;
@@ -347,7 +342,7 @@ export function useCreateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
   }));
 
-  return { mutation, get overtime() { return overtime; } };
+  return { mutation, get overtime() { return createOvertimeTracker(() => mutation.isPending, options.overtimeOptions ?? adminOptions.overtime); } };
 }
 
 export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = HttpError, TVariables = Record<string, unknown>>(options: { resource?: KnownResources; overtimeOptions?: OvertimeOptions } = {}) {
@@ -355,19 +350,14 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
   const resource = options.resource ?? parsed.resource ?? '';
   const adminOptions = getAdminOptions();
   const queryClient = useQueryClient();
-  let isMutating = $state(false);
-  const overtime = createOvertimeTracker(() => isMutating, options.overtimeOptions ?? adminOptions.overtime);
 
   const mutation = createMutation<{ data: TData[] }, TError, { resource?: KnownResources; ids: (string | number)[]; variables: TVariables; meta?: Record<string, unknown>; dataProviderName?: string }>(() => ({
     mutationFn: async (params) => {
-      isMutating = true;
       const resName = params.resource ?? resource;
       const provider = getDataProviderForResource(resName, params.dataProviderName);
-      try {
-        if (provider.updateMany) return await provider.updateMany<TData, TVariables>({ resource: resName, ids: params.ids, variables: params.variables, meta: params.meta });
-        const results = await Promise.all(params.ids.map(id => provider.update<TData, TVariables>({ resource: resName, id, variables: params.variables, meta: params.meta })));
-        return { data: results.map(r => r.data) };
-      } finally { isMutating = false; }
+      if (provider.updateMany) return await provider.updateMany<TData, TVariables>({ resource: resName, ids: params.ids, variables: params.variables, meta: params.meta });
+      const results = await Promise.all(params.ids.map(id => provider.update<TData, TVariables>({ resource: resName, id, variables: params.variables, meta: params.meta })));
+      return { data: results.map(r => r.data) };
     },
     onSuccess: (data, params) => {
       const resName = params.resource ?? resource;
@@ -388,7 +378,7 @@ export function useUpdateMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
   }));
 
-  return { mutation, get overtime() { return overtime; } };
+  return { mutation, get overtime() { return createOvertimeTracker(() => mutation.isPending, options.overtimeOptions ?? adminOptions.overtime); } };
 }
 
 export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = HttpError>(options: { resource?: KnownResources; overtimeOptions?: OvertimeOptions } = {}) {
@@ -396,19 +386,14 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
   const resource = options.resource ?? parsed.resource ?? '';
   const adminOptions = getAdminOptions();
   const queryClient = useQueryClient();
-  let isMutating = $state(false);
-  const overtime = createOvertimeTracker(() => isMutating, options.overtimeOptions ?? adminOptions.overtime);
 
   const mutation = createMutation<{ data: TData[] }, TError, { resource?: KnownResources; ids: (string | number)[]; meta?: Record<string, unknown>; dataProviderName?: string }>(() => ({
     mutationFn: async (params) => {
-      isMutating = true;
       const resName = params.resource ?? resource;
       const provider = getDataProviderForResource(resName, params.dataProviderName);
-      try {
-        if (provider.deleteMany) return await provider.deleteMany<TData>({ resource: resName, ids: params.ids, meta: params.meta });
-        const results = await Promise.all(params.ids.map(id => provider.deleteOne<TData>({ resource: resName, id, meta: params.meta })));
-        return { data: results.map(r => r.data) };
-      } finally { isMutating = false; }
+      if (provider.deleteMany) return await provider.deleteMany<TData>({ resource: resName, ids: params.ids, meta: params.meta });
+      const results = await Promise.all(params.ids.map(id => provider.deleteOne<TData>({ resource: resName, id, meta: params.meta })));
+      return { data: results.map(r => r.data) };
     },
     onSuccess: (data, params) => {
       const resName = params.resource ?? resource;
@@ -429,7 +414,7 @@ export function useDeleteMany<TData extends BaseRecord = BaseRecord, TError = Ht
     },
   }));
 
-  return { mutation, get overtime() { return overtime; } };
+  return { mutation, get overtime() { return createOvertimeTracker(() => mutation.isPending, options.overtimeOptions ?? adminOptions.overtime); } };
 }
 
 // ─── useInvalidate ──────────────────────────────────────────────────
