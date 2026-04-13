@@ -31,7 +31,8 @@
     "url": "https://github.com/zuohuadong/svadmin/issues"
   },
   "devDependencies": {
-    "drizzle-orm": "^0.45.2"
+    "drizzle-orm": "^0.45.2",
+    "refine-sqlx": "^0.9.0"
   },
   "peerDependenciesMeta": {
     "@svadmin/core": {
