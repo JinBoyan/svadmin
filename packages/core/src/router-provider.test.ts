@@ -1,15 +1,10 @@
 // Unit tests for RouterProvider implementations
-// Router provider tests need a DOM environment.
-// Skip if window is not available (CI without happy-dom).
-import { describe, test, expect } from 'bun:test';
+// Router provider tests need a DOM environment or a mock.
+import { describe, test, expect, beforeEach } from 'bun:test';
 import { createHashRouterProvider, createHistoryRouterProvider } from './router-provider';
-import { GlobalRegistrator } from '@happy-dom/global-registrator';
-
-GlobalRegistrator.register();
-
-const hasWindow = typeof globalThis.window !== 'undefined';
 
 describe('createHashRouterProvider (unit — no DOM)', () => {
+
   test('returns provider with go, back, parse methods', () => {
     const provider = createHashRouterProvider();
     expect(typeof provider.go).toBe('function');
@@ -32,8 +27,20 @@ describe('createHistoryRouterProvider (unit — no DOM)', () => {
   });
 });
 
-// DOM-dependent tests — only run if window is available
-describe.skipIf(!hasWindow)('createHashRouterProvider (DOM)', () => {
+// DOM-dependent tests — mocked window if not exists
+describe('createHashRouterProvider (with mock DOM)', () => {
+  beforeEach(() => {
+    if (typeof globalThis.window === 'undefined') {
+      let _hash = '';
+      (globalThis as any).window = {
+        location: {
+          get hash() { return _hash ? (_hash.startsWith('#') ? _hash : '#' + _hash) : ''; },
+          set hash(val) { _hash = val; }
+        }
+      };
+    }
+  });
+
   test('parse returns empty segments for root', () => {
     window.location.hash = '';
     const provider = createHashRouterProvider();
@@ -72,3 +79,4 @@ describe.skipIf(!hasWindow)('createHashRouterProvider (DOM)', () => {
     expect(window.location.hash).toBe('#/users');
   });
 });
+
