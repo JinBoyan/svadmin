@@ -9,7 +9,7 @@
     type ColumnVisibilityState,
     type ExpandedState,
   } from '@tanstack/svelte-table';
-  import { getCoreRowModel } from '@tanstack/table-core';
+  import { createCoreRowModel } from '@tanstack/table-core';
 
   import { useList, useDelete, useDeleteMany, getResource, notify } from '@svadmin/core';
   import type { Pagination as PaginationState, Sort, Filter, FieldDefinition } from '@svadmin/core';
@@ -280,7 +280,7 @@
   const tbl = createTable({
     get data() { return query.data?.data ?? []; },
     get columns() { return columns; },
-    getCoreRowModel: getCoreRowModel(),
+    getCoreRowModel: createCoreRowModel(),
     manualPagination: true,
     manualSorting: true,
     getRowId: (row: any) => String(row[primaryKey]),
