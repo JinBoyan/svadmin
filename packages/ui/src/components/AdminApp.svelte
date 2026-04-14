@@ -78,8 +78,10 @@
     Skeleton: Skeleton as unknown as ComponentRegistry['Skeleton'],
   };
 
-  // Set up context synchronously to avoid context undefined crash in children
-  setComponentRegistry({ ...defaultComponents, ...userComponents });
+  // Merge and keep a local reference — setContext is only visible to *children*,
+  // so we must use the local variable for lookups within this component.
+  const mergedComponents: ComponentRegistry = { ...defaultComponents, ...userComponents };
+  setComponentRegistry(mergedComponents);
 
   // Resolve router provider (default to hash)
   const resolvedRouter = $derived(routerProvider ?? createHashRouterProvider());
@@ -195,27 +197,27 @@
         {/if}
       {:else if route === '/:resource' || route === '/:parent/:parentId/:resource'}
         {#key params.resource}
-          {@const Comp = getComponentRegistry().AutoTable}
+          {@const Comp = mergedComponents.AutoTable}
           <Comp resourceName={params.resource} />
         {/key}
       {:else if route === '/:resource/create' || route === '/:parent/:parentId/:resource/create'}
         {#key params.resource}
-          {@const Comp = getComponentRegistry().AutoForm}
+          {@const Comp = mergedComponents.AutoForm}
           <Comp resourceName={params.resource} mode="create" />
         {/key}
       {:else if route === '/:resource/edit/:id' || route === '/:parent/:parentId/:resource/edit/:id'}
         {#key `${params.resource}-${params.id}`}
-          {@const Comp = getComponentRegistry().AutoForm}
+          {@const Comp = mergedComponents.AutoForm}
           <Comp resourceName={params.resource} mode="edit" id={params.id} />
         {/key}
       {:else if route === '/:resource/show/:id' || route === '/:parent/:parentId/:resource/show/:id'}
         {#key `${params.resource}-${params.id}`}
-          {@const Comp = getComponentRegistry().ShowPage}
+          {@const Comp = mergedComponents.ShowPage}
           <Comp resourceName={params.resource} id={params.id} />
         {/key}
       {:else if route === '/:resource/clone/:id' || route === '/:parent/:parentId/:resource/clone/:id'}
         {#key `${params.resource}-clone-${params.id}`}
-          {@const Comp = getComponentRegistry().AutoForm}
+          {@const Comp = mergedComponents.AutoForm}
           <Comp resourceName={params.resource} mode="clone" id={params.id} />
         {/key}
       {/if}
