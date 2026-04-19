@@ -52,6 +52,8 @@ const supabase = createClient(url, key);
 const dataProvider = createSupabaseDataProvider(supabase);
 ```
 
+如果你同时使用 `@supacloud/js`，CRUD 仍然建议继续使用 `createSupabaseDataProvider()`。像提交任务、查询任务、重试任务这类平台语义能力，放在可选子入口 [`@svadmin/supabase/supacloud`](/zh-cn/providers/supacloud) 中，而不是塞进主数据 Provider 契约里。
+
 ### GraphQL
 
 ```typescript

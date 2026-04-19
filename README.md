@@ -157,7 +157,11 @@ export const resources: ResourceDefinition[] = [
 ```svelte
 <script lang="ts">
   import { AdminApp } from '@svadmin/ui';
-  import { createSupabaseDataProvider, createSupabaseAuthProvider } from '@svadmin/supabase';
+  import {
+    createSupabaseDataProvider,
+    createSupabaseAuthProvider,
+    createSupabaseLiveProvider,
+  } from '@svadmin/supabase';
   import { createClient } from '@supabase/supabase-js';
   import { resources } from './resources';
   import Login from './pages/Login.svelte';
@@ -171,11 +175,67 @@ export const resources: ResourceDefinition[] = [
 <AdminApp
   dataProvider={createSupabaseDataProvider(supabase)}
   authProvider={createSupabaseAuthProvider(supabase)}
+  liveProvider={createSupabaseLiveProvider(supabase)}
   {resources}
   title="My App"
 >
   {#snippet loginPage()}<Login />{/snippet}
 </AdminApp>
+```
+
+### With SupaCloud Tasks / 使用 SupaCloud 任务增强
+
+`@supacloud/js` does not replace `@supabase/supabase-js`. It wraps a normal Supabase client and adds task-oriented platform APIs. `@svadmin/supabase` keeps the official Supabase adapters unchanged and exposes the optional `@svadmin/supabase/supacloud` subpath for these task features.
+
+`@supacloud/js` 不是 `@supabase/supabase-js` 的替代品，而是建立在官方 Supabase 客户端之上的平台增强层。`@svadmin/supabase` 会继续保持官方 Supabase 适配器不变，并通过可选子路径 `@svadmin/supabase/supacloud` 提供任务能力接入。
+
+```bash
+bun add @svadmin/supabase @supabase/supabase-js @supacloud/js
+```
+
+```ts
+import { createClient } from '@supabase/supabase-js';
+import { createSupaCloudClient } from '@supacloud/js';
+import {
+  createSupaCloudTaskProvider,
+  createSupaCloudTaskLiveProvider,
+} from '@svadmin/supabase/supacloud';
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
+
+const supacloud = createSupaCloudClient({
+  supabase,
+  managementApiUrl: import.meta.env.VITE_SUPACLOUD_API_URL,
+  projectRef: import.meta.env.VITE_SUPACLOUD_PROJECT_REF,
+});
+
+const taskProvider = createSupaCloudTaskProvider({ supacloud });
+const taskLiveProvider = createSupaCloudTaskLiveProvider({ supacloud });
+```
+
+```ts
+const task = await taskProvider.submit('aorist-ai/generate/crop', {
+  body: { image_id: 'img_123' },
+  idempotencyKey: 'crop-img_123-v1',
+});
+
+const finalState = await task.wait();
+console.log(finalState.status);
+```
+
+```ts
+const stop = taskLiveProvider.subscribe({
+  resource: 'tasks',
+  liveParams: { taskId: 'task_123' },
+  callback: (event) => {
+    console.log(event.payload);
+  },
+});
+
+stop();
 ```
 
 ### With Elysia (Type-Safe) / 使用 Elysia（端到端类型安全）

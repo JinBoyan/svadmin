@@ -94,6 +94,8 @@ import { createSupabaseAuthProvider } from '@svadmin/supabase';
 const authProvider = createSupabaseAuthProvider(supabaseClient);
 ```
 
+`@supacloud/js` does not change the auth flow. Keep using the official Supabase client with `createSupabaseAuthProvider()`, and layer any task APIs separately through [`@svadmin/supabase/supacloud`](/providers/supacloud).
+
 ### Appwrite
 
 ```typescript

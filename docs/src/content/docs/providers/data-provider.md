@@ -52,6 +52,8 @@ const supabase = createClient(url, key);
 const dataProvider = createSupabaseDataProvider(supabase);
 ```
 
+If you also use `@supacloud/js`, keep using `createSupabaseDataProvider()` for CRUD. Task APIs such as submit/list/retry live under the optional [`@svadmin/supabase/supacloud`](/providers/supacloud) entry instead of the main data provider contract.
+
 ### GraphQL
 
 ```typescript

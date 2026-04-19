@@ -46,6 +46,8 @@ const liveProvider = createSupabaseLiveProvider(supabaseClient);
 
 支持通过 Supabase Realtime 广播频道发布事件。
 
+如果你还需要 `@supacloud/js` 的任务状态订阅，可以使用 `@svadmin/supabase/supacloud` 里的 [`createSupaCloudTaskLiveProvider()`](/zh-cn/providers/supacloud)。它会把 `tasks.subscribe()` 桥接成标准的 svadmin `LiveProvider` 接口。
+
 ### Appwrite 实时
 
 ```typescript

@@ -13,12 +13,17 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./supacloud": {
+      "types": "./src/supacloud.ts",
+      "default": "./src/supacloud.ts"
     }
   },
   "peerDependencies": {
     "@svadmin/core": "workspace:*",
     "@supabase/supabase-js": "^2.0.0",
-    "@refinedev/supabase": "^5.0.0"
+    "@refinedev/supabase": "^5.0.0",
+    "@supacloud/js": "^0.10.0"
   },
   "license": "MIT",
   "author": "zuohuadong",
@@ -39,6 +44,9 @@
       "optional": true
     },
     "@refinedev/supabase": {
+      "optional": true
+    },
+    "@supacloud/js": {
       "optional": true
     }
   },

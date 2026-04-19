@@ -94,6 +94,8 @@ import { createSupabaseAuthProvider } from '@svadmin/supabase';
 const authProvider = createSupabaseAuthProvider(supabaseClient);
 ```
 
+`@supacloud/js` 不会改变认证流程。认证部分仍然建议继续使用官方 Supabase 客户端配合 `createSupabaseAuthProvider()`，任务相关 API 再通过 [`@svadmin/supabase/supacloud`](/zh-cn/providers/supacloud) 单独组合接入。
+
 ### Appwrite
 
 ```typescript

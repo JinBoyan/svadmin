@@ -212,3 +212,109 @@ describe('Supabase LiveProvider', () => {
     expect(sendArgs.payload.type).toBe('INSERT');
   });
 });
+
+
+// ─── SupaCloud Task Provider Tests ───────────────────────────────
+describe('SupaCloud Task Provider', () => {
+  test('submit proxies to supacloud tasks client', async () => {
+    const { createSupaCloudTaskProvider } = await import('./supacloud');
+    const taskHandle = {
+      id: 'task-1',
+      wait: mock(async () => ({ id: 'task-1', status: 'done' })),
+    };
+    const supacloud = {
+      submit: mock(async () => taskHandle),
+      get: mock(async () => ({ id: 'task-1', status: 'done' })),
+    };
+
+    const provider = createSupaCloudTaskProvider({ supacloud });
+    const result = await provider.submit('image.generate', {
+      body: { prompt: 'poster' },
+      idempotencyKey: 'job-1',
+    });
+
+    expect(supacloud.submit).toHaveBeenCalledWith('image.generate', {
+      body: { prompt: 'poster' },
+      idempotencyKey: 'job-1',
+    });
+    expect(result).toBe(taskHandle);
+  });
+
+  test('list normalizes object payload with data field', async () => {
+    const { createSupaCloudTaskProvider } = await import('./supacloud');
+    const supacloud = {
+      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
+      get: mock(async () => ({ id: 'task-1' })),
+      list: mock(async () => ({ data: [{ id: 'task-1', status: 'queued' }] })),
+    };
+
+    const provider = createSupaCloudTaskProvider({ supacloud });
+    const tasks = await provider.list();
+
+    expect(tasks).toEqual([{ id: 'task-1', status: 'queued' }]);
+  });
+
+  test('listDlq throws clear error when capability is missing', async () => {
+    const { createSupaCloudTaskProvider } = await import('./supacloud');
+    const supacloud = {
+      submit: mock(async () => ({ wait: async () => ({ id: 'task-1' }) })),
+      get: mock(async () => ({ id: 'task-1' })),
+    };
+
+    const provider = createSupaCloudTaskProvider({ supacloud });
+
+    await expect(provider.listDlq()).rejects.toThrow('tasks.listDlq');
+  });
+});
+
+
+// ─── SupaCloud Task LiveProvider Tests ───────────────────────────
+describe('SupaCloud Task LiveProvider', () => {
+  test('subscribe requires taskId in liveParams', async () => {
+    const { createSupaCloudTaskLiveProvider } = await import('./supacloud');
+    const supacloud = {
+      subscribe: mock(() => ({ unsubscribe: mock(() => {}) })),
+    };
+
+    const live = createSupaCloudTaskLiveProvider({ supacloud });
+
+    expect(() =>
+      live.subscribe({
+        resource: 'tasks',
+        callback: () => {},
+      }),
+    ).toThrow('liveParams.taskId');
+  });
+
+  test('subscribe maps task updates into svadmin live events', async () => {
+    const { createSupaCloudTaskLiveProvider } = await import('./supacloud');
+    let receivedTaskCallback: ((task: Record<string, unknown>) => void) | undefined;
+    const unsubscribe = mock(() => {});
+    const supacloud = {
+      subscribe: mock((taskId: string, callback: (task: Record<string, unknown>) => void) => {
+        receivedTaskCallback = callback;
+        expect(taskId).toBe('task-42');
+        return { unsubscribe };
+      }),
+    };
+
+    const live = createSupaCloudTaskLiveProvider({ supacloud });
+    const callback = mock(() => {});
+    const stop = live.subscribe({
+      resource: 'tasks',
+      liveParams: { taskId: 'task-42' },
+      callback,
+    });
+
+    receivedTaskCallback?.({ id: 'task-42', status: 'running' });
+
+    expect(callback).toHaveBeenCalledWith({
+      type: 'UPDATE',
+      resource: 'tasks',
+      payload: { id: 'task-42', status: 'running' },
+    });
+
+    stop();
+    expect(unsubscribe).toHaveBeenCalled();
+  });
+});

@@ -46,6 +46,8 @@ const liveProvider = createSupabaseLiveProvider(supabaseClient);
 
 Supports `publish()` via Supabase Realtime broadcast channels.
 
+If you need task-status subscriptions from `@supacloud/js`, use the optional [`createSupaCloudTaskLiveProvider()`](/providers/supacloud) helper from `@svadmin/supabase/supacloud`. It bridges `tasks.subscribe()` into the standard svadmin `LiveProvider` contract.
+
 ### Appwrite Realtime
 
 ```typescript
