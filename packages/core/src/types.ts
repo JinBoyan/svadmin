@@ -196,10 +196,30 @@ export interface DataProvider {
 
 export interface TaskRecord extends BaseRecord {
   id: string;
+  name?: string;
+  title?: string;
   status?: string;
+  progress?: number;
+  priority?: number;
+  queueName?: string;
+  queue_name?: string;
+  message?: string;
+  payload?: unknown;
+  result?: unknown;
+  result_data?: unknown;
   createdAt?: string | Date;
+  created_at?: string | Date;
   updatedAt?: string | Date;
+  updated_at?: string | Date;
+  startedAt?: string | Date;
+  started_at?: string | Date;
+  finishedAt?: string | Date;
+  finished_at?: string | Date;
+  cancelledAt?: string | Date;
+  cancelled_at?: string | Date;
   error?: unknown;
+  errorMessage?: string;
+  error_message?: string;
 }
 
 export interface SubmitTaskOptions {
