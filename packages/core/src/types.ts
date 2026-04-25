@@ -205,6 +205,12 @@ export interface TaskRecord extends BaseRecord {
   queue_name?: string;
   message?: string;
   payload?: unknown;
+  /**
+   * Task output payload. `result` is the canonical camelCase field used by
+   * svadmin UI helpers; `result_data` is accepted for Supabase/Postgres-style
+   * task mirrors. Consumers should prefer `result`, then fall back to
+   * `result_data`, matching `resolveTaskResult`.
+   */
   result?: unknown;
   result_data?: unknown;
   createdAt?: string | Date;
@@ -217,6 +223,12 @@ export interface TaskRecord extends BaseRecord {
   finished_at?: string | Date;
   cancelledAt?: string | Date;
   cancelled_at?: string | Date;
+  /**
+   * Task failure payload/message. `error` carries structured error details
+   * when available; `errorMessage` and `error_message` are string fallbacks for
+   * camelCase and snake_case providers. Consumers should prefer `error`, then
+   * `errorMessage`, then `error_message`, matching `resolveTaskError`.
+   */
   error?: unknown;
   errorMessage?: string;
   error_message?: string;
